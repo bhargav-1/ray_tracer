@@ -1,0 +1,21 @@
+version: "2.20"
+
+services:
+  app_container:
+    image: ${IMAGE_NAME:-bhargavulc/app_ui:GPU-dev}
+    container_name: first_container
+    user: ${DUID:-1000}:${DGID:-1000}
+    env_file:
+      - ../../docker/env/dev.env
+    network_mode: host
+    privileged: true
+    #    security_opt:
+    #      - seccomp:unconfined
+    #      - apparmor:unconfined
+    environment:
+      - DISPLAY=${DISPLAY}
+      - "QT_X11_NO_MITSHM=1" # qt fixes
+      - STARTUP_SLEEP=0
+      - SSH_PORT 2220
+    tty: true
+    runtime: ${RUNTIME:-nvidia}

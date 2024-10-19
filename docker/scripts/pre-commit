@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+docker exec clion_remote_dev /bin/bash -c "pwd && /home/bob/.local/bin/pre-commit run"

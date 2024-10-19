@@ -1,0 +1,183 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 25,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "cfg-debug",
+      "hidden": true,
+      "displayName": "Debug Config",
+      "binaryDir": "build",
+      "installDir": "build/install",
+      "toolchainFile": "${sourceDir}/.vcpkg/scripts/buildsystems/vcpkg.cmake",
+      "cacheVariables": {
+        "VCPKG_OVERLAY_PORTS": "${sourceDir}/overlays"
+      }
+    },
+    {
+      "name": "cfg-windows",
+      "generator": "Visual Studio 17 2022",
+      "inherits": [
+        "cfg-debug"
+      ],
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "cl.exe",
+        "CMAKE_CXX_COMPILER": "cl.exe"
+      },
+      "toolset": "host=x64",
+      "architecture": "x64",
+      "vendor": {
+        "microsoft.com/VisualStudioSettings/CMake/1.0": {
+          "hostOS": [
+            "Windows"
+          ]
+        }
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "cfg-linux",
+      "generator": "Ninja",
+      "inherits": [
+        "cfg-debug"
+      ],
+      "condition": {
+        "type": "notEquals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "bld-windows",
+      "configurePreset": "cfg-windows",
+      "configuration": "Debug",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "bld-linux",
+      "configurePreset": "cfg-linux",
+      "configuration": "Debug",
+      "condition": {
+        "type": "notEquals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "test-linux",
+      "configurePreset": "cfg-linux",
+      "output": {"outputOnFailure": true, "shortProgress": true},
+      "execution": {"noTestsAction": "error", "stopOnFailure": false}
+    }
+  ],
+  "packagePresets": [
+    {
+      "name": "pkg-linux",
+      "configurePreset": "cfg-linux",
+      "generators": [
+        "DEB",
+        "STGZ",
+        "TGZ"
+      ],
+      "configurations": [
+        "Debug"
+      ],
+      "packageDirectory": "packages",
+      "vendorName": "Test",
+      "condition": {
+        "type": "notEquals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "pkg-windows",
+      "configurePreset": "cfg-windows",
+      "generators": [
+        "NSIS"
+      ],
+      "configurations": [
+        "Debug"
+      ],
+      "packageDirectory": "packages",
+      "vendorName": "Test",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "windows",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "cfg-windows"
+        },
+        {
+          "type": "build",
+          "name": "bld-windows"
+        },
+        {
+          "type": "package",
+          "name": "pkg-windows"
+        }
+      ]
+    },
+    {
+      "name": "linux-notests",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "cfg-linux"
+        },
+        {
+          "type": "build",
+          "name": "bld-linux"
+        },
+        {
+          "type": "package",
+          "name": "pkg-linux"
+        }
+      ]
+    },
+    {
+      "name": "linux",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "cfg-linux"
+        },
+        {
+          "type": "build",
+          "name": "bld-linux"
+        },
+        {
+          "type": "test",
+          "name": "test-linux"
+        },
+        {
+          "type": "package",
+          "name": "pkg-linux"
+        }
+      ]
+    }
+  ]
+}

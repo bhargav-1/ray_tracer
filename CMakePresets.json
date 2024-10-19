@@ -1,0 +1,120 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 25,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "cfg-debug",
+      "hidden": true,
+      "displayName": "Debug Config",
+      "binaryDir": "build",
+      "installDir": "build/install",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "cfg-linux",
+      "generator": "Ninja",
+      "inherits": [
+        "cfg-debug"
+      ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "bld-linux",
+      "configurePreset": "cfg-linux",
+      "configuration": "Debug",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      },
+      "jobs": 4
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "test-linux",
+      "configurePreset": "cfg-linux",
+      "output": {
+        "outputOnFailure": true,
+        "shortProgress": true
+      },
+      "execution": {
+        "noTestsAction": "error",
+        "stopOnFailure": false
+      }
+    }
+  ],
+  "packagePresets": [
+    {
+      "name": "pkg-linux",
+      "configurePreset": "cfg-linux",
+      "generators": [
+        "DEB",
+        "STGZ",
+        "TGZ"
+      ],
+      "configurations": [
+        "Debug"
+      ],
+      "packageDirectory": "${sourceDir}/build/packages",
+      "vendorName": "Test",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "linux-notests",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "cfg-linux"
+        },
+        {
+          "type": "build",
+          "name": "bld-linux"
+        },
+        {
+          "type": "package",
+          "name": "pkg-linux"
+        }
+      ]
+    },
+    {
+      "name": "linux",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "cfg-linux"
+        },
+        {
+          "type": "build",
+          "name": "bld-linux"
+        },
+        {
+          "type": "test",
+          "name": "test-linux"
+        },
+        {
+          "type": "package",
+          "name": "pkg-linux"
+        }
+      ]
+    }
+  ]
+}

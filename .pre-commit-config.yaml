@@ -1,0 +1,67 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+fail_fast: false
+exclude: |
+  (?x)(
+      ^.idea/|
+      ^.git/
+  )
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: check-case-conflict
+      - id: check-docstring-first
+      - id: check-executables-have-shebangs
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-merge-conflict
+      - id: check-shebang-scripts-are-executable
+      - id: check-symlinks
+      - id: check-toml
+      - id: check-vcs-permalinks
+      - id: check-xml
+      - id: check-yaml
+      - id: destroyed-symlinks
+      - id: detect-private-key
+
+      - id: end-of-file-fixer
+      #     - id: forbid-new-submodules
+      - id: no-commit-to-branch
+        args: [ --branch, master, --branch, devel ]
+      - id: trailing-whitespace
+        args: [ --markdown-linebreak-ext=md ]
+  - repo: https://github.com/jumanjihouse/pre-commit-hooks
+    rev: 3.0.0
+    hooks:
+      - id: shellcheck
+  - repo: https://github.com/AleksaC/hadolint-py
+    rev: v2.12.0
+    hooks:
+      - id: hadolint
+        args: [ --ignore, DL3008, --ignore, SC1091 ]
+  - repo: https://github.com/psf/black
+    rev: 23.9.1
+    hooks:
+      - id: black
+  - repo: https://github.com/PyCQA/pylint
+    rev: v3.0.3
+    hooks:
+      - id: pylint
+  - repo: https://github.com/pocc/pre-commit-hooks
+    rev: v1.3.5
+    hooks:
+      - id: clang-format
+        args: [ -i, -style=file ]
+      - id: clang-tidy
+        args: [ -p=build ,-header-filter=.* ]
+        exclude: |
+#          (?x)(
+#          ^catkin_ws/src/panel_setter/panel_setter_manager/|
+#          ^catkin_ws/src/panel_setter/row_manager/|
+#          ^catkin_ws/src/base/worxx_node/
+#          )
+#      - id: include-what-you-use
+#      - id: cppcheck
+#        args: [--language=c++, --enable=all,--suppressions-list=suppressions.cppcheck]
+      - id: cpplint

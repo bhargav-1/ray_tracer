@@ -1,0 +1,34 @@
+version: "2.3"
+
+services:
+  sandbox:
+    extends:
+      file: docker/compose/common.yaml
+      service: app_container
+    image: ${IMAGE_NAME:-bhargavulc/app_ui:GPU-dev}
+    container_name: first_container
+    user: ${DUID:-1000}:${DGID:-1000}
+    network_mode: host
+    privileged: true
+    #    security_opt:
+    #      - seccomp:unconfined
+    #      - apparmor:unconfined
+    environment:
+      - DISPLAY=${DISPLAY}
+      - "QT_X11_NO_MITSHM=1" # qt fixes
+      - SSH_PORT=1122
+      - QT_DEBUG_PLUGINS=1
+    tty: true
+    cap_add:
+      - SYS_PTRACE  # For debugging purposes
+    volumes:
+      - ~/.ssh:/home/bob/.ssh
+      - ./:/home/bob/app_ui
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ~/.cache/:/home/bob/.cache/
+      # Below is required for bluetooth
+      - /var/run/dbus/:/var/run/dbus:z
+      - /dev/dri:/dev/dri
+      #TODO if there was any issue with USB or CAN, use device flag instead
+    #      - /dev:/dev
+    runtime: ${RUNTIME:-runc}

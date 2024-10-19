@@ -1,0 +1,3 @@
+InheritParentConfig: true
+# Catch2 3.4 implements assertions using comparison chains in its macros.
+Checks: '-bugprone-chained-comparison'

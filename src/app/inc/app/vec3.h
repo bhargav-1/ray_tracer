@@ -1,0 +1,19 @@
+#pragma once
+#include <cmath>
+#include "tuple.h"
+
+namespace ray_tracer {
+class Vec3 : public Tuple {
+ public:
+  Vec3() = default;
+  Vec3(double x, double y, double z) : Tuple(x, y, z, 0) {}
+  explicit(false) Vec3(const Tuple& tuple) : Tuple(tuple) {}
+  [[nodiscard]] constexpr auto Magnitude() const -> double { return std::sqrt((x_ * x_) + (y_ * y_) + (z_ * z_)); }
+  [[nodiscard]] auto Normalize() const -> Vec3 { return Vec3{x_ / Magnitude(), y_ / Magnitude(), z_ / Magnitude()}; }
+  [[nodiscard]] auto Dot(const Vec3& vec) const -> double { return (x_ * vec.x_) + (y_ * vec.y_) + (z_ * vec.z_); }
+  [[nodiscard]] auto Cross(const Vec3& vec) const -> Vec3 {
+    return Vec3{(y_ * vec.z_) - (z_ * vec.y_), (z_ * vec.x_) - (x_ * vec.z_), (x_ * vec.y_) - (y_ * vec.x_)};
+  }
+};
+
+}  // namespace ray_tracer

@@ -5,7 +5,7 @@ add_executable(app_lib_tests)
 
 target_sources(app_lib_tests
         PRIVATE
-        test.cpp
+        tuple_point_vector_chapter_1.cpp
 )
 
 target_link_libraries(app_lib_tests

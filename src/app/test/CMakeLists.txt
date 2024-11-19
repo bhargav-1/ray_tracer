@@ -6,6 +6,7 @@ add_executable(app_lib_tests)
 target_sources(app_lib_tests
         PRIVATE
         tuple_point_vector_chapter_1.cpp
+        canvas_drawing_chapter2.cpp
 )
 
 target_link_libraries(app_lib_tests

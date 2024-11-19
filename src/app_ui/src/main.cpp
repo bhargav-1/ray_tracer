@@ -3,7 +3,6 @@
 #include <QApplication>  // for QApplication
 #include <QPushButton>   // for QPushButton
 
-auto Add(int x, int y) -> int { return x + y; }
 
 auto main(int argc, char* argv[]) -> int {
   fmt::print("UI: Version: {}, Build: {}\n", RELEASE_VERSION_STRING, BUILD_VERSION_STRING);

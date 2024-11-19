@@ -74,10 +74,10 @@ SCENARIO("add two tuples ") {
   }
   GIVEN("one is point, other is vector") {
     THEN("adds up x+x,y+y,z+z,w+w") {
-      ray_tracer::Vec3 test_vec(1, 2, 3 );
+      ray_tracer::Vec3 test_vec(1, 2, 3);
       ray_tracer::Point test_point(-1, 0, 33);
-      test_point= test_point + test_vec;
-      CHECK(test_point== ray_tracer::Tuple(0, 2, 36, 1));
+      test_point = test_point + test_vec;
+      CHECK(test_point == ray_tracer::Tuple(0, 2, 36, 1));
     }
   }
 }

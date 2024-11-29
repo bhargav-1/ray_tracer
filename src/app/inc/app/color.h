@@ -17,7 +17,7 @@ class Color : public Tuple {
   double red_;
   double green_;
   double blue_;
-  double w_; // cppcheck-suppress [duplInheritedMember]
+  double w_;  // cppcheck-suppress [duplInheritedMember]
 };
 constexpr auto operator*(const Color& left, const Color& right) -> Color {
   return Color{left.red_ * right.red_, left.green_ * right.green_, left.blue_ * right.blue_, left.w_ * right.w_};

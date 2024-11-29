@@ -10,6 +10,7 @@ struct Pixel {
   int y;
   Color color;
 };
+
 class Canvas {
  public:
   // keeping it trunc- to not add everytime we run this program,
@@ -22,6 +23,7 @@ class Canvas {
       }
     }
   }
+
   void CanvasToPPM(const std::string& filename) noexcept {
     std::ofstream canvas_file{filename, std::ios::trunc};
     if (!canvas_file) {
@@ -52,6 +54,7 @@ class Canvas {
 
   [[nodiscard]] auto GetWidth() const -> int { return width_; }
   [[nodiscard]] auto GetHeight() const -> int { return height_; }
+
   auto ColorAtPixel(int x_dir, int y_dir) -> Color {
     if (x_dir < width_ && y_dir < height_ && x_dir > 0 && y_dir > 0) {
       return pixels_[(width_ * y_dir) + x_dir].color;
@@ -69,6 +72,7 @@ class Canvas {
     }
     return true;
   }
+
   void WritePixelColor(int x, int y, const Color& color) {
     if (x < width_ && x > 0 && y < height_ && y > 0) {
       pixels_[(width_ * y) + x].color = color;

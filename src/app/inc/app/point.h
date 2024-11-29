@@ -10,7 +10,7 @@ class Point : public Tuple {
     z_ = 0;
   }
   constexpr Point(double x, double y, double z) : Tuple(x, y, z, 1) {}
-  constexpr Point(const Tuple& tuple)               // NOLINT             // cppcheck-suppress [noExplicitConstructor]
+  constexpr Point(const Tuple& tuple)  // NOLINT             // cppcheck-suppress [noExplicitConstructor]
       : Tuple(tuple.GetX(), tuple.GetY(), tuple.GetZ(), 1.0) {}  // NOLINT
 };
 

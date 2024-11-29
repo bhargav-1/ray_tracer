@@ -9,9 +9,7 @@ class Vec3 : public Tuple {
   constexpr Vec3(double x, double y, double z) : Tuple(x, y, z, 0) {}
   constexpr Vec3(const Tuple& tuple) : Tuple(tuple) {}  // NOLINT // cppcheck-suppress [noExplicitConstructor]
   [[nodiscard]] auto Magnitude() const -> double { return std::sqrt((x_ * x_) + (y_ * y_) + (z_ * z_)); }
-  [[nodiscard]] auto Normalize() const -> Vec3 {
-    return Vec3{x_ / Magnitude(), y_ / Magnitude(), z_ / Magnitude()};
-  }
+  [[nodiscard]] auto Normalize() const -> Vec3 { return Vec3{x_ / Magnitude(), y_ / Magnitude(), z_ / Magnitude()}; }
   [[nodiscard]] constexpr auto Dot(const Vec3& vec) const -> double {
     return (x_ * vec.x_) + (y_ * vec.y_) + (z_ * vec.z_);
   }

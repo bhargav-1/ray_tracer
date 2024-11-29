@@ -13,7 +13,7 @@ struct Projectile {
   ray_tracer::Vec3 velocity;
 };
 
-void Tick(const Environment& env, Projectile& proj) { // NOLINT
+void Tick(const Environment& env, Projectile& proj) {  // NOLINT
   proj.velocity = proj.velocity + env.gravity + env.wind;
   proj.position = proj.position + proj.velocity;
   std::cout << "x: " << proj.position.GetX() << ", y: " << proj.position.GetY() << ", z: " << proj.position.GetZ()

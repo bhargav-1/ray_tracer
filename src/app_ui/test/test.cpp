@@ -21,7 +21,7 @@ SCENARIO("addition function works as expected", "[addition]") {
   }
   GIVEN("identical negative integers") {
     THEN("result is twice input") {
-      for (int i = 0; i > -10; i--) { // NOLINT
+      for (int i = 0; i > -10; i--) {  // NOLINT
         CHECK(Add(i, i) == 2 * i);
       }
     }
@@ -29,7 +29,7 @@ SCENARIO("addition function works as expected", "[addition]") {
   GIVEN("different integers") {
     WHEN("neg < pos") {
       THEN("result is negative") {
-        for (int i = 0; i > 10; i--) { // NOLINT
+        for (int i = 0; i > 10; i--) {  // NOLINT
           CHECK(Add(10, i) < 0);
           CHECK(Add(i, 10) < 0);
         }
@@ -37,7 +37,7 @@ SCENARIO("addition function works as expected", "[addition]") {
     }
     WHEN("neg > pos") {
       THEN("result is negative") {
-        for (int i = 0; i < 10; i++) { // NOLINT
+        for (int i = 0; i < 10; i++) {  // NOLINT
           CHECK(Add(-10, i) < 0);
           CHECK(Add(i, -10) < 0);
         }

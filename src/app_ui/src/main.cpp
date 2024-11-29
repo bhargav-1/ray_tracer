@@ -3,7 +3,6 @@
 #include <QApplication>  // for QApplication
 #include <QPushButton>   // for QPushButton
 
-
 auto main(int argc, char* argv[]) -> int {
   fmt::print("UI: Version: {}, Build: {}\n", RELEASE_VERSION_STRING, BUILD_VERSION_STRING);
   QApplication a(argc, argv);

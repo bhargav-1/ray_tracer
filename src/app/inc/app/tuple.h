@@ -5,7 +5,11 @@
 namespace ray_tracer {
 class Tuple {
  public:
-  Tuple(){x_=0;y_=0;z_=0;}
+  Tuple() {
+    x_ = 0;
+    y_ = 0;
+    z_ = 0;
+  }
   constexpr Tuple(const double& x_value, const double& y_value, const double& z_value, const double& w_value);
   constexpr Tuple(const Tuple&) = default;
   constexpr auto operator=(const Tuple& tuple) -> Tuple& {
@@ -38,10 +42,10 @@ class Tuple {
   [[nodiscard]] constexpr auto GetW() const -> double { return w_; }
 
  protected:
-  double x_{0}; // NOLINT
-  double y_{0}; // NOLINT
-  double z_{0}; // NOLINT
-  double w_{0}; // NOLINT
+  double x_{0};  // NOLINT
+  double y_{0};  // NOLINT
+  double z_{0};  // NOLINT
+  double w_{0};  // NOLINT
 };
 constexpr Tuple::Tuple(const double& x_value, const double& y_value, const double& z_value, const double& w_value)
     : x_(x_value), y_(y_value), z_(z_value), w_(w_value) {}

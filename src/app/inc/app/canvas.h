@@ -74,7 +74,7 @@ class Canvas {
   }
 
   void WritePixelColor(int x, int y, const Color& color) {
-    if (x < width_ && x > 0 && y < height_ && y > 0) {
+    if (x < width_ && x >= 0 && y < height_ && y >= 0) {
       pixels_[(width_ * y) + x].color = color;
     }
   }

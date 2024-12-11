@@ -43,4 +43,43 @@ SCENARIO("Given 2 x 2 matrix ") {
     }
   }
 }
+SCENARIO("Given 2 identical matrices ") {
+  GIVEN("A= B =M[4][4] = {{1,2,3,4},{5,6,7,8},{9,8,7,6},{5,4,3,2}}") {
+    THEN("A==B") {
+      ray_tracer::Matrix<4, 4> a_matrix{{1, 2, 3, 4}, {5, 6, 7, 8}, {9, 8, 7, 6}, {5, 4, 3, 2}};
+      ray_tracer::Matrix<4, 4> b_matrix{{1, 2, 3, 4}, {5, 6, 7, 8}, {9, 8, 7, 6}, {5, 4, 3, 2}};
+      CHECK(a_matrix == b_matrix);
+    }
+  }
+}
+SCENARIO("Given 2 non-identical matrices ") {
+  GIVEN("A= B =M[4][4] = {{1,2,3,4},{5,6,7,8},{9,8,7,6},{5,4,3,2}}") {
+    THEN("A!=B") {
+      ray_tracer::Matrix<4, 4> a_matrix{{1, 2, 3, 4}, {5, 6, 7, 8}, {9, 8, 7, 6}, {5, 4, 5, 2}};
+      ray_tracer::Matrix<4, 4> b_matrix{{1, 2, 3, 4}, {5, 6, 7, 8}, {9, 8, 7, 6}, {5, 4, 3, 2}};
+      CHECK(a_matrix != b_matrix);
+    }
+  }
+}
+SCENARIO("Multiply 4x4 ") {
+  GIVEN("A= B =M[4][4] = {{1,2,3,4},{5,6,7,8},{9,8,7,6},{5,4,3,2}}") {
+    THEN("C=A*B") {
+      ray_tracer::Matrix<4, 4> a_matrix{{1, 2, 3, 4}, {5, 6, 7, 8}, {9, 8, 7, 6}, {5, 4, 3, 2}};
+      ray_tracer::Matrix<4, 4> b_matrix{{-2, 1, 2, 3}, {3, 2, 1, -1}, {4, 3, 6, 5}, {1, 2, 7, 8}};
+      ray_tracer::Matrix<4, 4> const c_matrix{
+          {20, 22, 50, 48}, {44, 54, 114, 108}, {40, 58, 110, 102}, {16, 26, 46, 42}};
+      CHECK(c_matrix == a_matrix * b_matrix);
+    }
+  }
+}
+SCENARIO("Multiply 4x4 and tuple") {
+  GIVEN("A= B =M[4][4] = {{1,2,3,4},{5,6,7,8},{9,8,7,6},{5,4,3,2}}") {
+    THEN("C=A*B") {
+      ray_tracer::Matrix<4, 4> a_matrix{{1, 2, 3, 4}, {2, 4, 4, 2}, {8, 6, 4, 1}, {0, 0, 0, 1}};
+      ray_tracer::Tuple a_tuple(1, 2, 3, 1);
+      ray_tracer::Tuple const c_tuple{18, 24, 33, 1};
+      CHECK(c_tuple == a_matrix * a_tuple);
+    }
+  }
+}
 }  // namespace ray_tracer

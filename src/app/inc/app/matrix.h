@@ -55,10 +55,30 @@ class Matrix {
   template <size_t R, size_t C>
   friend auto constexpr operator*(const Matrix<R, C>& lhs, const Tuple& tuple)  // NOLINT [redundant]
       -> Tuple;
+  static auto IdentityMatrix() -> Matrix<Rows, Cols>;
+
+  template <size_t R, size_t C>
+  friend auto constexpr Transpose(const Matrix<R,C>& lhs) -> Matrix<C, R>; // NOLINT [redundant]
 
  private:
   std::array<std::array<double, Cols>, Rows> matrix_;
 };  // namespace ray_tracer
+template <size_t Rows, size_t Cols>
+auto Matrix<Rows, Cols>::IdentityMatrix() -> Matrix<Rows, Cols> {
+  static_assert(Rows == Cols, "Identity matrix must be square");
+  Matrix<Rows, Cols> identity_matrix;
+  for (size_t i = 0; i < Rows; i++) {
+    for (size_t j = 0; j < Cols; j++) {
+      if (i == j) {
+        identity_matrix(i, j) = 1;
+      } else {
+        identity_matrix(i, j) = 0;
+      }
+    }
+  }
+  return identity_matrix;
+}
+
 template <size_t R, size_t C, size_t R2, size_t C2>
 auto constexpr operator*(const Matrix<R, C>& lhs, const Matrix<R2, C2>& rhs) -> Matrix<R, C2> {
   static_assert(C == R2, "Matrix dimensions must match for multiplication");
@@ -100,4 +120,16 @@ template <size_t Rows, size_t Cols, size_t Rows2, size_t Cols2>
 constexpr auto operator!=(const Matrix<Rows, Cols>& lhs, const Matrix<Rows2, Cols2>& rhs) -> bool {
   return !(lhs == rhs);
 }
+
+template <size_t R, size_t C>
+auto constexpr Transpose(const Matrix<R, C>& lhs) -> Matrix<C, R> {
+  Matrix<C, R> result;
+  for (size_t i = 0; i < R; i++) {
+    for (size_t j = 0; j < C; j++) {
+      result(j, i) = lhs.matrix_[i][j];
+    }
+  }
+  return result;
+}
+
 }  // namespace ray_tracer

@@ -82,4 +82,39 @@ SCENARIO("Multiply 4x4 and tuple") {
     }
   }
 }
+SCENARIO("Multiply 4x4 and Identity matrix") {
+  GIVEN("A[4][4] = {{0,1,2,4},{1,2,4,8},{2,4,8,16},{4,8,16,32}}") {
+    THEN("A=A*I") {
+      ray_tracer::Matrix<4, 4> a_matrix{{0, 1, 2, 4}, {1, 2, 4, 8}, {2, 4, 8, 16}, {4, 8, 16, 32}};
+      const auto identity_matrix = ray_tracer::Matrix<4, 4>::IdentityMatrix();
+      CHECK(a_matrix == a_matrix * identity_matrix);
+    }
+  }
+}
+SCENARIO("Multiply tuple and Identity matrix") {
+  GIVEN("tuple A = {1,2,3,4}") {
+    THEN("A=A*I") {
+      Tuple a_tuple(1, 2, 3, 4);
+      const auto identity_matrix = ray_tracer::Matrix<4, 4>::IdentityMatrix();
+      CHECK(a_tuple == identity_matrix * a_tuple);
+    }
+  }
+}
+SCENARIO("Transposing a Matrix") {
+  GIVEN("Matrix A[4][4] = {{0,9,3,0},{9,8,0,8},{1,8,5,3},{0,0,5,8}}") {
+    THEN("Transpose(A) = {{0,9,1,0},{9,8,8,0},{3,0,5,5},{0,8,3,8}}") {
+      ray_tracer::Matrix<4, 4> temp_matrix{{0, 9, 3, 0}, {9, 8, 0, 8}, {1, 8, 5, 3}, {0, 0, 5, 8}};
+      ray_tracer::Matrix<4, 4> const transpose_matrix{{0, 9, 1, 0}, {9, 8, 8, 0}, {3, 0, 5, 5}, {0, 8, 3, 8}};
+      CHECK(transpose_matrix == Transpose(temp_matrix));
+    }
+  }
+}
+  SCENARIO("Transposing the Identity Matrix") {
+  GIVEN("Matrix A = IdentityMatrix<4,4>") {
+    THEN("A=A*I") {
+      const auto identity_matrix = ray_tracer::Matrix<4, 4>::IdentityMatrix();
+      CHECK(identity_matrix == Transpose(identity_matrix));
+    }
+  }
+}
 }  // namespace ray_tracer

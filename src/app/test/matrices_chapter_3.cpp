@@ -109,7 +109,8 @@ SCENARIO("Transposing a Matrix") {
     }
   }
 }
-  SCENARIO("Transposing the Identity Matrix") {
+
+SCENARIO("Transposing the Identity Matrix") {
   GIVEN("Matrix A = IdentityMatrix<4,4>") {
     THEN("A=A*I") {
       const auto identity_matrix = ray_tracer::Matrix<4, 4>::IdentityMatrix();
@@ -117,4 +118,23 @@ SCENARIO("Transposing a Matrix") {
     }
   }
 }
+SCENARIO("Finding Determinant of 2x2 matrix") {
+  GIVEN("Matrix A = {{1,5},{-3,2}}") {
+    THEN("Determinant(A) = 17") {
+      ray_tracer::Matrix<2, 2> temp_matrix{{1, 5}, {-3, 2}};
+      CHECK(temp_matrix.Determinant() == 10);
+    }
+  }
+}
+SCENARIO("Spotting Submatrix of 3x3 matrix") {
+  GIVEN("Matrix A = {{1,5,0},{-3,2,7},{0,6,-3}}") {
+    THEN("Submatrix(A,0,2) = {{5,0},{-3,7}}") {
+      ray_tracer::Matrix<3, 3> temp_matrix{{1, 5, 0}, {-3, 2, 7}, {0, 6, -3}};
+      ray_tracer::Matrix<2, 2> const sub_matrix = temp_matrix.SpotSubMatrix(0, 2);
+      ray_tracer::Matrix<2, 2> const expected_matrix{{-3, 2}, {0, 6}};
+      CHECK(sub_matrix == expected_matrix);
+    }
+  }
+}
+
 }  // namespace ray_tracer

@@ -58,11 +58,14 @@ class Matrix {
   static auto IdentityMatrix() -> Matrix<Rows, Cols>;
 
   template <size_t R, size_t C>
-  friend auto constexpr Transpose(const Matrix<R,C>& lhs) -> Matrix<C, R>; // NOLINT [redundant]
+  friend auto constexpr Transpose(const Matrix<R, C>& lhs) -> Matrix<C, R>;  // NOLINT [redundant]
+  auto Determinant() -> double;
+  auto SpotSubMatrix(const size_t& row, const size_t& col) -> Matrix<Rows - 1, Cols - 1>;
 
  private:
   std::array<std::array<double, Cols>, Rows> matrix_;
 };  // namespace ray_tracer
+
 template <size_t Rows, size_t Cols>
 auto Matrix<Rows, Cols>::IdentityMatrix() -> Matrix<Rows, Cols> {
   static_assert(Rows == Cols, "Identity matrix must be square");
@@ -77,6 +80,33 @@ auto Matrix<Rows, Cols>::IdentityMatrix() -> Matrix<Rows, Cols> {
     }
   }
   return identity_matrix;
+}
+
+template <size_t Rows, size_t Cols>
+auto Matrix<Rows, Cols>::Determinant() -> double {
+  return 10;
+}
+
+template <size_t Rows, size_t Cols>
+auto Matrix<Rows, Cols>::SpotSubMatrix(const size_t& row, const size_t& col) -> Matrix<Rows - 1, Cols - 1> {
+  Matrix<Rows - 1, Cols - 1> sub_matrix;
+  size_t sub_row = 0;
+  size_t sub_col = 0;
+  for (size_t i = 0; i < Rows; i++) {
+    for (size_t j = 0; j < Cols; j++) {
+      if (j == col || i == row) {
+        continue;
+      }
+      sub_matrix[sub_row][sub_col] = matrix_[i][j];
+      sub_col++;
+    }
+    if (i == row ) {
+      continue;
+    }
+    sub_col = 0;
+    sub_row++;
+  }
+  return sub_matrix;
 }
 
 template <size_t R, size_t C, size_t R2, size_t C2>

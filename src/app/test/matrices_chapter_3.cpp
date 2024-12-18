@@ -122,7 +122,7 @@ SCENARIO("Finding Determinant of 2x2 matrix") {
   GIVEN("Matrix A = {{1,5},{-3,2}}") {
     THEN("Determinant(A) = 17") {
       ray_tracer::Matrix<2, 2> temp_matrix{{1, 5}, {-3, 2}};
-      CHECK(temp_matrix.Determinant() == 10);
+      CHECK(temp_matrix.MinorDeterminant() == 17);
     }
   }
 }
@@ -135,6 +135,52 @@ SCENARIO("Spotting Submatrix of 3x3 matrix") {
       CHECK(sub_matrix == expected_matrix);
     }
   }
+  GIVEN("Matrix A = {{-6,1,1,6},{-8,5,8,6},{-1,0,8,2},{-7,1,-1,1}}") {
+    THEN("Submatrix(A,2,1) = {{-6,1,6},{-8,8,6},{-7,-1,1}}") {
+      ray_tracer::Matrix<4, 4> temp_matrix{{-6, 1, 1, 6}, {-8, 5, 8, 6}, {-1, 0, 8, 2}, {-7, 1, -1, 1}};
+      ray_tracer::Matrix<3, 3> const sub_matrix = temp_matrix.SpotSubMatrix(2, 1);
+      ray_tracer::Matrix<3, 3> const expected_matrix{{-6, 1, 6}, {-8, 8, 6}, {-7, -1, 1}};
+      CHECK(sub_matrix == expected_matrix);
+    }
+  }
 }
-
+SCENARIO("Computing minor") {
+  GIVEN("Matrix A[3][3] ={{3,5,0},{2,-1,-7},{6,-1,5}}") {
+    THEN("Minor(1,0) = 25") {
+      ray_tracer::Matrix<3, 3> temp_matrix{{3, 5, 0}, {2, -1, -7}, {6, -1, 5}};
+      CHECK(temp_matrix.Minor(1, 0) == 25);
+    }
+  }
+}
+SCENARIO("Computing COfactor") {
+  GIVEN("Matrix A[3][3] ={{3,5,0},{2,-1,-7},{6,-1,5}}") {
+    THEN("Cofactor(1,0) = -12") {
+      ray_tracer::Matrix<3, 3> temp_matrix{{3, 5, 0}, {2, -1, -7}, {6, -1, 5}};
+      CHECK(temp_matrix.Cofactor(1, 0) == -25);
+      AND_THEN("Cofactor(0,0) = -12") { CHECK(temp_matrix.Cofactor(0, 0) == -12); }
+      AND_THEN("Cofactor(1,0) = 25") { CHECK(temp_matrix.Cofactor(1, 0) == -25); }
+    }
+  }
+}
+SCENARIO("Calculating Matrix Determinant") {
+  GIVEN("MATRIX A ={{1,2,6},{-5,8,-4},{2,6,4}}") {
+    THEN("Determinant(A) = -196") {
+      ray_tracer::Matrix<3, 3> temp_matrix{{1, 2, 6}, {-5, 8, -4}, {2, 6, 4}};
+      CHECK(temp_matrix.Cofactor(0, 0) == 56);
+      AND_THEN("Cofactor(0,1) = 12") { CHECK(temp_matrix.Cofactor(0, 1) == 12); }
+      AND_THEN("Cofactor(0,2) = -46") { CHECK(temp_matrix.Cofactor(0, 2) == -46); }
+      AND_THEN("Determinant(A) = -196") { CHECK(temp_matrix.Determinant() == -196); }
+    }
+  }
+  GIVEN("MATRIX A ={{-2,-8,3,5},{-3,1,7,3},{1,2,-9,6},{-6,7,7,-9}}") {
+    THEN("Determinant(A) = -4074") {
+      ray_tracer::Matrix<4, 4> temp{{-2, -8, 3, 5}, {-3, 1, 7, 3}, {1, 2, -9, 6}, {-6, 7, 7, -9}};
+      CHECK(temp.Cofactor(0, 0) == 690);
+      AND_THEN("Cofactor(0,1) = 447") { CHECK(temp.Cofactor(0, 1) == 447); }
+      AND_THEN("Cofactor(0,2) = 210") { CHECK(temp.Cofactor(0, 2) == 210); }
+      AND_THEN("Cofactor(0,3) = 51") { CHECK(temp.Cofactor(0, 3) == 51); }
+      AND_THEN("Determinant(A) = -4071") { CHECK(temp.Determinant() == -4071); }
+    }
+  }
+}
 }  // namespace ray_tracer

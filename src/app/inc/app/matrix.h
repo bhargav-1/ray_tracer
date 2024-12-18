@@ -9,6 +9,10 @@ template <size_t Rows, size_t Cols>
 class Matrix {
  public:
   constexpr Matrix() : matrix_() {}
+  constexpr explicit Matrix(double value) {
+    static_assert(Rows == 1 && Cols == 1, "Scalar initialization is only valid for 1x1 matrices.");
+    matrix_[0][0] = value;
+  }
   constexpr Matrix(std::initializer_list<std::initializer_list<double>> matrix) {
     if (matrix.size() != Rows) {
       throw std::invalid_argument("Matrix rows must match");
@@ -60,6 +64,10 @@ class Matrix {
   template <size_t R, size_t C>
   friend auto constexpr Transpose(const Matrix<R, C>& lhs) -> Matrix<C, R>;  // NOLINT [redundant]
   auto Determinant() -> double;
+  auto MinorDeterminant() -> double;
+  auto Minor(const size_t& row, const size_t& col) -> double;
+  auto Cofactor(const size_t& row, const size_t& col) -> double;
+
   auto SpotSubMatrix(const size_t& row, const size_t& col) -> Matrix<Rows - 1, Cols - 1>;
 
  private:
@@ -84,12 +92,89 @@ auto Matrix<Rows, Cols>::IdentityMatrix() -> Matrix<Rows, Cols> {
 
 template <size_t Rows, size_t Cols>
 auto Matrix<Rows, Cols>::Determinant() -> double {
-  return 10;
+  static_assert(Rows == Cols, "Determinant matrix must be square");
+  static_assert(Rows > 0, "Determinant matrix must be at least 1x1");
+  double determinant = 0;
+
+  if constexpr (Rows == 0) {
+    determinant = 0;
+  } else if constexpr (Rows == 1) {
+    determinant = matrix_[0][0];
+  } else if constexpr (Rows == 2) {
+    determinant = matrix_[0][0] * matrix_[1][1] - matrix_[0][1] * matrix_[1][0];
+  } else if constexpr (Rows < 2) {
+    throw std::logic_error("Determinant cannot be calculated for matrix of size < 2");
+  } else if constexpr (Rows > 1000) {
+    determinant = 0;
+    throw std::logic_error("Determinant cannot be calculated for matrix of size > 1000");
+  } else {
+    for (size_t col = 0; col < Cols; col++) {
+      double sign = ((0 + col) % 2 == 0) ? 1.0 : -1.0;
+      if constexpr (Rows <= 2) {
+        determinant += sign * matrix_[0][col] * matrix_[0][0];
+      } else {
+        determinant += sign * matrix_[0][col] * SpotSubMatrix(0, col).Determinant();
+      }
+    }
+  }
+  return determinant;
+}
+
+template <size_t Rows, size_t Cols>
+auto Matrix<Rows, Cols>::MinorDeterminant() -> double {
+  static_assert(Rows == Cols, "Determinant matrix must be square");
+  return matrix_[0][0] * matrix_[1][1] - matrix_[0][1] * matrix_[1][0];
+}
+template <size_t Rows, size_t Cols>
+auto Matrix<Rows, Cols>::Minor(const size_t& row, const size_t& col) -> double {
+  static_assert(Rows == Cols, "Determinant matrix must be square");
+  static_assert(Rows >= 3, "Minor needs matrix must be >=3");
+  if constexpr (Rows <= 2) {
+    return matrix_[0][0];
+  }
+  if constexpr (Rows == 3) {
+    return SpotSubMatrix(row, col).MinorDeterminant();
+  }
+  if constexpr (Rows == 1) {
+    return 1;
+  }
+  if constexpr (Rows == 0) {
+    return 1;
+  }
+  if constexpr (Rows == 0) {
+    return 1;
+  }
+  return SpotSubMatrix(row, col).Determinant();
+}
+
+template <size_t Rows, size_t Cols>
+auto Matrix<Rows, Cols>::Cofactor(const size_t& row, const size_t& col) -> double {
+  static_assert(Rows == Cols, "Determinant matrix must be square");
+
+  if (row >= Rows || col >= Cols) {
+    throw std::invalid_argument("Row or column out of bounds");
+  }
+
+  if constexpr (Rows <= 2) {
+    std::cerr << "Cofactor is not implemented for matrices of size 2 or less." << '\n';
+    return 0.0;
+  }
+  return ((row + col) % 2 == 0 ? 1 : -1) * SpotSubMatrix(row, col).Determinant();
 }
 
 template <size_t Rows, size_t Cols>
 auto Matrix<Rows, Cols>::SpotSubMatrix(const size_t& row, const size_t& col) -> Matrix<Rows - 1, Cols - 1> {
+  static_assert(Rows == Cols, "Determinant matrix must be square");
+  // following doesn't actually let template know they cannot be 1 or 0;it doesnt compile for 1/0
+  static_assert(Rows <= 1000 && Cols <= 1000, "Cannot create a submatrix for matrices smaller than 2x2.");
   Matrix<Rows - 1, Cols - 1> sub_matrix;
+  if (row > Rows || col > Cols) {
+    throw std::logic_error("Submatrix row or column out of bounds");
+  }
+
+  if constexpr (Rows == 1 || Rows == 0 || Rows == 2) {
+    throw std::logic_error("submatrix of 1x1 is undefined");
+  }
   size_t sub_row = 0;
   size_t sub_col = 0;
   for (size_t i = 0; i < Rows; i++) {
@@ -100,7 +185,7 @@ auto Matrix<Rows, Cols>::SpotSubMatrix(const size_t& row, const size_t& col) -> 
       sub_matrix[sub_row][sub_col] = matrix_[i][j];
       sub_col++;
     }
-    if (i == row ) {
+    if (i == row) {
       continue;
     }
     sub_col = 0;

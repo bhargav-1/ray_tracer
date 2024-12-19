@@ -33,14 +33,14 @@ class Matrix {
     matrix_[2][0] = tuple.GetZ();
     matrix_[3][0] = tuple.GetW();
   }
-  auto operator()(size_t row, size_t col) -> double& {
+  constexpr auto operator()(size_t row, size_t col) -> double& {
     if (row < Rows && col < Cols) {
       return matrix_[row][col];
     }
     throw std::invalid_argument("Matrix row or column out of bounds");
   }
 
-  auto operator[](size_t row) -> std::array<double, Cols>& {
+  constexpr auto operator[](size_t row) -> std::array<double, Cols>& {
     if (row < Rows) {
       return matrix_[row];
     }
@@ -60,25 +60,25 @@ class Matrix {
   friend auto constexpr operator*(const Matrix<R, C>& lhs, const Tuple& tuple)  // NOLINT [redundant]
       -> Tuple;
   template <size_t R, size_t C>
-  friend std::ostream& operator<<(std::ostream& output_stream, const Matrix<R, C>& matrix);  // NOLINT [redundant]
-  static auto IdentityMatrix() -> Matrix<Rows, Cols>;
+  friend constexpr std::ostream& operator<<(std::ostream& output_stream, const Matrix<R, C>& matrix);  // NOLINT [redundant]
+  static constexpr auto IdentityMatrix() -> Matrix<Rows, Cols>;
 
   template <size_t R, size_t C>
   friend auto constexpr Transpose(const Matrix<R, C>& lhs) -> Matrix<C, R>;  // NOLINT [redundant]
-  auto Determinant() -> double;
-  auto MinorDeterminant() -> double;
-  auto Minor(const size_t& row, const size_t& col) -> double;
-  auto Cofactor(const size_t& row, const size_t& col) -> double;
-  auto SpotSubMatrix(const size_t& row, const size_t& col) -> Matrix<Rows - 1, Cols - 1>;
-  auto Invertible() -> bool;
-  auto Inverse() -> Matrix<Rows, Cols>;
+  constexpr auto Determinant() -> double;
+  constexpr auto MinorDeterminant() -> double;
+  constexpr auto Minor(const size_t& row, const size_t& col) -> double;
+  constexpr auto Cofactor(const size_t& row, const size_t& col) -> double;
+  constexpr auto SpotSubMatrix(const size_t& row, const size_t& col) -> Matrix<Rows - 1, Cols - 1>;
+  constexpr auto Invertible() -> bool;
+  constexpr auto Inverse() -> Matrix<Rows, Cols>;
 
  private:
   std::array<std::array<double, Cols>, Rows> matrix_;
 };  // namespace ray_tracer
 
 template <size_t Rows, size_t Cols>
-auto Matrix<Rows, Cols>::IdentityMatrix() -> Matrix<Rows, Cols> {
+constexpr auto Matrix<Rows, Cols>::IdentityMatrix() -> Matrix<Rows, Cols> {
   static_assert(Rows == Cols, "Identity matrix must be square");
   Matrix<Rows, Cols> identity_matrix;
   for (size_t i = 0; i < Rows; i++) {
@@ -94,7 +94,7 @@ auto Matrix<Rows, Cols>::IdentityMatrix() -> Matrix<Rows, Cols> {
 }
 
 template <size_t Rows, size_t Cols>
-auto Matrix<Rows, Cols>::Determinant() -> double {
+constexpr auto Matrix<Rows, Cols>::Determinant() -> double {
   static_assert(Rows == Cols, "Determinant matrix must be square");
   static_assert(Rows > 0, "Determinant matrix must be at least 1x1");
   double determinant = 0;
@@ -124,12 +124,12 @@ auto Matrix<Rows, Cols>::Determinant() -> double {
 }
 
 template <size_t Rows, size_t Cols>
-auto Matrix<Rows, Cols>::MinorDeterminant() -> double {
+constexpr auto Matrix<Rows, Cols>::MinorDeterminant() -> double {
   static_assert(Rows == Cols, "Determinant matrix must be square");
   return matrix_[0][0] * matrix_[1][1] - matrix_[0][1] * matrix_[1][0];
 }
 template <size_t Rows, size_t Cols>
-auto Matrix<Rows, Cols>::Minor(const size_t& row, const size_t& col) -> double {
+constexpr auto Matrix<Rows, Cols>::Minor(const size_t& row, const size_t& col) -> double {
   static_assert(Rows == Cols, "Determinant matrix must be square");
   static_assert(Rows >= 3, "Minor needs matrix must be >=3");
   if constexpr (Rows <= 2) {
@@ -151,7 +151,7 @@ auto Matrix<Rows, Cols>::Minor(const size_t& row, const size_t& col) -> double {
 }
 
 template <size_t Rows, size_t Cols>
-auto Matrix<Rows, Cols>::Cofactor(const size_t& row, const size_t& col) -> double {
+constexpr auto Matrix<Rows, Cols>::Cofactor(const size_t& row, const size_t& col) -> double {
   static_assert(Rows == Cols, "Determinant matrix must be square");
 
   if (row >= Rows || col >= Cols) {
@@ -166,7 +166,7 @@ auto Matrix<Rows, Cols>::Cofactor(const size_t& row, const size_t& col) -> doubl
 }
 
 template <size_t Rows, size_t Cols>
-auto Matrix<Rows, Cols>::SpotSubMatrix(const size_t& row, const size_t& col) -> Matrix<Rows - 1, Cols - 1> {
+constexpr auto Matrix<Rows, Cols>::SpotSubMatrix(const size_t& row, const size_t& col) -> Matrix<Rows - 1, Cols - 1> {
   static_assert(Rows == Cols, "Determinant matrix must be square");
   // following doesn't actually let template know they cannot be 1 or 0;it doesnt compile for 1/0
   static_assert(Rows <= 1000 && Cols <= 1000, "Cannot create a submatrix for matrices smaller than 2x2.");
@@ -198,11 +198,11 @@ auto Matrix<Rows, Cols>::SpotSubMatrix(const size_t& row, const size_t& col) -> 
 }
 
 template <size_t Rows, size_t Cols>
-auto Matrix<Rows, Cols>::Invertible() -> bool {
+constexpr auto Matrix<Rows, Cols>::Invertible() -> bool {
   return Determinant() != 0;
 }
 template <size_t Rows, size_t Cols>
-auto Matrix<Rows, Cols>::Inverse() -> Matrix<Rows, Cols> {
+constexpr auto Matrix<Rows, Cols>::Inverse() -> Matrix<Rows, Cols> {
   static_assert(Rows == Cols, "Determinant matrix must be square");
   if (!Invertible()) {
     throw std::logic_error("Matrix is not invertible");
@@ -270,7 +270,7 @@ auto constexpr Transpose(const Matrix<R, C>& lhs) -> Matrix<C, R> {
   return result;
 }
 template <size_t R, size_t C>
-auto operator<<(std::ostream& output_stream, const Matrix<R, C>& matrix) -> std::ostream& {
+constexpr auto operator<<(std::ostream& output_stream, const Matrix<R, C>& matrix) -> std::ostream& {
   output_stream << "[\n";
   for (const auto& row : matrix.matrix_) {
     output_stream << "  [ ";

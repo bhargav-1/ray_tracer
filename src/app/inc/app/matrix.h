@@ -59,6 +59,8 @@ class Matrix {
   template <size_t R, size_t C>
   friend auto constexpr operator*(const Matrix<R, C>& lhs, const Tuple& tuple)  // NOLINT [redundant]
       -> Tuple;
+  template <size_t R, size_t C>
+  friend std::ostream& operator<<(std::ostream& output_stream, const Matrix<R, C>& matrix);  // NOLINT [redundant]
   static auto IdentityMatrix() -> Matrix<Rows, Cols>;
 
   template <size_t R, size_t C>
@@ -67,8 +69,9 @@ class Matrix {
   auto MinorDeterminant() -> double;
   auto Minor(const size_t& row, const size_t& col) -> double;
   auto Cofactor(const size_t& row, const size_t& col) -> double;
-
   auto SpotSubMatrix(const size_t& row, const size_t& col) -> Matrix<Rows - 1, Cols - 1>;
+  auto Invertible() -> bool;
+  auto Inverse() -> Matrix<Rows, Cols>;
 
  private:
   std::array<std::array<double, Cols>, Rows> matrix_;
@@ -194,6 +197,26 @@ auto Matrix<Rows, Cols>::SpotSubMatrix(const size_t& row, const size_t& col) -> 
   return sub_matrix;
 }
 
+template <size_t Rows, size_t Cols>
+auto Matrix<Rows, Cols>::Invertible() -> bool {
+  return Determinant() != 0;
+}
+template <size_t Rows, size_t Cols>
+auto Matrix<Rows, Cols>::Inverse() -> Matrix<Rows, Cols> {
+  static_assert(Rows == Cols, "Determinant matrix must be square");
+  if (!Invertible()) {
+    throw std::logic_error("Matrix is not invertible");
+  }
+  Matrix<Rows, Cols> inverse;
+  for (size_t i = 0; i < Rows; i++) {
+    for (size_t j = 0; j < Cols; j++) {
+      const double cofactor = Cofactor(i, j);
+      inverse.matrix_[j][i] = cofactor / Determinant();
+    }
+  }
+  return inverse;
+}
+
 template <size_t R, size_t C, size_t R2, size_t C2>
 auto constexpr operator*(const Matrix<R, C>& lhs, const Matrix<R2, C2>& rhs) -> Matrix<R, C2> {
   static_assert(C == R2, "Matrix dimensions must match for multiplication");
@@ -246,5 +269,17 @@ auto constexpr Transpose(const Matrix<R, C>& lhs) -> Matrix<C, R> {
   }
   return result;
 }
-
+template <size_t R, size_t C>
+auto operator<<(std::ostream& output_stream, const Matrix<R, C>& matrix) -> std::ostream& {
+  output_stream << "[\n";
+  for (const auto& row : matrix.matrix_) {
+    output_stream << "  [ ";
+    for (const auto& elem : row) {
+      output_stream << elem << " ";
+    }
+    output_stream << "]\n";
+  }
+  output_stream << "]";
+  return output_stream;
+}  // namespace ray_tracer
 }  // namespace ray_tracer

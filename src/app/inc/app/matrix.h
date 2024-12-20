@@ -60,7 +60,8 @@ class Matrix {
   friend auto constexpr operator*(const Matrix<R, C>& lhs, const Tuple& tuple)  // NOLINT [redundant]
       -> Tuple;
   template <size_t R, size_t C>
-  friend constexpr std::ostream& operator<<(std::ostream& output_stream, const Matrix<R, C>& matrix);  // NOLINT [redundant]
+  friend constexpr auto operator<<(std::ostream& output_stream, const Matrix<R, C>& matrix)  // NOLINT [redundant]
+      -> std::ostream&;
   static constexpr auto IdentityMatrix() -> Matrix<Rows, Cols>;
 
   template <size_t R, size_t C>
@@ -72,10 +73,13 @@ class Matrix {
   constexpr auto SpotSubMatrix(const size_t& row, const size_t& col) -> Matrix<Rows - 1, Cols - 1>;
   constexpr auto Invertible() -> bool;
   constexpr auto Inverse() -> Matrix<Rows, Cols>;
+  static constexpr auto Translation(const double& x_dir, const double& y_dir, const double& z_dir)
+      -> ray_tracer::Matrix<4, 4>;
+  static constexpr auto Translation(const Tuple& tuple) -> ray_tracer::Matrix<4, 4>;
 
  private:
   std::array<std::array<double, Cols>, Rows> matrix_;
-};  // namespace ray_tracer
+};
 
 template <size_t Rows, size_t Cols>
 constexpr auto Matrix<Rows, Cols>::IdentityMatrix() -> Matrix<Rows, Cols> {
@@ -215,6 +219,23 @@ constexpr auto Matrix<Rows, Cols>::Inverse() -> Matrix<Rows, Cols> {
     }
   }
   return inverse;
+}
+
+template <size_t Rows, size_t Cols>
+constexpr auto Matrix<Rows, Cols>::Translation(const double& x_dir, const double& y_dir, const double& z_dir)
+    -> ray_tracer::Matrix<4, 4> {
+  auto result = ray_tracer::Matrix<4, 4>::IdentityMatrix();
+  result.matrix_[0][3] = x_dir;
+  result.matrix_[1][3] = y_dir;
+  result.matrix_[2][3] = z_dir;
+  return result;
+}
+
+template <size_t Rows, size_t Cols>
+constexpr auto Matrix<Rows, Cols>::Translation(const Tuple& tuple) -> ray_tracer::Matrix<4, 4> {
+  auto result = Translation(tuple.GetX(), tuple.GetY(), tuple.GetZ());
+  result.matrix_[4][4] = tuple.GetW();
+  return result;
 }
 
 template <size_t R, size_t C, size_t R2, size_t C2>

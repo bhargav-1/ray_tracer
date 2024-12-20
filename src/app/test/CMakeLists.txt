@@ -8,6 +8,7 @@ target_sources(app_lib_tests
         tuple_point_vector_chapter_1.cpp
         canvas_drawing_chapter2.cpp
         matrices_chapter_3.cpp
+        matrix_transformations_chapter4.cpp
 )
 
 target_link_libraries(app_lib_tests

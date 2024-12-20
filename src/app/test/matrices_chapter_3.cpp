@@ -261,11 +261,20 @@ SCENARIO("inverse of transpose of matrix and transpose of Inverse of matrix") {
   SCENARIO("Mutiplying almost I with tuple ") {
   GIVEN("A ={{1,0,0,0},{0,1,0,0},{0,0,1,0},{0,0,0,2}}, b = {1,2,3,4}") {
     THEN("A * b = {1,2,3,4}") {
-      ray_tracer::Matrix<4, 4> a_matrix{{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 2}};
+      ray_tracer::Matrix<4, 4> const a_matrix{{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 2}};
       ray_tracer::Tuple b_tuple{1, 2, 3, 4};
       ray_tracer::Tuple c_tuple{1, 2, 3, 8};
       CHECK(a_matrix * b_tuple != b_tuple);
       AND_THEN("A * b = {1,2,3,8}") { CHECK(a_matrix * b_tuple == c_tuple); }
+    }
+  }
+}
+  SCENARIO("Multiplying I with tuple") {
+  GIVEN("A ={{1,0,0,0},{0,1,0,0},{0,0,1,0},{0,0,0,1}}, b = {2,3,4,5}") {
+    THEN("A * b = {1,2,3,4}") {
+      ray_tracer::Matrix<4, 4> const a_matrix{{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}};
+      ray_tracer::Tuple b_tuple{2, 3, 4, 5};
+      CHECK(a_matrix * b_tuple == b_tuple);
     }
   }
 }

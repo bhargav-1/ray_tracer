@@ -73,6 +73,9 @@ class Matrix {
   constexpr auto SpotSubMatrix(const size_t& row, const size_t& col) -> Matrix<Rows - 1, Cols - 1>;
   constexpr auto Invertible() -> bool;
   constexpr auto Inverse() -> Matrix<Rows, Cols>;
+  static constexpr auto Scaling(const double& x_dir, const double& y_dir, const double& z_dir)
+      -> ray_tracer::Matrix<4, 4>;
+  static constexpr auto Scaling(const Tuple& tuple) -> ray_tracer::Matrix<4, 4>;
   static constexpr auto Translation(const double& x_dir, const double& y_dir, const double& z_dir)
       -> ray_tracer::Matrix<4, 4>;
   static constexpr auto Translation(const Tuple& tuple) -> ray_tracer::Matrix<4, 4>;
@@ -233,9 +236,21 @@ constexpr auto Matrix<Rows, Cols>::Translation(const double& x_dir, const double
 
 template <size_t Rows, size_t Cols>
 constexpr auto Matrix<Rows, Cols>::Translation(const Tuple& tuple) -> ray_tracer::Matrix<4, 4> {
-  auto result = Translation(tuple.GetX(), tuple.GetY(), tuple.GetZ());
-  result.matrix_[4][4] = tuple.GetW();
+  return Translation(tuple.GetX(), tuple.GetY(), tuple.GetZ());
+}
+template <size_t Rows, size_t Cols>
+constexpr auto Matrix<Rows, Cols>::Scaling(const double& x_dir, const double& y_dir, const double& z_dir)
+    -> ray_tracer::Matrix<4, 4> {
+  auto result = ray_tracer::Matrix<4, 4>::IdentityMatrix();
+  result.matrix_[0][0] = x_dir;
+  result.matrix_[1][1] = y_dir;
+  result.matrix_[2][2] = z_dir;
   return result;
+}
+
+template <size_t Rows, size_t Cols>
+constexpr auto Matrix<Rows, Cols>::Scaling(const Tuple& tuple) -> ray_tracer::Matrix<4, 4> {
+  return Scaling(tuple.GetX(), tuple.GetY(), tuple.GetZ());
 }
 
 template <size_t R, size_t C, size_t R2, size_t C2>

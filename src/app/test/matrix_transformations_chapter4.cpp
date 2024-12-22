@@ -3,6 +3,9 @@
 #include <app/tuple.h>                   // for tuple
 #include <app/vec3.h>                    // for vector
 #include <catch2/catch_test_macros.hpp>  // for operator""_catch_sr, Section
+// will use once ported to cpp20/ubuntu24
+// #include <numbers>                       // for numbers
+#include <cmath>
 
 namespace ray_tracer {
 SCENARIO("Multiply by translation") {
@@ -69,6 +72,51 @@ SCENARIO("Reflection is scaling by a negative value") {
       ray_tracer::Point p(2, 3, 4);
       CHECK(transform * p == ray_tracer::Point(-2, 3, 4));
     }
- }
+  }
+}
+SCENARIO("Rotating a point around the x axis") {
+  GIVEN("p = point(0,1,0),half_quarter = rotation_x(pi/4),full_quarter = rotation_x(pi/2)") {
+    THEN("half_quarter * p = point(0,sqrt(2)/2,sqrt(2)/2)") {
+      ray_tracer::Point p(0, 1, 0);
+      auto half_quarter = ray_tracer::Matrix<4, 4>::RotationX(M_PI / 4);
+      CHECK(half_quarter * p == ray_tracer::Point(0, std::sqrt(2) / 2, std::sqrt(2) / 2));
+      auto full_quarter = ray_tracer::Matrix<4, 4>::RotationX(M_PI / 2);
+      CHECK(full_quarter * p == ray_tracer::Point(0, 0, 1));
+    }
+  }
+}
+
+SCENARIO("inverse of an x-rotation rotates in opp direction") {
+  GIVEN("p = point(0,1,0),half_quarter = rotation_x(pi/4),full_quarter = rotation_x(pi/2)") {
+    THEN("half_quarter * p = point(0,sqrt(2)/2,sqrt(2)/2)") {
+      ray_tracer::Point p(0, 1, 0);
+      auto half_quarter = ray_tracer::Matrix<4, 4>::RotationX(M_PI / 4);
+      auto inv = half_quarter.Inverse();
+      CHECK(inv * p == ray_tracer::Point(0, std::sqrt(2) / 2, -std::sqrt(2) / 2));
+    }
+  }
+}
+SCENARIO("Rotating a point around the y axis") {
+  GIVEN("p = point(0,0,1),half_quarter = rotation_y(pi/4),full_quarter = rotation_y(pi/2)") {
+    THEN("half_quarter * p = point(sqrt(2)/2,0,sqrt(2)/2)") {
+      ray_tracer::Point p(0, 0, 1);
+      auto half_quarter = ray_tracer::Matrix<4, 4>::RotationY(M_PI / 4);
+      CHECK(half_quarter * p == ray_tracer::Point(std::sqrt(2) / 2, 0, std::sqrt(2) / 2));
+      auto full_quarter = ray_tracer::Matrix<4, 4>::RotationY(M_PI / 2);
+      CHECK(full_quarter * p == ray_tracer::Point(1, 0, 0));
+    }
+  }
+}
+
+SCENARIO("Rotating a point around the z axis") {
+  GIVEN("p = point(0,1,0),half_quarter = rotation_z(pi/4),full_quarter = rotation_z(pi/2)") {
+    THEN("half_quarter * p = point(-sqrt(2)/2,sqrt(2)/2,0)") {
+      ray_tracer::Point p(0, 1, 0);
+      auto half_quarter = ray_tracer::Matrix<4, 4>::RotationZ(M_PI / 4);
+      CHECK(half_quarter * p == ray_tracer::Point(-std::sqrt(2) / 2, std::sqrt(2) / 2, 0));
+      auto full_quarter = ray_tracer::Matrix<4, 4>::RotationZ(M_PI / 2);
+      CHECK(full_quarter * p == ray_tracer::Point(-1, 0, 0));
+    }
+  }
+}
 }  // namespace ray_tracer
- }

@@ -79,6 +79,9 @@ class Matrix {
   static constexpr auto Translation(const double& x_dir, const double& y_dir, const double& z_dir)
       -> ray_tracer::Matrix<4, 4>;
   static constexpr auto Translation(const Tuple& tuple) -> ray_tracer::Matrix<4, 4>;
+  static constexpr auto RotationX(const double& radians) -> ray_tracer::Matrix<4, 4>;
+  static constexpr auto RotationY(const double& radians) -> ray_tracer::Matrix<4, 4>;
+  static constexpr auto RotationZ(const double& radians) -> ray_tracer::Matrix<4, 4>;
 
  private:
   std::array<std::array<double, Cols>, Rows> matrix_;
@@ -238,6 +241,35 @@ template <size_t Rows, size_t Cols>
 constexpr auto Matrix<Rows, Cols>::Translation(const Tuple& tuple) -> ray_tracer::Matrix<4, 4> {
   return Translation(tuple.GetX(), tuple.GetY(), tuple.GetZ());
 }
+
+template <size_t Rows, size_t Cols>
+constexpr auto Matrix<Rows, Cols>::RotationX(const double& radians) -> ray_tracer::Matrix<4, 4> {
+  auto result = ray_tracer::Matrix<4, 4>::IdentityMatrix();
+  result.matrix_[1][1] = std::cos(radians);
+  result.matrix_[1][2] = -std::sin(radians);
+  result.matrix_[2][1] = std::sin(radians);
+  result.matrix_[2][2] = std::cos(radians);
+  return result;
+}
+template <size_t Rows, size_t Cols>
+constexpr auto Matrix<Rows, Cols>::RotationY(const double& radians) -> ray_tracer::Matrix<4, 4> {
+  auto result = ray_tracer::Matrix<4, 4>::IdentityMatrix();
+  result.matrix_[0][0] = std::cos(radians);
+  result.matrix_[0][2] = std::sin(radians);
+  result.matrix_[2][0] = -std::sin(radians);
+  result.matrix_[2][2] = std::cos(radians);
+  return result;
+}
+template <size_t Rows, size_t Cols>
+constexpr auto Matrix<Rows, Cols>::RotationZ(const double& radians) -> ray_tracer::Matrix<4, 4> {
+  auto result = ray_tracer::Matrix<4, 4>::IdentityMatrix();
+  result.matrix_[0][0] = std::cos(radians);
+  result.matrix_[0][1] = -std::sin(radians);
+  result.matrix_[1][0] = std::sin(radians);
+  result.matrix_[1][1] = std::cos(radians);
+  return result;
+}
+
 template <size_t Rows, size_t Cols>
 constexpr auto Matrix<Rows, Cols>::Scaling(const double& x_dir, const double& y_dir, const double& z_dir)
     -> ray_tracer::Matrix<4, 4> {

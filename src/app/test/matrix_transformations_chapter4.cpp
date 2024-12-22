@@ -119,4 +119,95 @@ SCENARIO("Rotating a point around the z axis") {
     }
   }
 }
+SCENARIO("A shearing transformation moves x in proportion to y") {
+  GIVEN("transform = shearing(1,0,0,0,0,0), p = point(2,3,4)") {
+    THEN("transform * p = point(5,3,4)") {
+      ray_tracer::shear::ShearX shear_x{1, 0};
+      ray_tracer::shear::ShearY shear_y{0, 0};
+      ray_tracer::shear::ShearZ shear_z{0, 0};
+      auto transform = ray_tracer::Matrix<4, 4>::Shearing(shear_x, shear_y, shear_z);
+      ray_tracer::Point p(2, 3, 4);
+      CHECK(transform * p == ray_tracer::Point(5, 3, 4));
+    }
+  }
+}
+SCENARIO("A shearing transformation moves y in proportion to x") {
+  GIVEN("transform = shearing(0,0,1,0,0,0), p = point(2,3,4)") {
+    THEN("transform * p = point(6,3,4)") {
+      ray_tracer::shear::ShearX shear_x{0, 0};
+      ray_tracer::shear::ShearY shear_y{1, 0};
+      ray_tracer::shear::ShearZ shear_z{0, 0};
+      auto transform = ray_tracer::Matrix<4, 4>::Shearing(shear_x, shear_y, shear_z);
+      ray_tracer::Point p(2, 3, 4);
+      CHECK(transform * p == ray_tracer::Point(2, 5, 4));
+    }
+  }
+}
+
+SCENARIO("A shearing transformaiton moves y in proportion to z") {
+  GIVEN("transform = shearing(0,0,0,1,0,0), p = point(2,3,4)") {
+    THEN("transform * p = point(2,7,4)") {
+      ray_tracer::shear::ShearX shear_x{0, 0};
+      ray_tracer::shear::ShearY shear_y{0, 1};
+      ray_tracer::shear::ShearZ shear_z{0, 0};
+      auto transform = ray_tracer::Matrix<4, 4>::Shearing(shear_x, shear_y, shear_z);
+      ray_tracer::Point p(2, 3, 4);
+      CHECK(transform * p == ray_tracer::Point(2, 7, 4));
+    }
+  }
+}
+
+SCENARIO("A shearing transformation moves z in proportion to x") {
+  GIVEN("transform = shearing(0,0,0,0,1,0), p = point(2,3,4)") {
+    THEN("transform * p = point(2,3,6)") {
+      ray_tracer::shear::ShearX shear_x{0, 0};
+      ray_tracer::shear::ShearY shear_y{0, 0};
+      ray_tracer::shear::ShearZ shear_z{1, 0};
+      auto transform = ray_tracer::Matrix<4, 4>::Shearing(shear_x, shear_y, shear_z);
+      ray_tracer::Point p(2, 3, 4);
+      CHECK(transform * p == ray_tracer::Point(2, 3, 6));
+    }
+  }
+}
+SCENARIO("A shearing transformation moves z in proportion to y") {
+  GIVEN("transform = shearing(0,0,0,0,0,1), p = point(2,3,4)") {
+    THEN("transform * p = point(2,3,7)") {
+      ray_tracer::shear::ShearX shear_x{0, 0};
+      ray_tracer::shear::ShearY shear_y{0, 0};
+      ray_tracer::shear::ShearZ shear_z{0, 1};
+      auto transform = ray_tracer::Matrix<4, 4>::Shearing(shear_x, shear_y, shear_z);
+      ray_tracer::Point p(2, 3, 4);
+      CHECK(transform * p == ray_tracer::Point(2, 3, 7));
+    }
+  }
+}
+
+SCENARIO("Individual transformations are applied in sequence") {
+  GIVEN("p = point(1,0,1), A = rotation_x(pi/2), B = scaling(5,5,5), C = translation(10,5,7)") {
+    THEN("C * B * A * p = point(15,0,7)") {
+      ray_tracer::Point p(1, 0, 1);
+      auto a = ray_tracer::Matrix<4, 4>::RotationX(M_PI / 2);
+      auto b = ray_tracer::Matrix<4, 4>::Scaling(5, 5, 5);
+      auto c = ray_tracer::Matrix<4, 4>::Translation(10, 5, 7);
+      auto p2 = a * p;
+      CHECK(p2 == ray_tracer::Point(1, -1, 0));
+      auto p3 = b * p2;
+      CHECK(p3 == ray_tracer::Point(5, -5, 0));
+      auto p4 = c * p3;
+      CHECK(p4 == ray_tracer::Point(15, 0, 7));
+    }
+  }
+}
+SCENARIO("Chained transformations must be applied in reverse order") {
+  GIVEN("p = point(1,0,1), A = rotation_x(pi/2), B = scaling(5,5,5), C = translation(10,5,7)") {
+    THEN("C * B * A * p =point(15,0,7)") {
+      ray_tracer::Point p(1, 0, 1);
+      auto a = ray_tracer::Matrix<4, 4>::RotationX(M_PI / 2);
+      auto b = ray_tracer::Matrix<4, 4>::Scaling(5, 5, 5);
+      auto c = ray_tracer::Matrix<4, 4>::Translation(10, 5, 7);
+      auto t = c * b * a;
+      CHECK(t * p == ray_tracer::Point(15, 0, 7));
+    }
+  }
+}
 }  // namespace ray_tracer

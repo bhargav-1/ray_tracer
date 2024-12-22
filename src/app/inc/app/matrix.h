@@ -5,6 +5,22 @@
 #include "tuple.h"
 
 namespace ray_tracer {
+
+namespace shear {
+struct ShearX {
+  double proportion_to_y = 0;
+  double proportion_to_z = 0;
+};
+struct ShearY {
+  double proportion_to_x = 0;
+  double proportion_to_z = 0;
+};
+struct ShearZ {
+  double proportion_to_x = 0;
+  double proportion_to_y = 0;
+};
+}  // namespace shear
+
 template <size_t Rows, size_t Cols>
 class Matrix {
  public:
@@ -82,6 +98,9 @@ class Matrix {
   static constexpr auto RotationX(const double& radians) -> ray_tracer::Matrix<4, 4>;
   static constexpr auto RotationY(const double& radians) -> ray_tracer::Matrix<4, 4>;
   static constexpr auto RotationZ(const double& radians) -> ray_tracer::Matrix<4, 4>;
+  static constexpr auto Shearing(const shear::ShearX& yz_shear,
+                                 const shear::ShearY& xz_shear,
+                                 const shear::ShearZ& xy_shear) -> ray_tracer::Matrix<4, 4>;
 
  private:
   std::array<std::array<double, Cols>, Rows> matrix_;
@@ -267,6 +286,19 @@ constexpr auto Matrix<Rows, Cols>::RotationZ(const double& radians) -> ray_trace
   result.matrix_[0][1] = -std::sin(radians);
   result.matrix_[1][0] = std::sin(radians);
   result.matrix_[1][1] = std::cos(radians);
+  return result;
+}
+template <size_t Rows, size_t Cols>
+constexpr auto Matrix<Rows, Cols>::Shearing(const shear::ShearX& yz_shear,
+                                            const shear::ShearY& xz_shear,
+                                            const shear::ShearZ& xy_shear) -> ray_tracer::Matrix<4, 4> {
+  auto result = ray_tracer::Matrix<4, 4>::IdentityMatrix();
+  result.matrix_[0][1] = yz_shear.proportion_to_y;
+  result.matrix_[0][2] = yz_shear.proportion_to_z;
+  result.matrix_[1][0] = xz_shear.proportion_to_x;
+  result.matrix_[1][2] = xz_shear.proportion_to_z;
+  result.matrix_[2][0] = xy_shear.proportion_to_x;
+  result.matrix_[2][1] = xy_shear.proportion_to_y;
   return result;
 }
 

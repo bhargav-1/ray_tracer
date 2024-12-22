@@ -89,18 +89,41 @@ class Matrix {
   constexpr auto SpotSubMatrix(const size_t& row, const size_t& col) -> Matrix<Rows - 1, Cols - 1>;
   constexpr auto Invertible() -> bool;
   constexpr auto Inverse() -> Matrix<Rows, Cols>;
-  static constexpr auto Scaling(const double& x_dir, const double& y_dir, const double& z_dir)
-      -> ray_tracer::Matrix<4, 4>;
-  static constexpr auto Scaling(const Tuple& tuple) -> ray_tracer::Matrix<4, 4>;
+
   static constexpr auto Translation(const double& x_dir, const double& y_dir, const double& z_dir)
       -> ray_tracer::Matrix<4, 4>;
   static constexpr auto Translation(const Tuple& tuple) -> ray_tracer::Matrix<4, 4>;
+  // need to add dummy R/C for enable_if, it doesn't compile otherwise
+  template <size_t R = Rows, size_t C = Cols>
+  constexpr auto Translate(const double& x_dir, const double& y_dir, const double& z_dir)
+      -> std::enable_if_t<R == 4 && C == 4, Matrix<4, 4>&>;
+  template <size_t R = Rows, size_t C = Cols>
+  constexpr auto Translate(const Tuple& tuple) -> std::enable_if_t<R == 4 && C == 4, Matrix<4, 4>&>;
+
+  static constexpr auto Scaling(const double& x_dir, const double& y_dir, const double& z_dir)
+      -> ray_tracer::Matrix<4, 4>;
+  static constexpr auto Scaling(const Tuple& tuple) -> ray_tracer::Matrix<4, 4>;
+  template <size_t R = Rows, size_t C = Cols>
+  constexpr auto Scale(const double& x_dir, const double& y_dir, const double& z_dir)
+      -> std::enable_if_t<R == 4 && C == 4, Matrix<4, 4>&>;
+  template <size_t R = Rows, size_t C = Cols>
+  constexpr auto Scale(const Tuple& tuple) -> std::enable_if_t<R == 4 && C == 4, Matrix<4, 4>&>;
   static constexpr auto RotationX(const double& radians) -> ray_tracer::Matrix<4, 4>;
+
+  template <size_t R = Rows, size_t C = Cols>
+  constexpr auto RotateX(const double& radians) -> std::enable_if_t<R == 4 && C == 4, Matrix<4, 4>&>;
   static constexpr auto RotationY(const double& radians) -> ray_tracer::Matrix<4, 4>;
+  template <size_t R = Rows, size_t C = Cols>
+  constexpr auto RotateY(const double& radians) -> std::enable_if_t<R == 4 && C == 4, Matrix<4, 4>&>;
   static constexpr auto RotationZ(const double& radians) -> ray_tracer::Matrix<4, 4>;
+  template <size_t R = Rows, size_t C = Cols>
+  constexpr auto RotateZ(const double& radians) -> std::enable_if_t<R == 4 && C == 4, Matrix<4, 4>&>;
   static constexpr auto Shearing(const shear::ShearX& yz_shear,
                                  const shear::ShearY& xz_shear,
                                  const shear::ShearZ& xy_shear) -> ray_tracer::Matrix<4, 4>;
+  template <size_t R = Rows, size_t C = Cols>
+  constexpr auto Shear(const shear::ShearX& yz_shear, const shear::ShearY& xz_shear, const shear::ShearZ& xy_shear)
+      -> std::enable_if_t<R == 4 && C == 4, Matrix<4, 4>&>;
 
  private:
   std::array<std::array<double, Cols>, Rows> matrix_;
@@ -260,6 +283,22 @@ template <size_t Rows, size_t Cols>
 constexpr auto Matrix<Rows, Cols>::Translation(const Tuple& tuple) -> ray_tracer::Matrix<4, 4> {
   return Translation(tuple.GetX(), tuple.GetY(), tuple.GetZ());
 }
+template <size_t Rows, size_t Cols>
+template <size_t R, size_t C>
+constexpr auto Matrix<Rows, Cols>::Translate(const double& x_dir, const double& y_dir, const double& z_dir)
+    -> std::enable_if_t<R == 4 && C == 4, Matrix<4, 4>&> {
+  auto translation = Matrix<4, 4>::IdentityMatrix();
+  translation.matrix_[0][3] = x_dir;
+  translation.matrix_[1][3] = y_dir;
+  translation.matrix_[2][3] = z_dir;
+  *this = *this * translation;
+  return *this;
+}
+template <size_t Rows, size_t Cols>
+template <size_t R, size_t C>
+constexpr auto Matrix<Rows, Cols>::Translate(const Tuple& tuple) -> std::enable_if_t<R == 4 && C == 4, Matrix<4, 4>&> {
+  return Translate(tuple.GetX(), tuple.GetY(), tuple.GetZ());
+}
 
 template <size_t Rows, size_t Cols>
 constexpr auto Matrix<Rows, Cols>::RotationX(const double& radians) -> ray_tracer::Matrix<4, 4> {
@@ -271,6 +310,18 @@ constexpr auto Matrix<Rows, Cols>::RotationX(const double& radians) -> ray_trace
   return result;
 }
 template <size_t Rows, size_t Cols>
+template <size_t R, size_t C>
+constexpr auto Matrix<Rows, Cols>::RotateX(const double& radians) -> std::enable_if_t<R == 4 && C == 4, Matrix<4, 4>&> {
+  auto result = ray_tracer::Matrix<4, 4>::IdentityMatrix();
+  result.matrix_[1][1] = std::cos(radians);
+  result.matrix_[1][2] = -std::sin(radians);
+  result.matrix_[2][1] = std::sin(radians);
+  result.matrix_[2][2] = std::cos(radians);
+  *this = *this * result;
+  return *this;
+}
+
+template <size_t Rows, size_t Cols>
 constexpr auto Matrix<Rows, Cols>::RotationY(const double& radians) -> ray_tracer::Matrix<4, 4> {
   auto result = ray_tracer::Matrix<4, 4>::IdentityMatrix();
   result.matrix_[0][0] = std::cos(radians);
@@ -280,6 +331,18 @@ constexpr auto Matrix<Rows, Cols>::RotationY(const double& radians) -> ray_trace
   return result;
 }
 template <size_t Rows, size_t Cols>
+template <size_t R, size_t C>
+constexpr auto Matrix<Rows, Cols>::RotateY(const double& radians) -> std::enable_if_t<R == 4 && C == 4, Matrix<4, 4>&> {
+  auto result = ray_tracer::Matrix<4, 4>::IdentityMatrix();
+  result.matrix_[0][0] = std::cos(radians);
+  result.matrix_[0][2] = std::sin(radians);
+  result.matrix_[2][0] = -std::sin(radians);
+  result.matrix_[2][2] = std::cos(radians);
+  *this = *this * result;
+  return *this;
+}
+
+template <size_t Rows, size_t Cols>
 constexpr auto Matrix<Rows, Cols>::RotationZ(const double& radians) -> ray_tracer::Matrix<4, 4> {
   auto result = ray_tracer::Matrix<4, 4>::IdentityMatrix();
   result.matrix_[0][0] = std::cos(radians);
@@ -288,6 +351,18 @@ constexpr auto Matrix<Rows, Cols>::RotationZ(const double& radians) -> ray_trace
   result.matrix_[1][1] = std::cos(radians);
   return result;
 }
+template <size_t Rows, size_t Cols>
+template <size_t R, size_t C>
+constexpr auto Matrix<Rows, Cols>::RotateZ(const double& radians) -> std::enable_if_t<R == 4 && C == 4, Matrix<4, 4>&> {
+  auto result = ray_tracer::Matrix<4, 4>::IdentityMatrix();
+  result.matrix_[0][0] = std::cos(radians);
+  result.matrix_[0][1] = -std::sin(radians);
+  result.matrix_[1][0] = std::sin(radians);
+  result.matrix_[1][1] = std::cos(radians);
+  *this = *this * result;
+  return *this;
+}
+
 template <size_t Rows, size_t Cols>
 constexpr auto Matrix<Rows, Cols>::Shearing(const shear::ShearX& yz_shear,
                                             const shear::ShearY& xz_shear,
@@ -301,6 +376,22 @@ constexpr auto Matrix<Rows, Cols>::Shearing(const shear::ShearX& yz_shear,
   result.matrix_[2][1] = xy_shear.proportion_to_y;
   return result;
 }
+template <size_t Rows, size_t Cols>
+template <size_t R, size_t C>
+constexpr auto Matrix<Rows, Cols>::Shear(const shear::ShearX& yz_shear,
+                                         const shear::ShearY& xz_shear,
+                                         const shear::ShearZ& xy_shear)
+    -> std::enable_if_t<R == 4 && C == 4, Matrix<4, 4>&> {
+  auto result = ray_tracer::Matrix<4, 4>::IdentityMatrix();
+  result.matrix_[0][1] = yz_shear.proportion_to_y;
+  result.matrix_[0][2] = yz_shear.proportion_to_z;
+  result.matrix_[1][0] = xz_shear.proportion_to_x;
+  result.matrix_[1][2] = xz_shear.proportion_to_z;
+  result.matrix_[2][0] = xy_shear.proportion_to_x;
+  result.matrix_[2][1] = xy_shear.proportion_to_y;
+  *this = *this * result;
+  return *this;
+}
 
 template <size_t Rows, size_t Cols>
 constexpr auto Matrix<Rows, Cols>::Scaling(const double& x_dir, const double& y_dir, const double& z_dir)
@@ -310,6 +401,22 @@ constexpr auto Matrix<Rows, Cols>::Scaling(const double& x_dir, const double& y_
   result.matrix_[1][1] = y_dir;
   result.matrix_[2][2] = z_dir;
   return result;
+}
+template <size_t Rows, size_t Cols>
+template <size_t R, size_t C>
+constexpr auto Matrix<Rows, Cols>::Scale(const double& x_dir, const double& y_dir, const double& z_dir)
+    -> std::enable_if_t<R == 4 && C == 4, Matrix<4, 4>&> {
+  auto result = ray_tracer::Matrix<4, 4>::IdentityMatrix();
+  result.matrix_[0][0] = x_dir;
+  result.matrix_[1][1] = y_dir;
+  result.matrix_[2][2] = z_dir;
+  *this = *this * result;
+  return *this;
+}
+template <size_t Rows, size_t Cols>
+template <size_t R, size_t C>
+constexpr auto Matrix<Rows, Cols>::Scale(const Tuple& tuple) -> std::enable_if_t<R == 4 && C == 4, Matrix<4, 4>&> {
+  return Scale(tuple.GetX(), tuple.GetY(), tuple.GetZ());
 }
 
 template <size_t Rows, size_t Cols>

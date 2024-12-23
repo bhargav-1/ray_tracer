@@ -18,14 +18,21 @@ target_link_libraries(app_lib
         Qt5::Widgets
 )
 
-add_executable(app_tester)
-
-target_sources(app_tester
+add_executable(projectile_canvas)
+target_sources(projectile_canvas
         PRIVATE
         src/main.cpp
 )
-
-target_link_libraries(app_tester
+target_link_libraries(projectile_canvas
+        PRIVATE
+        app_lib
+)
+add_executable(clock_canvas)
+target_sources(clock_canvas
+        PRIVATE
+        src/clock_canvas.cpp
+)
+target_link_libraries(clock_canvas
         PRIVATE
         app_lib
 )

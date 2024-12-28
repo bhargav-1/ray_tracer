@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.19)
+cmake_minimum_required(VERSION 3.25)
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 set(GENERATED_BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR}/generated)
@@ -11,7 +11,9 @@ enable_testing()
 # Compiler options
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-SET(CMAKE_BUILD_TYPE Debug)
+if (NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Debug CACHE STRING "Build type")
+endif ()
 
 # Output Options
 set(CMAKE_COLOR_DIAGNOSTICS ON)
@@ -48,7 +50,15 @@ message("------------------------------CMAKE_PROJECT_VERSION_PATCH: ${CMAKE_PROJ
 
 
 find_package(Catch2 REQUIRED)
-
+find_package(glfw3 CONFIG REQUIRED)
+find_package(OpenGL REQUIRED)
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(IMGUI REQUIRED IMPORTED_TARGET imgui)
+find_path(IMGUI_BACKEND_INCLUDE_DIR NAMES imgui_impl_glfw.h
+    HINTS ${IMGUI_INCLUDE_DIRS} PATH_SUFFIXES backends REQUIRED)
+target_include_directories(PkgConfig::IMGUI INTERFACE "${IMGUI_BACKEND_INCLUDE_DIR}")
+target_link_libraries(PkgConfig::IMGUI INTERFACE glfw OpenGL::GL ${CMAKE_DL_LIBS})
+add_library(imgui::imgui ALIAS PkgConfig::IMGUI)
 
 # Minimal inclusion, but see caveat further below
 # This generates CMAKE_INSTALL_* Variables

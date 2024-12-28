@@ -1,5 +1,6 @@
 build-essential
 catch2
+libimgui-dev
 clang
 clang-9
 clang-format
@@ -26,4 +27,6 @@ unzip
 wget
 vim
 zip
+libglfw3-dev
+libgl1-mesa-dev
 dpkg-dev

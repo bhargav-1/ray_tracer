@@ -6,13 +6,19 @@
 #include "imgui_impl_opengl3.h"  // NOLINT
 #define GL_SILENCE_DEPRECATION
 #include <GLFW/glfw3.h>  // Will drag system OpenGL headers
+#include <src/app/inc/app/color.h>
+
+#include "app/canvas.h"
+#include "app/matrix.h"
+#include "app/point.h"
+#include "app/tuple.h"
 
 static void GlfwErrorCallback(int error, const char* description) {
   fprintf(stderr, "GLFW Error %d: %s\n", error, description);
 }
 
 // Main code
-auto main(int /*unused*/, char* * /*unused*/) -> int {
+auto main(int /*unused*/, char* * /*unused*/) -> int {  // NOLINT
   glfwSetErrorCallback(GlfwErrorCallback);
   if (!glfwInit()) {
     return 1;
@@ -50,15 +56,6 @@ auto main(int /*unused*/, char* * /*unused*/) -> int {
   // Main loop
   io.IniFilename = nullptr;
   while (!glfwWindowShouldClose(window)) {
-    // Poll and handle events (inputs, window resize, etc.)
-    // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if
-    // dear imgui wants to use your inputs.
-    // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application,
-    // or clear/overwrite your copy of the mouse data.
-    // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application,
-    // or clear/overwrite your copy of the keyboard data.
-    // Generally you may always pass all inputs to dear imgui, and hide them from your application based
-    // on those two flags.
     glfwPollEvents();
     if (glfwGetWindowAttrib(window, GLFW_ICONIFIED) != 0) {
       std::this_thread::sleep_for(std::chrono::milliseconds{10});
@@ -69,11 +66,45 @@ auto main(int /*unused*/, char* * /*unused*/) -> int {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
+    ImGui::SetNextWindowSize(ImVec2(1000, 900), ImGuiCond_Once);
     ImGui::Begin("Clock Face:");  // Create a window called "Hello, world!" and append into it.
-    ImDrawList* draw_list = ImGui::GetWindowDrawList();
-    ImVec2 pos = ImGui::GetCursorScreenPos();
+    ImDrawList* canvas = ImGui::GetWindowDrawList();
+    const ImVec2 pos = ImGui::GetCursorScreenPos();
+    const ImVec2 window_size = ImGui::GetWindowSize();
 
-    draw_list->AddCircleFilled(ImVec2(pos.x + 100, pos.y + 100), 20, ImColor(255, 0, 0, 255));
+    float const center_x = pos.x + (window_size.x / 2);
+    float const center_y = pos.y + (window_size.y / 2);
+    float const radius = std::min(window_size.x, window_size.y) * 0.4F;
+
+    ray_tracer::Matrix<4, 4> canvas_transform =
+        ray_tracer::Matrix<4, 4>::IdentityMatrix().Translate(center_x, center_y, 0);
+
+    constexpr ray_tracer::Color kWhite{255, 255, 255, 255};
+    ImColor color = ImColor(static_cast<int>(kWhite.GetRed()),
+                            static_cast<int>(kWhite.GetGreen()),
+                            static_cast<int>(kWhite.GetBlue()),
+                            static_cast<int>(kWhite.GetW()));
+    ray_tracer::Point origin{0, 0, 0};
+    auto print_center = canvas_transform * origin;
+    ImVec2 center_vec = {static_cast<float>(print_center.GetX()), static_cast<float>(print_center.GetY())};
+    canvas->AddCircleFilled(center_vec, 10, color);
+    auto transform = ray_tracer::Matrix<4, 4>::IdentityMatrix().Translate(0, -radius, 0);
+    ray_tracer::Point mark_12 = transform * origin;
+    ray_tracer::Point current_mark = mark_12;
+
+    auto print_mark12 = canvas_transform * mark_12;
+    canvas->AddCircleFilled(
+        ImVec2(static_cast<float>(print_mark12.GetX()), static_cast<float>(print_mark12.GetY())), 10, color);
+
+    while (ray_tracer::Matrix<4, 4>::RotationZ(M_PI / 6) * current_mark != mark_12) {
+      current_mark = ray_tracer::Matrix<4, 4>::RotationZ(M_PI / 6) * current_mark;
+      auto print_point = canvas_transform * current_mark;
+      canvas->AddCircleFilled(
+          ImVec2(static_cast<float>(print_point.GetX()), static_cast<float>(print_point.GetY())), 10, color);
+      // std::cout << "Mark12:" << '\n';
+      // std::cout << "x: " << current_mark.GetX() << ", y: " << current_mark.GetY() << ", z: " << current_mark.GetZ()
+      // << '\n';
+    }
 
     ImGui::End();
 

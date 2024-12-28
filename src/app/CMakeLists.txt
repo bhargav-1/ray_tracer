@@ -37,28 +37,47 @@ target_link_libraries(clock_canvas
         app_lib
 )
 
+add_library(imgui_lib)
+target_sources(imgui_lib
+        PRIVATE)
+target_include_directories(imgui_lib
+        PUBLIC
+        ${CMAKE_SOURCE_DIR}/
+)
+target_link_libraries(imgui_lib
+        PUBLIC
+        glfw
+        OpenGL
+        imgui::imgui
+)
 
 add_executable(imgui_example)
 target_sources(imgui_example
         PRIVATE
         src/imgui_test.cpp
 )
-
 set_source_files_properties(src/imgui_test.cpp PROPERTIES
         SKIP_LINTING ON
 )
-target_include_directories(imgui_example
-        PRIVATE
-        ${CMAKE_SOURCE_DIR}/
-)
-
 target_link_libraries(imgui_example
         PRIVATE
-        glfw
-        OpenGL
-        imgui::imgui
-        app_lib
+        imgui_lib
 )
+
+add_executable(imgui_clock)
+target_sources(imgui_clock
+        PRIVATE
+        src/imgui_clock.cpp
+)
+# set_source_files_properties(src/imgui_clock.cpp PROPERTIES
+#        SKIP_LINTING ON
+# )
+target_link_libraries(imgui_clock
+        PRIVATE
+        app_lib
+        imgui_lib
+)
+
 
 add_subdirectory(test)
 

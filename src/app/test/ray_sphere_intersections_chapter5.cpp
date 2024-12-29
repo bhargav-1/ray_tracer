@@ -175,4 +175,63 @@ SCENARIO("The hit is always the lowest nonnegative intersection") {
   }
 }
 
+SCENARIO("Translating a ray") {
+  GIVEN("r = Ray(point(1,2,3), vector(0,1,0)),m = translation(3,4,5),r2 = transform(r,m)") {
+    ray_tracer::Ray ray(ray_tracer::Point(1, 2, 3), ray_tracer::Vec3(0, 1, 0));
+    ray_tracer::Matrix<4, 4> mat = ray_tracer::Matrix<4, 4>::Translation(3, 4, 5);
+    ray_tracer::Ray ray2 = ray.Transform(mat);
+    THEN("r2.origin = point(4,6,8)") { CHECK(ray2.GetOrigin() == ray_tracer::Point(4, 6, 8)); }
+    THEN("r2.direction = vector(0,1,0)") { CHECK(ray2.GetDirection() == ray_tracer::Vec3(0, 1, 0)); }
+  }
+}
+
+SCENARIO("Scaling a ray") {
+  GIVEN("r = Ray(point(1,2,3), vector(0,1,0)),m = scaling(2,3,4),r2 = transform(r,m)") {
+    ray_tracer::Ray ray(ray_tracer::Point(1, 2, 3), ray_tracer::Vec3(0, 1, 0));
+    ray_tracer::Matrix<4, 4> mat = ray_tracer::Matrix<4, 4>::Scaling(2, 3, 4);
+    ray_tracer::Ray ray2 = ray.Transform(mat);
+    THEN("r2.origin = point(2,6,12)") { CHECK(ray2.GetOrigin() == ray_tracer::Point(2, 6, 12)); }
+    THEN("r2.direction = vector(0,3,0)") { CHECK(ray2.GetDirection() == ray_tracer::Vec3(0, 3, 0)); }
+  }
+}
+
+SCENARIO("5: A Sphere's default transformation") {
+  GIVEN("s = Sphere()") {
+    ray_tracer::Sphere sphe;
+    THEN("s.transform = identity_matrix") { CHECK(sphe.GetTransform() == ray_tracer::Matrix<4, 4>::IdentityMatrix()); }
+  }
+}
+SCENARIO("5: Changing a Sphere's transformation") {
+  GIVEN("s = Sphere(),t = translation(2,3,4)") {
+    ray_tracer::Sphere sphe;
+    ray_tracer::Matrix<4, 4> mat = ray_tracer::Matrix<4, 4>::Translation(2, 3, 4);
+    sphe.SetTransform(mat);
+    THEN("s.transform = t") { CHECK(sphe.GetTransform() == mat); }
+  }
+}
+SCENARIO("5: Intersecting a scaled Sphere with a ray") {
+  GIVEN("r = Ray(point(0,0,-5), vector(0,0,1)),s = Sphere()") {
+    ray_tracer::Ray ray(ray_tracer::Point(0, 0, -5), ray_tracer::Vec3(0, 0, 1));
+    ray_tracer::Sphere sphe;
+    sphe.SetTransform(ray_tracer::Matrix<4, 4>::Scaling(2, 2, 2));
+    THEN("xs = intersect(s,r)") {
+      auto xs = Intersect(ray, sphe);
+      THEN("xs.count = 2") { CHECK(xs.size() == 2); }
+      THEN("xs[0].GetTime() = 3") { CHECK(xs[0].GetTime() == 3); }
+      THEN("xs[1].GetTime() = 7") { CHECK(xs[1].GetTime() == 7); }
+    }
+  }
+}
+SCENARIO("5: Intersecting a translated Sphere with a ray") {
+  GIVEN("r = Ray(point(0,0,-5), vector(0,0,1)),s = Sphere()") {
+    ray_tracer::Ray ray(ray_tracer::Point(0, 0, -5), ray_tracer::Vec3(0, 0, 1));
+    ray_tracer::Sphere sphe;
+    sphe.SetTransform(ray_tracer::Matrix<4, 4>::Translation(5, 0, 0));
+    THEN("xs = intersect(s,r)") {
+      auto xs = Intersect(ray, sphe);
+      THEN("xs.count = 0") { CHECK(xs.empty()); }
+    }
+  }
+}
+
 }  // namespace ray_tracer

@@ -1,7 +1,7 @@
 #pragma once
 #include "matrix.h"
-#include "tuple.h"
 #include "point.h"
+#include "tuple.h"
 #include "vec3.h"
 
 namespace ray_tracer {
@@ -11,10 +11,12 @@ class Ray {
   [[nodiscard]] constexpr auto GetOrigin() const -> Point { return origin_; }
   [[nodiscard]] constexpr auto GetDirection() const -> Vec3 { return direction_; }
   [[nodiscard]] constexpr auto Position(double time) const -> Point { return origin_ + direction_ * time; }
+  [[nodiscard]] constexpr auto Transform(const Matrix<4, 4>& matrix) const -> Ray {
+    return Ray{matrix * origin_, matrix * direction_};
+  }
 
-
-  private:
-   Point origin_;
-   Vec3 direction_;
+ private:
+  Point origin_;
+  Vec3 direction_;
 };
 }  // namespace ray_tracer

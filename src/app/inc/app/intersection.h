@@ -24,9 +24,14 @@ inline auto operator==(Intersection const& lhs, Intersection const& rhs) -> bool
 // can be constexpr in later cpp23++or cpp20++
 //en.wikipedia.org/wiki/Line–sphere_intersection
 inline auto Intersect(const Ray& ray, const Sphere& sphere) -> std::vector<Intersection> {
-  ray_tracer::Vec3 sphere_to_ray = ray.GetOrigin() - Point(0, 0, 0);
-  auto a = ray.GetDirection().Dot(ray.GetDirection());
-  auto b = 2 * ray.GetDirection().Dot(sphere_to_ray);
+  // transform the ray to the sphere's coordinate system
+  auto transform = sphere.GetTransform().Inverse();
+  auto transformed_ray = ray.Transform(transform);
+
+  // following is just the algorithm for ray/spher intersection
+  ray_tracer::Vec3 sphere_to_ray = transformed_ray.GetOrigin() - Point(0, 0, 0);
+  auto a = transformed_ray.GetDirection().Dot(transformed_ray.GetDirection());
+  auto b = 2 * transformed_ray.GetDirection().Dot(sphere_to_ray);
   auto c = sphere_to_ray.Dot(sphere_to_ray) - 1;
   auto discriminant = b * b - 4 * a * c;
   if (discriminant < 0) {

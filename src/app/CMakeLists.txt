@@ -13,9 +13,6 @@ target_include_directories(app_lib
 target_link_libraries(app_lib
         PUBLIC
         fmt::fmt
-        Qt5::Core
-        Qt5::Gui
-        Qt5::Widgets
 )
 
 add_executable(projectile_canvas)
@@ -69,10 +66,22 @@ target_sources(imgui_clock
         PRIVATE
         src/imgui_clock.cpp
 )
-# set_source_files_properties(src/imgui_clock.cpp PROPERTIES
-#        SKIP_LINTING ON
-# )
 target_link_libraries(imgui_clock
+        PRIVATE
+        app_lib
+        imgui_lib
+)
+
+add_executable(ray_sphere_casting_chapter5)
+target_sources(ray_sphere_casting_chapter5
+        PRIVATE
+        src/ray_sphere_casting_chapter5_app.cpp
+)
+set_source_files_properties(src/ray_sphere_casting_chapter5_app.cpp PROPERTIES
+        SKIP_LINTING ON
+)
+
+target_link_libraries(ray_sphere_casting_chapter5
         PRIVATE
         app_lib
         imgui_lib

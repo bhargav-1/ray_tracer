@@ -16,6 +16,7 @@ class Vec3 : public Tuple {
   [[nodiscard]] constexpr auto Cross(const Vec3& vec) const -> Vec3 {
     return Vec3{(y_ * vec.z_) - (z_ * vec.y_), (z_ * vec.x_) - (x_ * vec.z_), (x_ * vec.y_) - (y_ * vec.x_)};
   }
+  [[nodiscard]] constexpr auto Reflect(const Vec3& normal) const -> Vec3 { return {*this - normal * 2 * Dot(normal)}; }
 };
 
 }  // namespace ray_tracer

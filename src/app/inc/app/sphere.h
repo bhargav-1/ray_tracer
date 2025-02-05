@@ -22,6 +22,13 @@ class Sphere {
   friend auto operator==(const Sphere& lhs, const Sphere& rhs) -> bool;
   [[nodiscard]] auto GetTransform() const -> Matrix<4, 4> { return transform_; }
   void SetTransform(const Matrix<4, 4>& transform) { transform_ = transform; }
+  [[nodiscard]] auto NormalAt(const ray_tracer::Point &point) const -> Vec3 {
+    // return Vec3(point - ray_tracer::Point(0, 0, 0)).Normalize();
+      const auto object_point = GetTransform().Inverse() * point;
+      auto const object_normal = Vec3(object_point - ray_tracer::Point(0, 0, 0));
+      Vec3 const world_normal = Transpose(GetTransform().Inverse()) * object_normal;
+      return world_normal.Normalize();
+  };
 
  private:
   std::size_t id_;

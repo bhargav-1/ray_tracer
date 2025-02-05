@@ -195,3 +195,22 @@ SCENARIO("cross Product Vector") {
     }
   }
 }
+
+SCENARIO("Reflecting a vector approaching at 45 degrees") {
+  GIVEN("vector (1,-1,0) and normal (0,1,0)") {
+    THEN("returns vector (1,1,0)") {
+      ray_tracer::Vec3 const vec(1, -1, 0);
+      ray_tracer::Vec3 const normal(0, 1, 0);
+      CHECK(vec.Reflect(normal) == ray_tracer::Vec3(1, 1, 0));
+    }
+  }
+}
+SCENARIO("Reflecting a vector off a slanted surface") {
+  GIVEN("vector (0,-1,0) and normal sqrt(2)/2,sqrt(2)/2,0)") {
+    THEN("returns vector (1,0,0)") {
+      ray_tracer::Vec3 const vec(0, -1, 0);
+      ray_tracer::Vec3 const normal(std::sqrt(2) / 2, std::sqrt(2) / 2, 0);
+      CHECK(vec.Reflect(normal) == ray_tracer::Vec3(1, 0, 0));
+    }
+  }
+}

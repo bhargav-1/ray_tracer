@@ -10,6 +10,7 @@ target_sources(app_lib_tests
         matrices_chapter_3.cpp
         matrix_transformations_chapter4.cpp
         ray_sphere_intersections_chapter5.cpp
+        light_and_shading_chapter6.cpp
 )
 
 target_link_libraries(app_lib_tests

@@ -1,5 +1,7 @@
 #include <app/color.h>
-#include <app/intersection.h>            // for Intersection
+#include <app/intersection.h>  // for Intersection
+#include <app/lighting.h>
+#include <app/material.h>
 #include <app/matrix.h>                  // for matrix
 #include <app/point.h>                   // for tuple
 #include <app/point_light.h>             // for point_light
@@ -80,6 +82,108 @@ SCENARIO("A point light has position and intensity") {
       PointLight const point_light(position, intensity);
       CHECK(point_light.GetPosition() == position);
       CHECK(point_light.GetIntensity() == intensity);
+    }
+  }
+}
+
+SCENARIO("The default material") {
+  GIVEN("m = material()") {
+    THEN("m.color = color(1,1,1), m.ambient = 0.1, m.diffuse = 0.9, m.specular = 0.9, m.shininess = 200.0") {
+      Material const material;
+      CHECK(material.GetColor() == Color(1, 1, 1, 1));
+      CHECK(material.GetAmbient() == 0.1);
+      CHECK(material.GetDiffuse() == 0.9);
+      CHECK(material.GetSpecular() == 0.9);
+      CHECK(material.GetShininess() == 200.0);
+    }
+  }
+}
+SCENARIO("A Sphere has a default material") {
+  GIVEN("s = sphere(), m=s.material") {
+    THEN("m = material()") {
+      Sphere const sphere;
+      Material const material = sphere.GetMaterial();
+      CHECK(material.GetColor() == Color(1, 1, 1, 1));
+      CHECK(material.GetAmbient() == 0.1);
+      CHECK(material.GetDiffuse() == 0.9);
+      CHECK(material.GetSpecular() == 0.9);
+      CHECK(material.GetShininess() == 200.0);
+    }
+  }
+}
+SCENARIO("A Sphere may be assigned a material") {
+  GIVEN("s = sphere(), m = material(), set_material(s, m)") {
+    THEN("s.material = m") {
+      Sphere sphere;
+      Material material;
+      sphere.SetMaterial(material);
+      CHECK(sphere.GetMaterial() == material);
+    }
+  }
+}
+SCENARIO("lighting with the eye between the light and the surface") {
+  GIVEN("eyev = vector(0,0,-1), normalv = vector(0,0,-1), light = point_light(point(0,0,-10), color(1,1,1))") {
+    auto eyev = ray_tracer::Vec3(0, 0, -1);
+    auto normalv = ray_tracer::Vec3(0, 0, -1);
+    auto light = ray_tracer::PointLight(ray_tracer::Point(0, 0, -10), ray_tracer::Color(1, 1, 1));
+    auto material = ray_tracer::Material();
+    auto position = ray_tracer::Point(0, 0, 0);
+    auto result = Lighting(material, light, position, eyev, normalv);
+    THEN("result = lighting(m, s, light, position, eyev, normalv)") {
+      CHECK(result == ray_tracer::Color(1.9, 1.9, 1.9));
+    }
+  }
+}
+SCENARIO("lIghting with the eye between light and surface,eye offset 45 deg") {
+  GIVEN("eyev = vector(0,√2/2,-√2/2), normalv = vector(0,0,-1), light = point_light(point(0,0,-10), color(1,1,1))") {
+    auto eyev = ray_tracer::Vec3(0, std::sqrt(2) / 2, -std::sqrt(2) / 2);
+    auto normalv = ray_tracer::Vec3(0, 0, -1);
+    auto light = ray_tracer::PointLight(ray_tracer::Point(0, 0, -10), ray_tracer::Color(1, 1, 1));
+    auto material = ray_tracer::Material();
+    auto position = ray_tracer::Point(0, 0, 0);
+    auto result = Lighting(material, light, position, eyev, normalv);
+    THEN("result = lighting(m, s, light, position, eyev, normalv)") {
+      CHECK(result == ray_tracer::Color(1.0, 1.0, 1.0));
+    }
+  }
+}
+SCENARIO("lighting with eye opposite surface, light offset 45 deg") {
+  GIVEN("eyev = vector(0,0,-1), normalv = vector(0,0,-1), light = point_light(point(0,10,-10), color(1,1,1))") {
+    auto eyev = ray_tracer::Vec3(0, 0, -1);
+    auto normalv = ray_tracer::Vec3(0, 0, -1);
+    auto light = ray_tracer::PointLight(ray_tracer::Point(0, 10, -10), ray_tracer::Color(1, 1, 1));
+    auto material = ray_tracer::Material();
+    auto position = ray_tracer::Point(0, 0, 0);
+    auto result = Lighting(material, light, position, eyev, normalv);
+    THEN("result = lighting(m, s, light, position, eyev, normalv)") {
+      CHECK(result == ray_tracer::Color(0.7364, 0.7364, 0.7364));
+    }
+  }
+}
+SCENARIO("lighting with eye in the path of the reflection vector") {
+  GIVEN(
+      "eyev = vector(0, -√2/2, -√2/2), normalv = vector(0,0,-1), light = point_light(point(0,10,-10), color(1,1,1))") {
+    auto eyev = ray_tracer::Vec3(0, -std::sqrt(2) / 2, -std::sqrt(2) / 2);
+    auto normalv = ray_tracer::Vec3(0, 0, -1);
+    auto light = ray_tracer::PointLight(ray_tracer::Point(0, 10, -10), ray_tracer::Color(1, 1, 1));
+    auto material = ray_tracer::Material();
+    auto position = ray_tracer::Point(0, 0, 0);
+    auto result = Lighting(material, light, position, eyev, normalv);
+    THEN("result = lighting(m, s, light, position, eyev, normalv)") {
+      CHECK(result == ray_tracer::Color(1.6364, 1.6364, 1.6364));
+    }
+  }
+}
+SCENARIO("lighting with light behind the surface") {
+  GIVEN("eyev = vector(0,0,-1), normalv = vector(0,0,-1), light = point_light(point(0,0,10), color(1,1,1))") {
+    auto eyev = ray_tracer::Vec3(0, 0, -1);
+    auto normalv = ray_tracer::Vec3(0, 0, -1);
+    auto light = ray_tracer::PointLight(ray_tracer::Point(0, 0, 10), ray_tracer::Color(1, 1, 1, 1));
+    auto material = ray_tracer::Material();
+    auto position = ray_tracer::Point(0, 0, 0);
+    auto result = Lighting(material, light, position, eyev, normalv);
+    THEN("result = lighting(m, s, light, position, eyev, normalv)") {
+      CHECK(result == ray_tracer::Color(0.1, 0.1, 0.1));
     }
   }
 }

@@ -87,6 +87,21 @@ target_link_libraries(ray_sphere_casting_chapter5
         imgui_lib
 )
 
+add_executable(light_and_shading_chapter6)
+target_sources(light_and_shading_chapter6
+        PRIVATE
+        src/light_and_shading_chapter6_app.cpp
+)
+set_source_files_properties(src/light_and_shading_chapter6_app.cpp PROPERTIES
+        SKIP_LINTING ON
+)
+
+target_link_libraries(light_and_shading_chapter6
+        PRIVATE
+        app_lib
+        imgui_lib
+)
+
 
 add_subdirectory(test)
 

@@ -14,6 +14,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Debug CACHE STRING "Build type")
 endif ()
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0")
 
 # Output Options
 set(CMAKE_COLOR_DIAGNOSTICS ON)
@@ -85,7 +87,6 @@ exclude_files=ui_autogen
 
 # Main UI Application
 add_subdirectory(src/app)
-add_subdirectory(src/app_ui)
 
 
 

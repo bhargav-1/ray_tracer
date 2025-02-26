@@ -13,6 +13,11 @@ gdb
 git
 iwyu
 libdbus-1-dev
+libxinerama-dev
+libxcursor-dev
+xorg-dev
+libglu1-mesa-dev
+pkg-config
 nano
 ninja-build
 openssh-server

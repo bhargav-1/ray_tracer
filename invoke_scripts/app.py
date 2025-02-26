@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 """
 app.py uses Python Invoke to implement useful project
-tooling associated build, packaging, and running the app_ui
+tooling associated build, packaging, and running the raytracerchallenge
 application.
 """
 
@@ -118,7 +118,7 @@ def run(context, args=""):
     :return:
     """
 
-    context.run(f"./build/src/app_ui/app_ui {args}")
+    context.run(f"./build/src/app/light_and_shading_chapter6{args}")
 
 
 run_coll = Collection("run")

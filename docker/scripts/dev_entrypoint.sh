@@ -28,7 +28,7 @@ mkdir -p ~/.ssh/config.d
    echo "  User ${USER}"; \
    echo "  IdentityFile ~/.ssh/id_rsa"; \
    echo "  IdentitiesOnly yes"; \
- ) |tee -a ~/.ssh/config.d/app_ui_config
+ ) |tee -a ~/.ssh/config.d/raytracerchallenge_config
 
 eval "$( fixuid )"
 
@@ -43,7 +43,7 @@ cat /etc/ssh/sshd_config.d/sshd_config_test_clion.conf
 
 sudo  /usr/sbin/sshd -e &
 
-if [ -d /home/"${USER}"/app_ui/.git ]; then
+if [ -d /home/"${USER}"/raytracerchallenge/.git ]; then
   # .git exists, so a valid git repo has been mounted
   # Remove old version variables
   unset GIT_REV

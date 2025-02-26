@@ -86,9 +86,14 @@ RUN if [ "${CI_CHECKS}" = "true" ]; then  \
 WORKDIR /home/${USER}/${PROJ_NAME}/build/packages
 # Generate a list of deps so we can use that later to install all the deps
 # before installing the app to prevent docker cache misses
-RUN ls && dpkg-deb -I chirp-app_ui*.deb | grep -E "Depends|Recommends|Suggests|Pre\-Depends" \
-    | tr -d "|," | sed "s/([^)]*)/()/g" | tr -d "()" | tr " " "\n" \
-    | grep -Ev "Depends|Recommends|Suggests|Pre\-Depends" | xargs > app.deps
+RUN ls && dpkg-deb -I chirp-raytracerchallenge*.deb \
+    | grep -E "Depends|Recommends|Suggests|Pre\-Depends" \
+    | tr -d "|," \
+    | sed "s/([^)]*)/()/g" \
+    | tr -d "()" | tr " " "\n" \
+    | grep -Ev "Depends|Recommends|Suggests|Pre\-Depends" \
+    | xargs > app.deps || true
+RUN cat app.deps
 WORKDIR /home/${USER_ARG}/${PROJ_NAME}
 #
 COPY --chown=${UID}:${GID} ./.pre-commit-config.yaml ./.pre-commit-config.yaml
@@ -149,8 +154,8 @@ RUN ( \
 #
 #COPY --from=dev /home/${USER}/${PROJ_NAME}/build/packages/*.deb .
 #RUN sudo apt-get update \
-#    && sudo apt install -y ./chirp-app_ui*.deb \
-#    && sudo apt-get clean && sudo rm -rf /var/lib/apt/lists/* && sudo rm chirp-app_ui*.deb
+#    && sudo apt install -y ./chirp-raytracerchallenge*.deb \
+#    && sudo apt-get clean && sudo rm -rf /var/lib/apt/lists/* && sudo rm chirp-raytracerchallenge*.deb
 #
 #WORKDIR /home/${USER}/
 #RUN bash -c 'echo -e HARDWARE is $HARDWARE'
@@ -179,4 +184,4 @@ RUN ( \
 ##RUN sudo chmod +x /usr/local/bin/prod_entrypoint.sh
 #
 ##ENTRYPOINT [ "/usr/local/bin/prod_entrypoint.sh" ]
-#CMD ["app_ui"]
+#CMD ["raytracerchallenge"]

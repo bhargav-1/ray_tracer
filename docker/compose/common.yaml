@@ -2,7 +2,7 @@ version: "2.20"
 
 services:
   app_container:
-    image: ${IMAGE_NAME:-bhargavulc/app_ui:GPU-dev}
+    image: ${IMAGE_NAME:-bhargavulc/raytracerchallenge:GPU-dev}
     container_name: first_container
     user: ${DUID:-1000}:${DGID:-1000}
     env_file:

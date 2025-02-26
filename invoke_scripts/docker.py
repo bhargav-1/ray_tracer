@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 """
 docker.py uses Python Invoke to implement useful project
-tooling associated with the bhargavulc/app_ui project.
+tooling associated with the bhargavulc/raytraerchallenge project.
 
 In particular docker.py is focused on implementing building
 and running of docker containers
@@ -15,7 +15,7 @@ import dataclasses
 import os
 from invoke import task
 
-proj = "app_ui"
+proj = "raytracerchallenge"
 
 is_linux = os.name != "nt"
 
@@ -83,7 +83,7 @@ def build(ctx, hw="GPU", mode="dev", ci_checks=False):
     dockerfile = "docker/Dockerfile"
     image_name = f"bhargavulc/{proj}:{hw}-{mode}"
     ctx.run(
-        f"docker build --target {mode} -f {dockerfile}"
+        f"docker build --network=host --target {mode} -f {dockerfile}"
         + f" --build-arg PROJ_NAME={proj}"
         + f" --build-arg DOCKER_BASE={docker_base}"
         + f" --build-arg HARDWARE={hw}"
@@ -130,7 +130,7 @@ def up(
     runtime = "nvidia" if gpu else "runc"
 
     if use_local_image:
-        image_name = f"app_ui:{hw}-{mode}"
+        image_name = f"raytracerchallenge:{hw}-{mode}"
 
     else:
         if recent:

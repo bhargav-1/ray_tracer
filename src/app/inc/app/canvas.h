@@ -1,5 +1,6 @@
 #pragma once
 #include <fstream>
+#include <algorithm>
 #include <vector>
 #include "color.h"
 #include "point.h"

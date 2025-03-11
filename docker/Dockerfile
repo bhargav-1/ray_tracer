@@ -1,8 +1,10 @@
-
-ARG DOCKER_BASE=ubuntu:focal
+ARG DOCKER_BASE=ubuntu:noble
 # hadolint global ignore=DL3004
 # hadolint global ignore=DL3006
 FROM $DOCKER_BASE as base
+# bug https://bugs.launchpad.net/cloud-images/+bug/2005129 - using one of the solution
+# deleting ubuntu user which has 1000/1000 uid/gid = first user, we want to use our usr with same uid/gid
+RUN userdel -r ubuntu
 ARG PROJ_NAME
 ARG HARDWARE=CPU
 ARG UID=1000
@@ -48,7 +50,10 @@ RUN sudo apt-get update && sudo DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-ge
 
 # Need to sudo pip3 install so they get installed in system and we don't have to modify path
 COPY ./docker/dependencies/pip3.txt /tmp/
-RUN sudo pip3 install --no-cache-dir -r /tmp/pip3.txt
+# this might cause problems if python package can cause system wide dependancies issues, but for now
+# we are installing development tools. have to use apt install python3-package_name
+# might have to install it in virtual env and modify PATH
+RUN sudo pip3 install --no-cache-dir --break-system-packages -r /tmp/pip3.txt
 
 # If Dev, install fixuid so we can fix ownership. Should only
 #hadolint ignore=SC2059
@@ -128,60 +133,47 @@ RUN ( \
  ) | sudo tee -a /etc/ssh/sshd_config.d/sshd_config_test_clion.conf \
  && sudo mkdir /run/sshd
 
-#COPY ./docker/scripts/dev_entrypoint.sh /usr/local/bin
-#RUN sudo chmod +x /usr/local/bin/dev_entrypoint.sh
-#
-#WORKDIR /home/${USER}/${PROJ_NAME}
-#
-#ENTRYPOINT [ "/usr/local/bin/dev_entrypoint.sh" ]
-#CMD ["/bin/bash"]
-#
-#FROM base as prod
-#
-#SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-#
-#WORKDIR /tmp
-## We want to install the app, but have to install ~500MB of deps.
-## If we just copied the.deb, we'd miss on the docker cache and have to re-install everytime
-## So first pass just deps through in text file (which shouldn't change often)
-## Then install app.
-#COPY --from=dev /home/${USER}/${PROJ_NAME}/build/packages/app.deps .
-##hadolint ignore=SC2046
-#RUN sudo apt-get update && sudo DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get install -y \
-#      $(cat app.deps) \
-#    && sudo apt-get clean \
-#    && sudo rm -rf /var/lib/apt/lists/*
-#
-#COPY --from=dev /home/${USER}/${PROJ_NAME}/build/packages/*.deb .
-#RUN sudo apt-get update \
-#    && sudo apt install -y ./chirp-raytracerchallenge*.deb \
-#    && sudo apt-get clean && sudo rm -rf /var/lib/apt/lists/* && sudo rm chirp-raytracerchallenge*.deb
-#
-#WORKDIR /home/${USER}/
-#RUN bash -c 'echo -e HARDWARE is $HARDWARE'
-#
-#RUN if [ "$HARDWARE" = "GPU" ]; then \
-#      echo "HARDWARE intended for: $HARDWARE"; \
-#      echo "export NVIDIA_VISIBLE_DEVICES \${NVIDIA_VISIBLE_DEVICES:-all}" | sudo tee -a /etc/environment && \
-#      echo "export NVIDIA_DRIVER_CAPABILITIES \${NVIDIA_DRIVER_CAPABILITIES:+$NVIDIA_DRIVER_CAPABILITIES,}graphics" | sudo tee -a /etc/environment; \
-#    fi
-#
-#ENV NVIDIA_VISIBLE_DEVICES \
-#    ${NVIDIA_VISIBLE_DEVICES:-all}
-#ENV NVIDIA_DRIVER_CAPABILITIES \
-#    ${NVIDIA_DRIVER_CAPABILITIES:+$NVIDIA_DRIVER_CAPABILITIES,}graphics
-#
-##RUN ( \
-##   echo 'LogLevel DEBUG2'; \
-##   echo 'PermitRootLogin yes'; \
-##   echo 'PasswordAuthentication no'; \
-##   echo 'X11Forwarding yes'; \
-##   echo 'Port 2222'; \
-## ) | sudo tee -a /etc/ssh/sshd_config.d/sshd_config_test_clion.conf \
-## && sudo mkdir /run/sshd
-#
-##COPY ./docker/scripts/prod_entrypoint.sh /usr/local/bin
-##RUN sudo chmod +x /usr/local/bin/prod_entrypoint.sh
-#
-##ENTRYPOINT [ "/usr/local/bin/prod_entrypoint.sh" ]
-#CMD ["raytracerchallenge"]
+COPY ./docker/scripts/dev_entrypoint.sh /usr/local/bin
+RUN sudo chmod +x /usr/local/bin/dev_entrypoint.sh
+
+WORKDIR /home/${USER}/${PROJ_NAME}
+
+ENTRYPOINT [ "/usr/local/bin/dev_entrypoint.sh" ]
+CMD ["/bin/bash"]
+
+FROM base as prod
+
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
+WORKDIR /tmp
+# We want to install the app, but have to install ~500MB of deps.
+# If we just copied the.deb, we'd miss on the docker cache and have to re-install everytime
+# So first pass just deps through in text file (which shouldn't change often)
+# Then install app.
+COPY --from=dev /home/${USER}/${PROJ_NAME}/build/packages/app.deps .
+#hadolint ignore=SC2046
+RUN sudo apt-get update && sudo DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get install -y \
+      $(cat app.deps) \
+    && sudo apt-get clean \
+    && sudo rm -rf /var/lib/apt/lists/*
+
+COPY --from=dev /home/${USER}/${PROJ_NAME}/build/packages/*.deb .
+RUN sudo apt-get update \
+    && sudo apt install -y ./chirp-raytracerchallenge*.deb \
+    && sudo apt-get clean && sudo rm -rf /var/lib/apt/lists/* && sudo rm chirp-raytracerchallenge*.deb
+
+WORKDIR /home/${USER}/
+RUN bash -c 'echo -e HARDWARE is $HARDWARE'
+
+RUN if [ "$HARDWARE" = "GPU" ]; then \
+      echo "HARDWARE intended for: $HARDWARE"; \
+      echo "export NVIDIA_VISIBLE_DEVICES \${NVIDIA_VISIBLE_DEVICES:-all}" | sudo tee -a /etc/environment && \
+      echo "export NVIDIA_DRIVER_CAPABILITIES \${NVIDIA_DRIVER_CAPABILITIES:+$NVIDIA_DRIVER_CAPABILITIES,}graphics" | sudo tee -a /etc/environment; \
+    fi
+
+ENV NVIDIA_VISIBLE_DEVICES \
+    ${NVIDIA_VISIBLE_DEVICES:-all}
+ENV NVIDIA_DRIVER_CAPABILITIES \
+    ${NVIDIA_DRIVER_CAPABILITIES:+$NVIDIA_DRIVER_CAPABILITIES,}graphics
+
+CMD ["raytracerchallenge"]

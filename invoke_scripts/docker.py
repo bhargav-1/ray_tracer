@@ -79,7 +79,7 @@ def build(ctx, hw="GPU", mode="dev", ci_checks=False):
     ci_checks_str = "false"
     if ci_checks:
         ci_checks_str = "true"
-    docker_base = "ubuntu:focal"
+    docker_base = "ubuntu:noble"
     dockerfile = "docker/Dockerfile"
     image_name = f"bhargavulc/{proj}:{hw}-{mode}"
     ctx.run(

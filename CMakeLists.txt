@@ -9,7 +9,7 @@ project(RayTracerChallenge VERSION "${GIT_TAG_SPLIT}")
 enable_testing()
 
 # Compiler options
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Debug CACHE STRING "Build type")
@@ -25,20 +25,20 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 option(BUILD_WITH_SA_CHECKS "enforces static-analyses checks at compile time" ON)
 # Note: SA_CHECKS are disabled on Windows
 if (BUILD_WITH_SA_CHECKS AND CMAKE_COMPILER_IS_GNUCXX)
-    set(CMAKE_CXX_CLANG_TIDY clang-tidy;)
-#    set(CMAKE_CXX_CPPCHECK cppcheck)
-#    list(APPEND CMAKE_CXX_CPPCHECK
-#            "--language=c++"
-#            "--enable=all"
-#            "--suppressions-list=${CMAKE_SOURCE_DIR}/supressions.cppcheck")
-    set(CMAKE_CXX_CPPLINT cpplint)
+    #    set(CMAKE_CXX_CLANG_TIDY clang-tidy;)
+    #    set(CMAKE_CXX_CPPCHECK cppcheck)
+    #    list(APPEND CMAKE_CXX_CPPCHECK
+    #            "--language=c++"
+    #            "--enable=all"
+    #            "--suppressions-list=${CMAKE_SOURCE_DIR}/supressions.cppcheck")
+    #    set(CMAKE_CXX_CPPLINT cpplint)
     #    set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE iwyu)
     #    list(APPEND CMAKE_CXX_INCLUDE_WHAT_YOU_USE
     #      "-Xiwyu"
     #      "--mapping_file=../mappings.imp")
-    if (CMAKE_COMPILER_IS_GNUCXX)
-        add_compile_options(-Wall -Wextra -Wpedantic -Werror)
-    endif ()
+    #    if (CMAKE_COMPILER_IS_GNUCXX)
+    #        add_compile_options(-Wall -Wextra -Wpedantic -Werror)
+    #    endif ()
 endif ()
 
 

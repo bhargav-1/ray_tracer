@@ -2,11 +2,11 @@ build-essential
 catch2
 libimgui-dev
 clang
-clang-9
 clang-format
 clang-tidy
 cppcheck
 curl
+file
 g++
 gcc
 gdb

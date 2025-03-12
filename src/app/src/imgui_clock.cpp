@@ -8,13 +8,14 @@
 #include <GLFW/glfw3.h>  // Will drag system OpenGL headers
 #include <src/app/inc/app/color.h>
 
-#include "app/canvas.h"
+#include <algorithm>
+#include <numbers>
 #include "app/matrix.h"
 #include "app/point.h"
 #include "app/tuple.h"
 
-static void GlfwErrorCallback(int error, const char* description) {
-  fprintf(stderr, "GLFW Error %d: %s\n", error, description);
+static auto GlfwErrorCallback(int error, const char* description) -> void {  // NOLINT
+  fprintf(stderr, "GLFW Error %d: %s\n", error, description);                // NOLINT
 }
 
 // Main code
@@ -38,10 +39,10 @@ auto main(int /*unused*/, char* * /*unused*/) -> int {  // NOLINT
   // Setup Dear ImGui context
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
-  ImGuiIO& io = ImGui::GetIO();
-  (void)io;
-  io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
-  io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
+  ImGuiIO& io_gui = ImGui::GetIO();
+  (void)io_gui;
+  io_gui.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
+  io_gui.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
 
   // Setup Dear ImGui style
   ImGui::StyleColorsDark();
@@ -54,7 +55,7 @@ auto main(int /*unused*/, char* * /*unused*/) -> int {  // NOLINT
   constexpr auto kClearColor = ImVec4(0.45F, 0.55F, 0.60F, 1.00F);
 
   // Main loop
-  io.IniFilename = nullptr;
+  io_gui.IniFilename = nullptr;
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();
     if (glfwGetWindowAttrib(window, GLFW_ICONIFIED) != 0) {
@@ -76,28 +77,28 @@ auto main(int /*unused*/, char* * /*unused*/) -> int {  // NOLINT
     float const center_y = pos.y + (window_size.y / 2);
     float const radius = std::min(window_size.x, window_size.y) * 0.4F;
 
-    ray_tracer::Matrix<4, 4> canvas_transform =
+    const ray_tracer::Matrix<4, 4> canvas_transform =
         ray_tracer::Matrix<4, 4>::IdentityMatrix().Translate(center_x, center_y, 0);
 
     constexpr ray_tracer::Color kWhite{255, 255, 255, 255};
-    ImColor color = ImColor(static_cast<int>(kWhite.GetRed()),
-                            static_cast<int>(kWhite.GetGreen()),
-                            static_cast<int>(kWhite.GetBlue()),
-                            static_cast<int>(kWhite.GetW()));
-    ray_tracer::Point origin{0, 0, 0};
+    const ImColor color = ImColor(static_cast<int>(kWhite.GetRed()),
+                                  static_cast<int>(kWhite.GetGreen()),
+                                  static_cast<int>(kWhite.GetBlue()),
+                                  static_cast<int>(kWhite.GetW()));
+    const ray_tracer::Point origin{0, 0, 0};
     auto print_center = canvas_transform * origin;
-    ImVec2 center_vec = {static_cast<float>(print_center.GetX()), static_cast<float>(print_center.GetY())};
+    const ImVec2 center_vec = {static_cast<float>(print_center.GetX()), static_cast<float>(print_center.GetY())};
     canvas->AddCircleFilled(center_vec, 10, color);
     auto transform = ray_tracer::Matrix<4, 4>::IdentityMatrix().Translate(0, -radius, 0);
-    ray_tracer::Point mark_12 = transform * origin;
+    const ray_tracer::Point mark_12 = transform * origin;
     ray_tracer::Point current_mark = mark_12;
 
     auto print_mark12 = canvas_transform * mark_12;
     canvas->AddCircleFilled(
         ImVec2(static_cast<float>(print_mark12.GetX()), static_cast<float>(print_mark12.GetY())), 10, color);
 
-    while (ray_tracer::Matrix<4, 4>::RotationZ(M_PI / 6) * current_mark != mark_12) {
-      current_mark = ray_tracer::Matrix<4, 4>::RotationZ(M_PI / 6) * current_mark;
+    while (ray_tracer::Matrix<4, 4>::RotationZ(std::numbers::pi / 6) * current_mark != mark_12) {
+      current_mark = ray_tracer::Matrix<4, 4>::RotationZ(std::numbers::pi / 6) * current_mark;
       auto print_point = canvas_transform * current_mark;
       canvas->AddCircleFilled(
           ImVec2(static_cast<float>(print_point.GetX()), static_cast<float>(print_point.GetY())), 10, color);
@@ -112,12 +113,14 @@ auto main(int /*unused*/, char* * /*unused*/) -> int {  // NOLINT
     ImGui::Render();
     int display_w;
     int display_h;
-    glfwGetFramebufferSize(window, &display_w, &display_h);
-    glViewport(0, 0, display_w, display_h);
-    glClearColor(
-        kClearColor.x * kClearColor.w, kClearColor.y * kClearColor.w, kClearColor.z * kClearColor.w, kClearColor.w);
-    glClear(GL_COLOR_BUFFER_BIT);
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    glfwGetFramebufferSize(window, &display_w, &display_h);  // NOLINT
+    glViewport(0, 0, display_w, display_h);                  // NOLINT
+    glClearColor(kClearColor.x * kClearColor.w,              // NOLINT
+                 kClearColor.y * kClearColor.w,
+                 kClearColor.z * kClearColor.w,
+                 kClearColor.w);
+    glClear(GL_COLOR_BUFFER_BIT);                            // NOLINT
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());  // NOLINT
 
     glfwSwapBuffers(window);
   }

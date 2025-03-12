@@ -18,7 +18,7 @@ class SphereCounter {
 class Sphere {
  public:
   // __COUNTER__  is compiler specific and is used to generate a unique number for each sphere
-  Sphere() noexcept : id_(SphereCounter<__COUNTER__>::kValue) {}
+  Sphere() noexcept : id_(SphereCounter<__COUNTER__>::kValue) {} // NOLINT
   ~Sphere() = default;
   [[nodiscard]] constexpr auto GetId() const noexcept -> std::size_t { return id_; }
   friend auto operator==(const Sphere& lhs, const Sphere& rhs) -> bool;

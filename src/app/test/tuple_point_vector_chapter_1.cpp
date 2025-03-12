@@ -1,8 +1,10 @@
 #include <app/point.h>                   // for point
 #include <app/tuple.h>                   // for tuple
 #include <app/vec3.h>                    // for point
+#include <cmath>
+#include <numbers>
 #include <catch2/catch_test_macros.hpp>  // for operator""_catch_sr, Section
-#include <catch2/catch_tostring.hpp>     // for ReusableStringStream
+// #include <catch2/catch_tostring.hpp>     // for ReusableStringStream
 
 // Behavior Driven Development Style Testing
 // https://github.com/catchorg/Catch2/blob/devel/docs/test-cases-and-sections.md#bdd-style-test-cases
@@ -16,7 +18,7 @@ SCENARIO("A Tuple with w=1.0 is a point", "[point]") {
   }
   GIVEN("w is 1") {
     THEN("its a point") {
-      ray_tracer::Tuple tp_test(0, 0, 1, 1);
+      const ray_tracer::Tuple tp_test(0, 0, 1, 1);
       CHECK(tp_test.IsPoint() == true);
     }
   }
@@ -60,21 +62,22 @@ SCENARIO("vec3() creates tuples with w = 0") {
 SCENARIO("add two tuples ") {
   GIVEN("one is tuple, other is vector") {
     THEN("adds up x+x,y+y,z+z") {
-      ray_tracer::Tuple tuple1(1, 2, 3, 1);
-      ray_tracer::Tuple tuple2(-1, 2, 33, 0);
+      const ray_tracer::Tuple tuple1(1, 2, 3, 1);
+      const ray_tracer::Tuple tuple2(-1, 2, 33, 0);
       CHECK(tuple1 + tuple2 == ray_tracer::Tuple(0, 4, 36, 1));
     }
   }
   GIVEN("one is tuple, other is vector") {
     THEN("adds up x+x,y+y,z+z,w+w") {
-      ray_tracer::Tuple tuple1(1, 2, 3, 0);
-      ray_tracer::Point tuple2(-1, 0, 33);
+      const ray_tracer::Tuple tuple1(1, 2, 3, 0);
+      const ray_tracer::Point tuple2(-1, 0, 33);
       CHECK(tuple1 + tuple2 == ray_tracer::Tuple(0, 2, 36, 1));
     }
   }
+
   GIVEN("one is point, other is vector") {
     THEN("adds up x+x,y+y,z+z,w+w") {
-      ray_tracer::Vec3 test_vec(1, 2, 3);
+      const ray_tracer::Vec3 test_vec(1, 2, 3);
       ray_tracer::Point test_point(-1, 0, 33);
       test_point = test_point + test_vec;
       CHECK(test_point == ray_tracer::Tuple(0, 2, 36, 1));
@@ -86,7 +89,7 @@ SCENARIO("subtract two tuples ") {
     THEN("adds up x+x,y+y,z+z,w+w") {
       ray_tracer::Point const tuple1(1, 2, 3);
       ray_tracer::Point const tuple2(-1, 0, 33);
-      ray_tracer::Vec3 vec = tuple1 - tuple2;
+      const ray_tracer::Vec3 vec = tuple1 - tuple2;
       REQUIRE(vec.IsVector());
       CHECK(tuple1 - tuple2 == ray_tracer::Vec3(2, 2, -30));
     }
@@ -209,7 +212,7 @@ SCENARIO("Reflecting a vector off a slanted surface") {
   GIVEN("vector (0,-1,0) and normal sqrt(2)/2,sqrt(2)/2,0)") {
     THEN("returns vector (1,0,0)") {
       ray_tracer::Vec3 const vec(0, -1, 0);
-      ray_tracer::Vec3 const normal(std::sqrt(2) / 2, std::sqrt(2) / 2, 0);
+      ray_tracer::Vec3 const normal(std::numbers::sqrt2 / 2, std::numbers::sqrt2 / 2, 0);
       CHECK(vec.Reflect(normal) == ray_tracer::Vec3(1, 0, 0));
     }
   }

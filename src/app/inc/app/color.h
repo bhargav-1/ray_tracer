@@ -4,8 +4,8 @@
 namespace ray_tracer {
 class Color : public Tuple {
  public:
-  constexpr Color(double red, double green, double blue, double w = 0.0)
-      : Tuple(red, green, blue, w), red_(red), green_(green), blue_(blue), w_(w) {}
+  constexpr Color(double red, double green, double blue, double w_type = 0.0)
+      : Tuple(red, green, blue, w_type), red_(red), green_(green), blue_(blue), w_(w_type) {}
   Color() : Color(1.0, 1.0, 1.0, 1.0) {}
   constexpr explicit Color(const Tuple& tuple) : Color(tuple.GetX(), tuple.GetY(), tuple.GetY(), tuple.GetW()) {}
   [[nodiscard]] constexpr auto GetRed() const -> double { return red_; }

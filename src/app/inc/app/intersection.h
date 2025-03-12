@@ -29,18 +29,18 @@ inline auto Intersect(const Ray& ray, const Sphere& sphere) -> std::vector<Inter
   auto transformed_ray = ray.Transform(transform);
 
   // following is just the algorithm for ray/spher intersection
-  ray_tracer::Vec3 sphere_to_ray = transformed_ray.GetOrigin() - Point(0, 0, 0);
-  auto a = transformed_ray.GetDirection().Dot(transformed_ray.GetDirection());
-  auto b = 2 * transformed_ray.GetDirection().Dot(sphere_to_ray);
-  auto c = sphere_to_ray.Dot(sphere_to_ray) - 1;
-  auto discriminant = b * b - 4 * a * c;
+  const ray_tracer::Vec3 sphere_to_ray = transformed_ray.GetOrigin() - Point(0, 0, 0);
+  const auto a_var = transformed_ray.GetDirection().Dot(transformed_ray.GetDirection());
+  const auto b_var = 2 * transformed_ray.GetDirection().Dot(sphere_to_ray);
+  const auto c_var = sphere_to_ray.Dot(sphere_to_ray) - 1;
+  auto discriminant = (b_var * b_var) - (4 * a_var * c_var);
   if (discriminant < 0) {
     return {};
   }
   // this t is time/unit in the ray
-  auto t1 = (-b - std::sqrt(discriminant)) / (2 * a);
-  auto t2 = (-b + std::sqrt(discriminant)) / (2 * a);
-  return {Intersection(t1, sphere), Intersection(t2, sphere)};
+  auto t1_var = (-b_var - std::sqrt(discriminant)) / (2 * a_var);
+  auto t2_var = (-b_var + std::sqrt(discriminant)) / (2 * a_var);
+  return {Intersection(t1_var, sphere), Intersection(t2_var, sphere)};
 }
 
 inline auto Hit(const std::vector<Intersection>& intersections) -> std::optional<Intersection> {

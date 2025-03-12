@@ -1,15 +1,16 @@
 #include <app/color.h>
-#include <app/intersection.h>  // for Intersection
+// #include <app/intersection.h>  // for Intersection
 #include <app/lighting.h>
 #include <app/material.h>
 #include <app/matrix.h>                  // for matrix
 #include <app/point.h>                   // for tuple
 #include <app/point_light.h>             // for point_light
-#include <app/ray.h>                     // for Ray
 #include <app/sphere.h>                  // for Sphere
 #include <app/tuple.h>                   // for tuple
 #include <app/vec3.h>                    // for vector
 #include <catch2/catch_test_macros.hpp>  // for operator""_catch_sr, Section
+#include <cmath>
+#include <numbers>
 
 namespace ray_tracer {
 
@@ -67,9 +68,10 @@ SCENARIO("Computing the normal on a translated sphere") {
 SCENARIO("Computing the normal on a transformed sphere") {
   GIVEN("s = sphere(), set_transform(s, scaling(1,0.5,1)*rotation_z(π/5))") {
     ray_tracer::Sphere sphere;
-    sphere.SetTransform(ray_tracer::Matrix<4, 4>::Scaling(1, 0.5, 1) * ray_tracer::Matrix<4, 4>::RotationZ(M_PI / 5));
+    sphere.SetTransform(ray_tracer::Matrix<4, 4>::Scaling(1, 0.5, 1) *
+                        ray_tracer::Matrix<4, 4>::RotationZ(std::numbers::pi / 5));
     THEN("normal at point(0,√2/2,-√2/2) = vector(0,0.97014,-0.24254)") {
-      CHECK(sphere.NormalAt(Point(0, std::sqrt(2) / 2, -std::sqrt(2) / 2)) == Vec3(0, 0.97014, -0.24254));
+      CHECK(sphere.NormalAt(Point(0, std::numbers::sqrt2 / 2, -std::numbers::sqrt2 / 2)) == Vec3(0, 0.97014, -0.24254));
     }
   }
 }
@@ -136,7 +138,7 @@ SCENARIO("lighting with the eye between the light and the surface") {
 }
 SCENARIO("lIghting with the eye between light and surface,eye offset 45 deg") {
   GIVEN("eyev = vector(0,√2/2,-√2/2), normalv = vector(0,0,-1), light = point_light(point(0,0,-10), color(1,1,1))") {
-    auto eyev = ray_tracer::Vec3(0, std::sqrt(2) / 2, -std::sqrt(2) / 2);
+    auto eyev = ray_tracer::Vec3(0, std::numbers::sqrt2 / 2, -std::numbers::sqrt2 / 2);
     auto normalv = ray_tracer::Vec3(0, 0, -1);
     auto light = ray_tracer::PointLight(ray_tracer::Point(0, 0, -10), ray_tracer::Color(1, 1, 1));
     auto material = ray_tracer::Material();
@@ -163,7 +165,7 @@ SCENARIO("lighting with eye opposite surface, light offset 45 deg") {
 SCENARIO("lighting with eye in the path of the reflection vector") {
   GIVEN(
       "eyev = vector(0, -√2/2, -√2/2), normalv = vector(0,0,-1), light = point_light(point(0,10,-10), color(1,1,1))") {
-    auto eyev = ray_tracer::Vec3(0, -std::sqrt(2) / 2, -std::sqrt(2) / 2);
+    auto eyev = ray_tracer::Vec3(0, -std::numbers::sqrt2 / 2, -std::numbers::sqrt2 / 2);
     auto normalv = ray_tracer::Vec3(0, 0, -1);
     auto light = ray_tracer::PointLight(ray_tracer::Point(0, 10, -10), ray_tracer::Color(1, 1, 1));
     auto material = ray_tracer::Material();

@@ -17,8 +17,8 @@ class Canvas {
   // keeping it trunc- to not add everytime we run this program,
   // will delete the content and create new stuff
   Canvas(int width, int height) : width_(width), height_(height) {
-    for (int y = 0; y < height; y++) {
-      for (int x = 0; x < width; x++) {
+    for (int y = 0; y < height; y++) { // NOLINT
+      for (int x = 0; x < width; x++) { // NOLINT
         Pixel const pxl{.x = x, .y = y, .color = {0, 0, 0}};
         pixels_.push_back(pxl);
       }
@@ -64,8 +64,8 @@ class Canvas {
   }
 
   auto AllPixelsColorCheck(const Color& color) -> bool {
-    for (int y = 0; y < height_; y++) {
-      for (int x = 0; x < width_; x++) {
+    for (int y = 0; y < height_; y++) { // NOLINT
+      for (int x = 0; x < width_; x++) { // NOLINT
         if (ColorAtPixel(x, y) != color) {
           return false;
         }
@@ -74,15 +74,15 @@ class Canvas {
     return true;
   }
 
-  void WritePixelColor(int x, int y, const Color& color) {
-    if (x < width_ && x >= 0 && y < height_ && y >= 0) {
+  void WritePixelColor(int x, int y, const Color& color) { // NOLINT
+    if (x < width_ && x >= 0 && y < height_ && y >= 0) { // NOLINT
       pixels_[(width_ * y) + x].color = color;
     }
   }
 
   void PrintPixels() {
-    for (int y = 0; y < height_; y++) {
-      for (int x = 0; x < width_; x++) {
+    for (int y = 0; y < height_; y++) { // NOLINT
+      for (int x = 0; x < width_; x++) { // NOLINT
         auto temp = pixels_[(width_ * y) + x].color.GetRed();
         if (temp == 1) {
           std::cout << "x: " << x << " y:" << y << ' ';

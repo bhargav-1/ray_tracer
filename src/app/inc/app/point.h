@@ -9,7 +9,8 @@ class Point : public Tuple {
     y_ = 0;
     z_ = 0;
   }
-  constexpr Point(double x, double y, double z) : Tuple(x, y, z, 1) {}
+  constexpr Point(double x_coordinate, double y_coordinate, double z_coordinate)
+      : Tuple(x_coordinate, y_coordinate, z_coordinate, 1) {}
   constexpr Point(const Tuple& tuple)  // NOLINT             // cppcheck-suppress [noExplicitConstructor]
       : Tuple(tuple.GetX(), tuple.GetY(), tuple.GetZ(), 1.0) {}  // NOLINT
 };

@@ -34,11 +34,11 @@ class Matrix {
       throw std::invalid_argument("Matrix rows must match");
     }
     size_t row = 0;
-    for (const auto& r : matrix) {
-      if (r.size() != Cols) {
+    for (const auto& r_var : matrix) {
+      if (r_var.size() != Cols) {
         throw std::invalid_argument("Matrix columns must match");
       }
-      std::copy(r.begin(), r.end(), matrix_[row].begin());
+      std::copy(r_var.begin(), r_var.end(), matrix_[row].begin());
       row++;
     }
   }
@@ -164,7 +164,7 @@ constexpr auto Matrix<Rows, Cols>::Determinant() -> double {
     throw std::logic_error("Determinant cannot be calculated for matrix of size > 1000");
   } else {
     for (size_t col = 0; col < Cols; col++) {
-      double sign = ((0 + col) % 2 == 0) ? 1.0 : -1.0;
+      const double sign = ((0 + col) % 2 == 0) ? 1.0 : -1.0;
       if constexpr (Rows <= 2) {
         determinant += sign * matrix_[0][col] * matrix_[0][0];
       } else {
@@ -442,7 +442,7 @@ auto constexpr operator*(const Matrix<R, C>& lhs, const Matrix<R2, C2>& rhs) -> 
 template <size_t R, size_t C>
 auto constexpr operator*(const Matrix<R, C>& lhs, const Tuple& tuple) -> Tuple {
   static_assert(C == 4, "Matrix must be 4x4 for multiplication with Tuple");
-  Matrix<R, 1> temp(tuple);
+  const Matrix<R, 1> temp(tuple);
   Matrix<R, 1> temp2 = lhs * temp;
   return Tuple(temp2[0][0], temp2[1][0], temp2[2][0], temp2[3][0]);
 }

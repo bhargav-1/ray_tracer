@@ -1,8 +1,10 @@
 #pragma once
+#include <algorithm>
 #include <optional>
 #include <vector>
 #include "app/ray.h"
 #include "app/sphere.h"
+#include "app/world.h"
 
 namespace ray_tracer {
 class Intersection {
@@ -41,6 +43,17 @@ inline auto Intersect(const Ray& ray, const Sphere& sphere) -> std::vector<Inter
   auto t1_var = (-b_var - std::sqrt(discriminant)) / (2 * a_var);
   auto t2_var = (-b_var + std::sqrt(discriminant)) / (2 * a_var);
   return {Intersection(t1_var, sphere), Intersection(t2_var, sphere)};
+}
+
+inline auto Intersect( const Ray& ray, const World& world) -> std::vector<Intersection> {
+  std::vector<Intersection> intersections;
+  for (auto const& object : world.Objects()) {
+    auto object_intersections = Intersect(ray, object);
+    std::cout << " object_intersections size: " << object_intersections.size() << "\n";
+    intersections.insert(intersections.end(), object_intersections.begin(), object_intersections.end());
+  }
+  std::ranges::sort(intersections,{},&Intersection::GetTime);
+  return intersections;
 }
 
 inline auto Hit(const std::vector<Intersection>& intersections) -> std::optional<Intersection> {

@@ -222,7 +222,7 @@ constexpr auto Matrix<Rows, Cols>::SpotSubMatrix(const size_t& row, const size_t
   static_assert(Rows == Cols, "Determinant matrix must be square");
   // following doesn't actually let template know they cannot be 1 or 0;it doesnt compile for 1/0
   static_assert(Rows <= 1000 && Cols <= 1000, "Cannot create a submatrix for matrices smaller than 2x2.");
-  Matrix<Rows - 1, Cols - 1> sub_matrix;
+  Matrix<Rows - 1, Cols - 1> sub_matrix;  // NOLINT
   if (row > Rows || col > Cols) {
     throw std::logic_error("Submatrix row or column out of bounds");
   }

@@ -11,6 +11,7 @@ target_sources(app_lib_tests
         matrix_transformations_chapter4.cpp
         ray_sphere_intersections_chapter5.cpp
         light_and_shading_chapter6.cpp
+        making_a_scene_chapter7.cpp
 )
 
 target_link_libraries(app_lib_tests

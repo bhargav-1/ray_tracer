@@ -46,4 +46,43 @@ SCENARIO("7: Intersect a world with a ray") {
     }
   }
 }
+SCENARIO("Precomputing the state of an intersection") {
+  GIVEN("r = ray(point(0,0,-5), vector(0,0,1)), shape = sphere(), i = intersection(4, shape)") {
+    THEN("comps = prepare_computations(i, r)") {
+      auto ray = ray_tracer::Ray(ray_tracer::Point(0, 0, -5), ray_tracer::Vec3(0, 0, 1));
+      auto shape = ray_tracer::Sphere();
+      auto intersection = ray_tracer::Intersection(4, shape);
+      auto comps = ray_tracer::PrepareComputations(intersection, ray);
+      CHECK(comps.GetTime() == intersection.GetTime());
+      CHECK(comps.GetObject() == intersection.GetObject());
+      CHECK(comps.GetPoint() == ray.Position(comps.GetTime()));
+      CHECK(comps.GetEyeV() == -ray.GetDirection());
+      CHECK(comps.GetNormalV() == ray_tracer::Vec3(0, 0, -1));
+    }
+  }
+}
+SCENARIO("The hit, when an intersection occurs on the outside") {
+  GIVEN("r = ray(point(0,0,-5), vector(0,0,1)), shape = sphere(), i = intersection(4, shape)") {
+    THEN("comps = prepare_computations(i, r), comps.inside = false") {
+      auto ray = ray_tracer::Ray(ray_tracer::Point(0, 0, -5), ray_tracer::Vec3(0, 0, 1));
+      auto shape = ray_tracer::Sphere();
+      auto intersection = ray_tracer::Intersection(4, shape);
+      auto comps = ray_tracer::PrepareComputations(intersection, ray);
+      CHECK(comps.IsInside() == false);
+    }
+  }
+}
+SCENARIO("The hit, when an intersection occurs on the inside") {
+  GIVEN("r = ray(point(0,0,0), vector(0,0,1)), shape = sphere(), i = intersection(1, shape)") {
+    THEN("comps = prepare_computations(i, r), comps.inside = true, comps.normalv = -normalv") {
+      auto ray = ray_tracer::Ray(ray_tracer::Point(0, 0, 0), ray_tracer::Vec3(0, 0, 1));
+      auto shape = ray_tracer::Sphere();
+      auto intersection = ray_tracer::Intersection(1, shape);
+      auto comps = ray_tracer::PrepareComputations(intersection, ray);
+      CHECK(comps.IsInside() == true);
+      CHECK(comps.GetNormalV() == ray_tracer::Vec3(0, 0, -1));
+    }
+  }
+}
+
 }  // namespace ray_tracer

@@ -11,7 +11,7 @@ class Intersection {
  public:
   Intersection(double time, Sphere sphere) : time_(time), sphere_(sphere){};
   auto friend operator==(Intersection const& lhs, Intersection const& rhs) -> bool;
-  [[nodiscard]] auto GetTime() const { return time_; }
+  [[nodiscard]] constexpr auto GetTime() const { return time_; }
   [[nodiscard]] auto GetObject() const { return sphere_; }
 
  private:
@@ -25,7 +25,7 @@ inline auto operator==(Intersection const& lhs, Intersection const& rhs) -> bool
 
 // can be constexpr in later cpp23++or cpp20++
 //en.wikipedia.org/wiki/Line–sphere_intersection
-inline auto Intersect(const Ray& ray, const Sphere& sphere) -> std::vector<Intersection> {
+constexpr auto Intersect(const Ray& ray, const Sphere& sphere) -> std::vector<Intersection> {
   // transform the ray to the sphere's coordinate system
   auto transform = sphere.GetTransform().Inverse();
   auto transformed_ray = ray.Transform(transform);
@@ -45,7 +45,7 @@ inline auto Intersect(const Ray& ray, const Sphere& sphere) -> std::vector<Inter
   return {Intersection(t1_var, sphere), Intersection(t2_var, sphere)};
 }
 
-inline auto Intersect( const Ray& ray, const World& world) -> std::vector<Intersection> {
+constexpr auto Intersect( const Ray& ray, const World& world) -> std::vector<Intersection> {
   std::vector<Intersection> intersections;
   for (auto const& object : world.Objects()) {
     auto object_intersections = Intersect(ray, object);
@@ -56,7 +56,7 @@ inline auto Intersect( const Ray& ray, const World& world) -> std::vector<Inters
   return intersections;
 }
 
-inline auto Hit(const std::vector<Intersection>& intersections) -> std::optional<Intersection> {
+constexpr auto Hit(const std::vector<Intersection>& intersections) -> std::optional<Intersection> {
   auto current_intersection = std::optional<Intersection>();
   for (const auto& intersection : intersections) {
     if (intersection.GetTime() >= 0) {
@@ -72,4 +72,47 @@ inline auto Hit(const std::vector<Intersection>& intersections) -> std::optional
   return current_intersection;
 }
 
+class Computations {
+ public:
+  Computations(double time,
+               Sphere object,
+               Point point,
+               Vec3 eye_v,
+               Vec3 normal_v,
+               bool inside)
+      : time_(time),
+        object_(object),
+        point_(std::move(point)),
+        eye_v_(std::move(eye_v)),
+        normal_v_(std::move(normal_v)),
+        inside_(inside){};
+  [[nodiscard]] constexpr auto GetTime() const -> double { return time_; }
+  [[nodiscard]] auto GetObject() const -> Sphere { return object_; }
+  [[nodiscard]] constexpr auto GetPoint() const -> Point { return point_; }
+  [[nodiscard]] constexpr auto GetEyeV() const -> Vec3 { return eye_v_; }
+  [[nodiscard]] constexpr auto GetNormalV() const -> Vec3 { return normal_v_; }
+  [[nodiscard]] constexpr auto IsInside() const -> bool { return inside_; }
+
+ private:
+  double time_;
+  Sphere object_;
+  Point point_;
+  Vec3 eye_v_;
+  Vec3 normal_v_;
+  bool inside_;
+};
+
+inline auto PrepareComputations(const Intersection& intersection, const Ray& ray) -> Computations {
+  auto time = intersection.GetTime();
+  auto object = intersection.GetObject();
+  auto point = ray.Position(time);
+  auto eye_v = -ray.GetDirection();
+  auto normal_v = object.NormalAt(point);
+  bool inside = false;
+  if (normal_v.Dot(eye_v) < 0) {
+    inside = true;
+    normal_v = -normal_v;
+  }
+  return Computations{time, object, point, eye_v, normal_v, inside};
+}
 }  // namespace ray_tracer

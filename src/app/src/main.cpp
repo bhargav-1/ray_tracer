@@ -25,7 +25,7 @@ auto main() noexcept -> int {  // NOLINT
   Projectile projtl{.position = ray_tracer::Point{0, 1, 0},
                     .velocity = ray_tracer::Vec3{1, 1.8, 0}.Normalize() * 11.25};
   Environment const env{.gravity = ray_tracer::Vec3{0, -0.1, 0}, .wind = ray_tracer::Vec3{-0.01, 0, 0}};
-  int count = 0;
+  // int count = 0;
   std::cout << "!!!x: " << projtl.position.GetX() << ", y: " << projtl.position.GetY()
             << ", z: " << projtl.position.GetZ() << '\n';
   ray_tracer::Canvas canvas{900, 550};
@@ -34,7 +34,7 @@ auto main() noexcept -> int {  // NOLINT
                            canvas.GetHeight() - static_cast<int>(projtl.position.GetY()),
                            ray_tracer::Color{1, 0, 0});
     Tick(env, projtl);
-    count++;
+    // count++;
   }
   canvas.WritePixelColor(static_cast<int>(projtl.position.GetX()),
                          canvas.GetHeight() - static_cast<int>(projtl.position.GetY()),

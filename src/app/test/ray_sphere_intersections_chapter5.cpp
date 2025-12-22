@@ -33,7 +33,7 @@ SCENARIO("Computing a Point from a Distance") {
 SCENARIO("A Ray intersects a sphere at two points") {
   GIVEN("r = Ray(point(0,0,-5), vector(0,0,1)),s=Sphere(),xs=intersect(r,s)") {
     const ray_tracer::Ray ray(ray_tracer::Point(0, 0, -5), ray_tracer::Vec3(0, 0, 1));
-    const ray_tracer::Sphere s_spher;
+    const ray_tracer::Sphere s_spher(1);
     auto xs_intersect = Intersect(ray, s_spher);
     THEN("xs.count = 2") { CHECK(xs_intersect.size() == 2); }
     THEN("xs[0] = 4.0") { CHECK(xs_intersect[0].GetTime() == 4.0); }
@@ -43,7 +43,7 @@ SCENARIO("A Ray intersects a sphere at two points") {
 SCENARIO("A Ray intersects a sphere at a tangent") {
   GIVEN("r = Ray(point(0,1,-5), vector(0,0,1)),s=Sphere(),xs=intersect(r,s)") {
     const ray_tracer::Ray ray(ray_tracer::Point(0, 1, -5), ray_tracer::Vec3(0, 0, 1));
-    const ray_tracer::Sphere s_sphere;
+    const ray_tracer::Sphere s_sphere(1);
     auto xs_intersect = Intersect(ray, s_sphere);
     THEN("xs.count = 2") { CHECK(xs_intersect.size() == 2); }
     THEN("xs[0] = 5.0") { CHECK(xs_intersect[0].GetTime() == 5.0); }
@@ -54,7 +54,7 @@ SCENARIO("A Ray intersects a sphere at a tangent") {
 SCENARIO("A Ray misses a sphere") {
   GIVEN("r = Ray(point(0,2,-5), vector(0,0,1)),s=Sphere(),xs=intersect(r,s)") {
     const ray_tracer::Ray ray(ray_tracer::Point(0, 2, -5), ray_tracer::Vec3(0, 0, 1));
-    const ray_tracer::Sphere s_sphere;
+    const ray_tracer::Sphere s_sphere(1);
     auto xs_intersect = Intersect(ray, s_sphere);
     THEN("xs.count = 0") { CHECK(xs_intersect.empty()); }
   }
@@ -63,7 +63,7 @@ SCENARIO("A Ray misses a sphere") {
 SCENARIO("A Ray originates inside a sphere") {
   GIVEN("r = Ray(point(0,0,0), vector(0,0,1)),s=Sphere(),xs=intersect(r,s)") {
     const ray_tracer::Ray ray(ray_tracer::Point(0, 0, 0), ray_tracer::Vec3(0, 0, 1));
-    const ray_tracer::Sphere spere;
+    const ray_tracer::Sphere spere(1);
     auto xs_interset = Intersect(ray, spere);
     THEN("xs.count = 2") { CHECK(xs_interset.size() == 2); }
     THEN("xs[0] = -1.0") { CHECK(xs_interset[0].GetTime() == -1.0); }
@@ -74,7 +74,7 @@ SCENARIO("A Ray originates inside a sphere") {
 SCENARIO("A sphere is behind a ray") {
   GIVEN("r = Ray(point(0,0,5), vector(0,0,1)),s=Sphere(),xs=intersect(r,s)") {
     const ray_tracer::Ray ray(ray_tracer::Point(0, 0, 5), ray_tracer::Vec3(0, 0, 1));
-    const ray_tracer::Sphere sphere;
+    const ray_tracer::Sphere sphere(1);
     auto xs_intersect = Intersect(ray, sphere);
     THEN("xs.count = 2") { CHECK(xs_intersect.size() == 2); }
     THEN("xs[0] = -6.0") { CHECK(xs_intersect[0].GetTime() == -6.0); }
@@ -84,7 +84,7 @@ SCENARIO("A sphere is behind a ray") {
 
 SCENARIO("An intersection encapsulates t and object") {
   GIVEN("s=Sphere(),i=Intersection(3.5,s)") {
-    const ray_tracer::Sphere sphe;
+    const ray_tracer::Sphere sphe(1);
     const ray_tracer::Intersection intersectn(3.5, sphe);
     THEN("i.t = 3.5") { CHECK(intersectn.GetTime() == 3.5); }
     THEN("i.object = s") { CHECK(intersectn.GetObject() == sphe); }
@@ -93,7 +93,7 @@ SCENARIO("An intersection encapsulates t and object") {
 
 SCENARIO("Aggregating Intersections") {
   GIVEN("s=Sphere(),i1=Intersection(1,s),i2=Intersection(2,s)") {
-    const ray_tracer::Sphere sphe;
+    const ray_tracer::Sphere sphe(1);
     const ray_tracer::Intersection intersectn1(1, sphe);
     const ray_tracer::Intersection intersectn2(2, sphe);
     THEN("xs = Intersection(1,s),Intersection(2,s)") {
@@ -107,7 +107,7 @@ SCENARIO("Aggregating Intersections") {
 SCENARIO("Intersect sets the object on the intersection") {
   GIVEN("r = Ray(point(0,0,-5), vector(0,0,1)),s=Sphere(),xs=intersect(r,s)") {
     const ray_tracer::Ray ray(ray_tracer::Point(0, 0, -5), ray_tracer::Vec3(0, 0, 1));
-    const ray_tracer::Sphere s_sphere;
+    const ray_tracer::Sphere s_sphere(1);
     auto xs_intersect = Intersect(ray, s_sphere);
     THEN("xs.count = 2") { CHECK(xs_intersect.size() == 2); }
     THEN("xs[0].object = s") { CHECK(xs_intersect[0].GetObject() == s_sphere); }
@@ -117,7 +117,7 @@ SCENARIO("Intersect sets the object on the intersection") {
 
 SCENARIO("The hit, when all intersections have positive t") {
   GIVEN("s=Sphere(),i1=Intersection(1,s),i2=Intersection(2,s)") {
-    const ray_tracer::Sphere sphe;
+    const ray_tracer::Sphere sphe(1);
     const ray_tracer::Intersection intersectn1(1, sphe);
     const ray_tracer::Intersection intersectn2(2, sphe);
     THEN("xs = Intersection(1,s),Intersection(2,s)") {
@@ -132,7 +132,7 @@ SCENARIO("The hit, when all intersections have positive t") {
 
 SCENARIO("The hit, when some intersections have negative t") {
   GIVEN("s=Sphere(),i1=Intersection(-1,s),i2=Intersection(1,s)") {
-    const ray_tracer::Sphere sphe;
+    const ray_tracer::Sphere sphe(1);
     const ray_tracer::Intersection intersectn1(-1, sphe);
     const ray_tracer::Intersection intersectn2(1, sphe);
     THEN("xs = Intersection(-1,s),Intersection(1,s)") {
@@ -146,7 +146,7 @@ SCENARIO("The hit, when some intersections have negative t") {
 }
 SCENARIO("The hit, when all intersections have negative t") {
   GIVEN("s=Sphere(),i1=Intersection(-2,s),i2=Intersection(-1,s)") {
-    const ray_tracer::Sphere sphe;
+    const ray_tracer::Sphere sphe(1);
     const ray_tracer::Intersection intersectn1(-2, sphe);
     const ray_tracer::Intersection intersectn2(-1, sphe);
     THEN("xs = Intersection(-2,s),Intersection(-1,s)") {
@@ -161,7 +161,7 @@ SCENARIO("The hit, when all intersections have negative t") {
 
 SCENARIO("The hit is always the lowest nonnegative intersection") {
   GIVEN("s=Sphere(),i1=Intersection(5,s),i2=Intersection(7,s),i3=Intersection(-3,s),i4=Intersection(2,s)") {
-    const ray_tracer::Sphere sphe;
+    const ray_tracer::Sphere sphe(1);
     const ray_tracer::Intersection intersectn1(5, sphe);
     const ray_tracer::Intersection intersectn2(7, sphe);
     const ray_tracer::Intersection intersectn3(-3, sphe);
@@ -198,13 +198,13 @@ SCENARIO("Scaling a ray") {
 
 SCENARIO("5: A Sphere's default transformation") {
   GIVEN("s = Sphere()") {
-    const ray_tracer::Sphere sphe;
+    const ray_tracer::Sphere sphe(1);
     THEN("s.transform = identity_matrix") { CHECK(sphe.GetTransform() == ray_tracer::Matrix<4, 4>::IdentityMatrix()); }
   }
 }
 SCENARIO("5: Changing a Sphere's transformation") {
   GIVEN("s = Sphere(),t = translation(2,3,4)") {
-    ray_tracer::Sphere sphe;
+    ray_tracer::Sphere sphe(1);
     const ray_tracer::Matrix<4, 4> mat = ray_tracer::Matrix<4, 4>::Translation(2, 3, 4);
     sphe.SetTransform(mat);
     THEN("s.transform = t") { CHECK(sphe.GetTransform() == mat); }
@@ -213,7 +213,7 @@ SCENARIO("5: Changing a Sphere's transformation") {
 SCENARIO("5: Intersecting a scaled Sphere with a ray") {
   GIVEN("r = Ray(point(0,0,-5), vector(0,0,1)),s = Sphere()") {
     const ray_tracer::Ray ray(ray_tracer::Point(0, 0, -5), ray_tracer::Vec3(0, 0, 1));
-    ray_tracer::Sphere sphe;
+    ray_tracer::Sphere sphe(1);
     sphe.SetTransform(ray_tracer::Matrix<4, 4>::Scaling(2, 2, 2));
     THEN("xs = intersect(s,r)") {
       auto xs_inter = Intersect(ray, sphe);
@@ -226,7 +226,7 @@ SCENARIO("5: Intersecting a scaled Sphere with a ray") {
 SCENARIO("5: Intersecting a translated Sphere with a ray") {
   GIVEN("r = Ray(point(0,0,-5), vector(0,0,1)),s = Sphere()") {
     const ray_tracer::Ray ray(ray_tracer::Point(0, 0, -5), ray_tracer::Vec3(0, 0, 1));
-    ray_tracer::Sphere sphe;
+    ray_tracer::Sphere sphe(1);
     sphe.SetTransform(ray_tracer::Matrix<4, 4>::Translation(5, 0, 0));
     THEN("xs = intersect(s,r)") {
       auto xs_inter = Intersect(ray, sphe);

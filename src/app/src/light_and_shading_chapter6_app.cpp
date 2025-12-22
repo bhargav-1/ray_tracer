@@ -50,7 +50,7 @@ static void RenderScene(ImDrawList* canvas) {
   std::cout << print_center << "\n";
   canvas->AddCircleFilled(center_vec, 10, color);
 
-  ray_tracer::Sphere shape;
+  ray_tracer::Sphere shape(1);
   ray_tracer::Material material;
   material.SetColor(ray_tracer::Color{0.2, 0.2, 1.0});
   shape.SetMaterial(material);

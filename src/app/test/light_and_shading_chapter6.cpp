@@ -17,7 +17,7 @@ namespace ray_tracer {
 SCENARIO("Normal on a Sphere at a Point on the X Axis") {
   GIVEN("A Sphere at a Point on the X Axis") {
     THEN("normal at point(1,0,0) = vector(1,0,0)") {
-      ray_tracer::Sphere const sphere;
+      ray_tracer::Sphere const sphere(1);
       CHECK(sphere.NormalAt(Point(1, 0, 0)) == Vec3(1, 0, 0));
     }
   }
@@ -25,7 +25,7 @@ SCENARIO("Normal on a Sphere at a Point on the X Axis") {
 SCENARIO("The Normal on a Sphere at a Point on the Y Axis") {
   GIVEN("A Sphere at a Point on the Y Axis") {
     THEN("normal at point(0,1,0) = vector(0,1,0)") {
-      Sphere const sphere;
+      Sphere const sphere(1);
       CHECK(sphere.NormalAt(Point(0, 1, 0)) == Vec3(0, 1, 0));
     }
   }
@@ -33,7 +33,7 @@ SCENARIO("The Normal on a Sphere at a Point on the Y Axis") {
 SCENARIO("The Normal on a Sphere at a Point on the Z Axis") {
   GIVEN("A Sphere at a Point on the Z Axis") {
     THEN("normal at point(0,0,1) = vector(0,0,1)") {
-      Sphere const sphere;
+      Sphere const sphere(1);
       CHECK(sphere.NormalAt(Point(0, 0, 1)) == Vec3(0, 0, 1));
     }
   }
@@ -41,7 +41,7 @@ SCENARIO("The Normal on a Sphere at a Point on the Z Axis") {
 SCENARIO("The Normal on a Sphere at a Nonaxial Point") {
   GIVEN("A Sphere at a Nonaxial Point") {
     THEN("normal at point(√3/3,√3/3,√3/3) = vector(√3/3,√3/3,√3/3)") {
-      Sphere const sphere;
+      Sphere const sphere(1);
       CHECK(sphere.NormalAt(Point(std::sqrt(3) / 3, std::sqrt(3) / 3, std::sqrt(3) / 3)) ==
             Vec3(std::sqrt(3) / 3, std::sqrt(3) / 3, std::sqrt(3) / 3));
     }
@@ -50,7 +50,7 @@ SCENARIO("The Normal on a Sphere at a Nonaxial Point") {
 SCENARIO("The Normal is a Normalized Vector") {
   GIVEN("A Sphere at a Nonaxial Point") {
     THEN("normal at point(√3/3,√3/3,√3/3) = vector(√3/3,√3/3,√3/3)") {
-      Sphere const sphere;
+      Sphere const sphere(1);
       CHECK(sphere.NormalAt(Point(std::sqrt(3) / 3, std::sqrt(3) / 3, std::sqrt(3) / 3)) ==
             Vec3(std::sqrt(3) / 3, std::sqrt(3) / 3, std::sqrt(3) / 3));
     }
@@ -58,7 +58,7 @@ SCENARIO("The Normal is a Normalized Vector") {
 }
 SCENARIO("Computing the normal on a translated sphere") {
   GIVEN("s = sphere(), set_transform(s, translation(0,1,0))") {
-    ray_tracer::Sphere sphere;
+    ray_tracer::Sphere sphere(1);
     sphere.SetTransform(ray_tracer::Matrix<4, 4>::Translation(0, 1, 0));
     THEN("normal at point(0,1.70711,-0.70711) = vector(0,0.70711,-0.70711)") {
       CHECK(sphere.NormalAt(Point(0, 1.70711, -0.70711)) == Vec3(0, 0.70711, -0.70711));
@@ -67,7 +67,7 @@ SCENARIO("Computing the normal on a translated sphere") {
 }
 SCENARIO("Computing the normal on a transformed sphere") {
   GIVEN("s = sphere(), set_transform(s, scaling(1,0.5,1)*rotation_z(π/5))") {
-    ray_tracer::Sphere sphere;
+    ray_tracer::Sphere sphere(1);
     sphere.SetTransform(ray_tracer::Matrix<4, 4>::Scaling(1, 0.5, 1) *
                         ray_tracer::Matrix<4, 4>::RotationZ(std::numbers::pi / 5));
     THEN("normal at point(0,√2/2,-√2/2) = vector(0,0.97014,-0.24254)") {
@@ -103,7 +103,7 @@ SCENARIO("The default material") {
 SCENARIO("A Sphere has a default material") {
   GIVEN("s = sphere(), m=s.material") {
     THEN("m = material()") {
-      Sphere const sphere;
+      Sphere const sphere(1);
       Material const material = sphere.GetMaterial();
       CHECK(material.GetColor() == Color(1, 1, 1, 1));
       CHECK(material.GetAmbient() == 0.1);
@@ -116,7 +116,7 @@ SCENARIO("A Sphere has a default material") {
 SCENARIO("A Sphere may be assigned a material") {
   GIVEN("s = sphere(), m = material(), set_material(s, m)") {
     THEN("s.material = m") {
-      Sphere sphere;
+      Sphere sphere(1);
       Material material;
       sphere.SetMaterial(material);
       CHECK(sphere.GetMaterial() == material);

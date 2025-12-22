@@ -1,5 +1,6 @@
 #include <app/matrix.h>
 #include <app/intersection.h>
+#include <app/sphere.h>
 #include <catch2/catch_test_macros.hpp>  // for operator""_catch_sr, Section
 
 namespace ray_tracer {
@@ -21,8 +22,8 @@ SCENARIO("The Default world") {
     THEN("w contains s1 and s2") {
       auto light = ray_tracer::PointLight(ray_tracer::Point(-10, 10, -10), ray_tracer::Color(1, 1, 1));
       auto world = ray_tracer::World::DefaultWorld();
-      auto sphere1 = ray_tracer::Sphere();
-      auto sphere2 = ray_tracer::Sphere();
+      auto sphere1 = ray_tracer::Sphere(1);
+      auto sphere2 = ray_tracer::Sphere(2);
       sphere2.SetTransform(ray_tracer::Matrix<4,4>::Scaling(0.5, 0.5, 0.5));
       CHECK(world.Lights().size() == 1);
       CHECK(world.Objects().size() == 2);
@@ -50,7 +51,7 @@ SCENARIO("Precomputing the state of an intersection") {
   GIVEN("r = ray(point(0,0,-5), vector(0,0,1)), shape = sphere(), i = intersection(4, shape)") {
     THEN("comps = prepare_computations(i, r)") {
       auto ray = ray_tracer::Ray(ray_tracer::Point(0, 0, -5), ray_tracer::Vec3(0, 0, 1));
-      auto shape = ray_tracer::Sphere();
+      auto shape = ray_tracer::Sphere(1);
       auto intersection = ray_tracer::Intersection(4, shape);
       auto comps = ray_tracer::PrepareComputations(intersection, ray);
       CHECK(comps.GetTime() == intersection.GetTime());
@@ -65,7 +66,7 @@ SCENARIO("The hit, when an intersection occurs on the outside") {
   GIVEN("r = ray(point(0,0,-5), vector(0,0,1)), shape = sphere(), i = intersection(4, shape)") {
     THEN("comps = prepare_computations(i, r), comps.inside = false") {
       auto ray = ray_tracer::Ray(ray_tracer::Point(0, 0, -5), ray_tracer::Vec3(0, 0, 1));
-      auto shape = ray_tracer::Sphere();
+      auto shape = ray_tracer::Sphere(1);
       auto intersection = ray_tracer::Intersection(4, shape);
       auto comps = ray_tracer::PrepareComputations(intersection, ray);
       CHECK(comps.IsInside() == false);
@@ -76,7 +77,7 @@ SCENARIO("The hit, when an intersection occurs on the inside") {
   GIVEN("r = ray(point(0,0,0), vector(0,0,1)), shape = sphere(), i = intersection(1, shape)") {
     THEN("comps = prepare_computations(i, r), comps.inside = true, comps.normalv = -normalv") {
       auto ray = ray_tracer::Ray(ray_tracer::Point(0, 0, 0), ray_tracer::Vec3(0, 0, 1));
-      auto shape = ray_tracer::Sphere();
+      auto shape = ray_tracer::Sphere(1);
       auto intersection = ray_tracer::Intersection(1, shape);
       auto comps = ray_tracer::PrepareComputations(intersection, ray);
       CHECK(comps.IsInside() == true);

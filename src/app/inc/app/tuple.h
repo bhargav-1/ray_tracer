@@ -5,11 +5,7 @@
 namespace ray_tracer {
 class Tuple {
  public:
-  Tuple() {
-    x_ = 0;
-    y_ = 0;
-    z_ = 0;
-  }
+  constexpr Tuple() noexcept = default;
   constexpr Tuple(const double& x_value, const double& y_value, const double& z_value, const double& w_value);
   constexpr Tuple(const Tuple&) = default;
   constexpr auto operator=(const Tuple& tuple) -> Tuple& {

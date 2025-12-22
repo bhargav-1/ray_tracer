@@ -1,6 +1,4 @@
 #pragma once
-#include <vector>
-
 #include "material.h"
 #include "matrix.h"
 #include "point.h"
@@ -9,16 +7,10 @@
 
 namespace ray_tracer {
 
-template <std::size_t N>
-class SphereCounter {
-  friend class Sphere;
-  static constexpr std::size_t kValue = N;
-};
-
 class Sphere {
  public:
-  // __COUNTER__  is compiler specific and is used to generate a unique number for each sphere
-  Sphere() noexcept : id_(SphereCounter<__COUNTER__>::kValue) {} // NOLINT
+  Sphere() = delete;
+  constexpr explicit Sphere(std::size_t id) : id_(id) {} // NOLINT [readability-identifier-naming]
   ~Sphere() = default;
   [[nodiscard]] constexpr auto GetId() const noexcept -> std::size_t { return id_; }
   friend auto operator==(const Sphere& lhs, const Sphere& rhs) -> bool;

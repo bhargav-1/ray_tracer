@@ -97,7 +97,7 @@ auto main(int /*unused*/, char* * /*unused*/) -> int {  // NOLINT
     std::cout << print_center << "\n";
     canvas->AddCircleFilled(center_vec, 10, color);
 
-    ray_tracer::Sphere shape;
+    ray_tracer::Sphere shape(1);
     auto transform = ray_tracer::Matrix<4, 4>::Scaling(1, 1, 1);
     transform =
         transform * ray_tracer::Matrix<4, 4>::Shearing(

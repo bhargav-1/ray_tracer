@@ -30,14 +30,14 @@ class Matrix {
     matrix_[0][0] = value;
   }
   constexpr Matrix(std::initializer_list<std::initializer_list<double>> matrix) {
-    if (matrix.size() != Rows) {
-      throw std::invalid_argument("Matrix rows must match");
-    }
+    // if (matrix.size() != Rows) {
+    //   throw std::invalid_argument("Matrix rows must match");
+    // }
     size_t row = 0;
     for (const auto& r_var : matrix) {
-      if (r_var.size() != Cols) {
-        throw std::invalid_argument("Matrix columns must match");
-      }
+      // if (r_var.size() != Cols) {
+      //   throw std::invalid_argument("Matrix columns must match");
+      // }
       std::copy(r_var.begin(), r_var.end(), matrix_[row].begin());
       row++;
     }
@@ -53,14 +53,16 @@ class Matrix {
     if (row < Rows && col < Cols) {
       return matrix_[row][col];
     }
-    throw std::invalid_argument("Matrix row or column out of bounds");
+    // throw std::invalid_argument("Matrix row or column out of bounds");
+    return matrix_[0][0];
   }
 
   constexpr auto operator[](size_t row) -> std::array<double, Cols>& {
     if (row < Rows) {
       return matrix_[row];
     }
-    throw std::invalid_argument("Matrix row out of bounds");
+    // throw std::invalid_argument("Matrix row out of bounds");
+    return matrix_[0];
   }
   [[nodiscard]] static constexpr auto GetRows() -> size_t { return Rows; }
   [[nodiscard]] static constexpr auto GetCols() -> size_t { return Cols; }
@@ -158,10 +160,10 @@ constexpr auto Matrix<Rows, Cols>::Determinant() -> double {
   } else if constexpr (Rows == 2) {
     determinant = matrix_[0][0] * matrix_[1][1] - matrix_[0][1] * matrix_[1][0];
   } else if constexpr (Rows < 2) {
-    throw std::logic_error("Determinant cannot be calculated for matrix of size < 2");
+    // throw std::logic_error("Determinant cannot be calculated for matrix of size < 2");
   } else if constexpr (Rows > 1000) {
     determinant = 0;
-    throw std::logic_error("Determinant cannot be calculated for matrix of size > 1000");
+    // throw std::logic_error("Determinant cannot be calculated for matrix of size > 1000");
   } else {
     for (size_t col = 0; col < Cols; col++) {
       const double sign = ((0 + col) % 2 == 0) ? 1.0 : -1.0;
@@ -206,9 +208,9 @@ template <size_t Rows, size_t Cols>
 constexpr auto Matrix<Rows, Cols>::Cofactor(const size_t& row, const size_t& col) -> double {
   static_assert(Rows == Cols, "Determinant matrix must be square");
 
-  if (row >= Rows || col >= Cols) {
-    throw std::invalid_argument("Row or column out of bounds");
-  }
+  // if (row >= Rows || col >= Cols) {
+    // throw std::invalid_argument("Row or column out of bounds");
+  // }
 
   if constexpr (Rows <= 2) {
     std::cerr << "Cofactor is not implemented for matrices of size 2 or less." << '\n';
@@ -223,13 +225,13 @@ constexpr auto Matrix<Rows, Cols>::SpotSubMatrix(const size_t& row, const size_t
   // following doesn't actually let template know they cannot be 1 or 0;it doesnt compile for 1/0
   static_assert(Rows <= 1000 && Cols <= 1000, "Cannot create a submatrix for matrices smaller than 2x2.");
   Matrix<Rows - 1, Cols - 1> sub_matrix;  // NOLINT
-  if (row > Rows || col > Cols) {
-    throw std::logic_error("Submatrix row or column out of bounds");
-  }
+  // if (row > Rows || col > Cols) {
+  //   throw std::logic_error("Submatrix row or column out of bounds");
+  // }
 
-  if constexpr (Rows == 1 || Rows == 0 || Rows == 2) {
-    throw std::logic_error("submatrix of 1x1 is undefined");
-  }
+  // if constexpr (Rows == 1 || Rows == 0 || Rows == 2) {
+  //   throw std::logic_error("submatrix of 1x1 is undefined");
+  // }
   size_t sub_row = 0;
   size_t sub_col = 0;
   for (size_t i = 0; i < Rows; i++) {
@@ -256,9 +258,9 @@ constexpr auto Matrix<Rows, Cols>::Invertible() -> bool {
 template <size_t Rows, size_t Cols>
 constexpr auto Matrix<Rows, Cols>::Inverse() -> Matrix<Rows, Cols> {
   static_assert(Rows == Cols, "Determinant matrix must be square");
-  if (!Invertible()) {
-    throw std::logic_error("Matrix is not invertible");
-  }
+  // if (!Invertible()) {
+  //   throw std::logic_error("Matrix is not invertible");
+  // }
   Matrix<Rows, Cols> inverse;
   for (size_t i = 0; i < Rows; i++) {
     for (size_t j = 0; j < Cols; j++) {

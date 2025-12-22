@@ -160,10 +160,10 @@ constexpr auto Matrix<Rows, Cols>::Determinant() -> double {
   } else if constexpr (Rows == 2) {
     determinant = matrix_[0][0] * matrix_[1][1] - matrix_[0][1] * matrix_[1][0];
   } else if constexpr (Rows < 2) {
-    // throw std::logic_error("Determinant cannot be calculated for matrix of size < 2");
+    throw std::logic_error("Determinant cannot be calculated for matrix of size < 2");
   } else if constexpr (Rows > 1000) {
     determinant = 0;
-    // throw std::logic_error("Determinant cannot be calculated for matrix of size > 1000");
+    throw std::logic_error("Determinant cannot be calculated for matrix of size > 1000");
   } else {
     for (size_t col = 0; col < Cols; col++) {
       const double sign = ((0 + col) % 2 == 0) ? 1.0 : -1.0;

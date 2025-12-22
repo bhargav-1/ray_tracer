@@ -14,8 +14,8 @@ class World {
   static auto DefaultWorld() -> World {
    World world;
     world.AddLight(PointLight(Point(-10, 10, -10), Color(1, 1, 1)));
-    auto sphere1 = ray_tracer::Sphere();
-    auto sphere2 = ray_tracer::Sphere();
+    auto sphere1 = ray_tracer::Sphere(1);
+    auto sphere2 = ray_tracer::Sphere(2);
     sphere2.SetTransform(ray_tracer::Matrix<4,4>::Scaling(0.5, 0.5, 0.5));
     world.AddObject(sphere1);
     world.AddObject(sphere2);

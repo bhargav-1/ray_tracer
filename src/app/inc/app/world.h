@@ -6,11 +6,11 @@
 namespace ray_tracer {
 class World {
  public:
-  World() = default;
-  void AddObject(const Sphere& object) { objects_.push_back(object); }
-  void AddLight(const PointLight& light) { lights_.push_back(light); }
-  [[nodiscard]] auto Objects() const -> const std::vector<Sphere>& { return objects_; }
-  [[nodiscard]] auto Lights() const -> const std::vector<PointLight>& { return lights_; }
+  constexpr World() = default;
+  void constexpr AddObject(const Sphere& object) { objects_.push_back(object); }
+  void constexpr AddLight(const PointLight& light) { lights_.push_back(light); }
+  [[nodiscard]] auto constexpr Objects() const -> const std::vector<Sphere>& { return objects_; }
+  [[nodiscard]] auto constexpr Lights() const -> const std::vector<PointLight>& { return lights_; }
   static auto DefaultWorld() -> World {
    World world;
     world.AddLight(PointLight(Point(-10, 10, -10), Color(1, 1, 1)));

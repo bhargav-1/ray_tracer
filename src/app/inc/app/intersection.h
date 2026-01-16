@@ -9,10 +9,10 @@
 namespace ray_tracer {
 class Intersection {
  public:
-  Intersection(double time, Sphere sphere) : time_(time), sphere_(sphere){};
+  constexpr Intersection(double time, Sphere sphere) : time_(time), sphere_(sphere){};
   auto friend operator==(Intersection const& lhs, Intersection const& rhs) -> bool;
   [[nodiscard]] constexpr auto GetTime() const { return time_; }
-  [[nodiscard]] auto GetObject() const { return sphere_; }
+  [[nodiscard]] auto constexpr GetObject() const { return sphere_; }
 
  private:
   double time_;
@@ -74,7 +74,7 @@ constexpr auto Hit(const std::vector<Intersection>& intersections) -> std::optio
 
 class Computations {
  public:
-  Computations(double time,
+  constexpr Computations(double time,
                Sphere object,
                Point point,
                Vec3 eye_v,
@@ -87,7 +87,7 @@ class Computations {
         normal_v_(std::move(normal_v)),
         inside_(inside){};
   [[nodiscard]] constexpr auto GetTime() const -> double { return time_; }
-  [[nodiscard]] auto GetObject() const -> Sphere { return object_; }
+  [[nodiscard]] constexpr auto GetObject() const -> Sphere { return object_; }
   [[nodiscard]] constexpr auto GetPoint() const -> Point { return point_; }
   [[nodiscard]] constexpr auto GetEyeV() const -> Vec3 { return eye_v_; }
   [[nodiscard]] constexpr auto GetNormalV() const -> Vec3 { return normal_v_; }
@@ -102,11 +102,11 @@ class Computations {
   bool inside_;
 };
 
-inline auto PrepareComputations(const Intersection& intersection, const Ray& ray) -> Computations {
-  auto time = intersection.GetTime();
-  auto object = intersection.GetObject();
-  auto point = ray.Position(time);
-  auto eye_v = -ray.GetDirection();
+constexpr auto PrepareComputations(const Intersection& intersection, const Ray& ray) -> Computations {
+  const auto time = intersection.GetTime();
+  const auto object = intersection.GetObject();
+  const auto point = ray.Position(time);
+  const auto eye_v = -ray.GetDirection();
   auto normal_v = object.NormalAt(point);
   bool inside = false;
   if (normal_v.Dot(eye_v) < 0) {

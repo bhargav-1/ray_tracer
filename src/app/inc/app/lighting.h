@@ -18,12 +18,11 @@ auto inline Lighting(
     specular = Color(0, 0, 0);
   } else {
     diffuse = effective_color * material.GetDiffuse() * light_dot_normal;
-    auto reflectv = Vec3(-lightv.Reflect(normalv));
-    auto reflect_dot_eye = reflectv.Dot(eyev);
-    if (reflect_dot_eye <= 0) {
+    const auto reflectv = Vec3(-lightv.Reflect(normalv));
+    if (const auto reflect_dot_eye = reflectv.Dot(eyev); reflect_dot_eye <= 0) {
       specular = Color(0, 0, 0);
     } else {
-      auto factor = pow(reflect_dot_eye, material.GetShininess());
+      const auto factor = pow(reflect_dot_eye, material.GetShininess());
       specular = light.GetIntensity() * material.GetSpecular() * factor;
     }
   }

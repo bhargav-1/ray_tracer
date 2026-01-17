@@ -5,6 +5,7 @@
 #include "app/ray.h"
 #include "app/sphere.h"
 #include "app/world.h"
+#include "app/lighting.h"
 
 namespace ray_tracer {
 class Intersection {
@@ -114,5 +115,12 @@ constexpr auto PrepareComputations(const Intersection& intersection, const Ray& 
     normal_v = -normal_v;
   }
   return Computations{time, object, point, eye_v, normal_v, inside};
+}
+constexpr auto ShadeHit(const World& world, const Computations& computations) -> Color {
+  Color color{0,0,0};
+  for (auto world_light : world.Lights()) {
+    color = color + Lighting(computations.GetObject().GetMaterial(),world_light, computations.GetPoint(), computations.GetEyeV(), computations.GetNormalV());
+  }
+  return color;
 }
 }  // namespace ray_tracer

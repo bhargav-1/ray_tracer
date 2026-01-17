@@ -1,10 +1,11 @@
 #include <app/matrix.h>
 #include <app/intersection.h>
 #include <app/sphere.h>
+#include <app/utilities.h>
 #include <catch2/catch_test_macros.hpp>  // for operator""_catch_sr, Section
 
 namespace ray_tracer {
-SCENARIO("Creating a world") {
+SCENARIO("7: Creating a world") {
   GIVEN("w = world()") {
     THEN("w contains no objects and w has no light source") {
       const auto world = ray_tracer::World();
@@ -14,7 +15,7 @@ SCENARIO("Creating a world") {
   }
 }
 
-SCENARIO("The Default world") {
+SCENARIO("7: The Default world") {
   GIVEN(
       "light =  point_light(light(-10,10,-10), color(1,1,1), s1 = sphere() with "
       "material(color(0.8,1.0,0.6),diffuse(0.7),specular(0.2))) and s2 = sphere() with "
@@ -47,7 +48,7 @@ SCENARIO("7: Intersect a world with a ray") {
     }
   }
 }
-SCENARIO("Precomputing the state of an intersection") {
+SCENARIO("7: Precomputing the state of an intersection") {
   GIVEN("r = ray(point(0,0,-5), vector(0,0,1)), shape = sphere(), i = intersection(4, shape)") {
     THEN("comps = prepare_computations(i, r)") {
       auto ray = ray_tracer::Ray(ray_tracer::Point(0, 0, -5), ray_tracer::Vec3(0, 0, 1));
@@ -62,7 +63,7 @@ SCENARIO("Precomputing the state of an intersection") {
     }
   }
 }
-SCENARIO("The hit, when an intersection occurs on the outside") {
+SCENARIO("7: The hit, when an intersection occurs on the outside") {
   GIVEN("r = ray(point(0,0,-5), vector(0,0,1)), shape = sphere(), i = intersection(4, shape)") {
     THEN("comps = prepare_computations(i, r), comps.inside = false") {
       auto ray = ray_tracer::Ray(ray_tracer::Point(0, 0, -5), ray_tracer::Vec3(0, 0, 1));
@@ -73,7 +74,7 @@ SCENARIO("The hit, when an intersection occurs on the outside") {
     }
   }
 }
-SCENARIO("The hit, when an intersection occurs on the inside") {
+SCENARIO("7: The hit, when an intersection occurs on the inside") {
   GIVEN("r = ray(point(0,0,0), vector(0,0,1)), shape = sphere(), i = intersection(1, shape)") {
     THEN("comps = prepare_computations(i, r), comps.inside = true, comps.normalv = -normalv") {
       auto ray = ray_tracer::Ray(ray_tracer::Point(0, 0, 0), ray_tracer::Vec3(0, 0, 1));
@@ -82,6 +83,42 @@ SCENARIO("The hit, when an intersection occurs on the inside") {
       auto comps = ray_tracer::PrepareComputations(intersection, ray);
       CHECK(comps.IsInside() == true);
       CHECK(comps.GetNormalV() == ray_tracer::Vec3(0, 0, -1));
+    }
+  }
+}
+SCENARIO("7: Shading an intersection") {
+  GIVEN("w = default_world(), r = ray(point(0, 0,-5), vector(0,0,1)), and"
+        "shape = world_.Objects()[1], i = intersection(4,shape), when comps = prepare_computations(i,r)") {
+    THEN("color = shade_hit(w, comps), color = color(0.38066, 0.47583, 0.2855)") {
+      auto world = ray_tracer::World::DefaultWorld();
+      auto ray = ray_tracer::Ray(ray_tracer::Point(0, 0, -5), ray_tracer::Vec3(0, 0, 1));
+      auto shape = world.Objects()[0];
+      auto intersection = ray_tracer::Intersection(4, shape);
+      auto comps = ray_tracer::PrepareComputations(intersection, ray);
+      auto color = ray_tracer::ShadeHit(world, comps);
+      CHECK(utilities::Equal(color.GetRed(), 0.38066));
+      CHECK(utilities::Equal(color.GetGreen(), 0.47583));
+      CHECK(utilities::Equal(color.GetBlue(), 0.2855));
+    }
+  }
+}
+
+SCENARIO("7: Shading an intersection from the inside") {
+  GIVEN("w = default_world(), r = ray(point(0,0,0), vector(0,0,1)), and shape = world_.getObject[1], i = intersection(0.5,shape), when comps = prepare_computations(i,r)") {
+    THEN("color = shade_hit(w, comps), color = color(0.90498, 0.90498, 0.90498)") {
+      auto world = ray_tracer::World::DefaultWorld();
+      world.ChangeDefaultLight(PointLight(Point(0, 0.25, 0), Color(1, 1, 1)));
+      auto ray = ray_tracer::Ray(ray_tracer::Point(0, 0, 0), ray_tracer::Vec3(0, 0, 1));
+      auto shape = world.Objects()[1];
+      auto intersection = ray_tracer::Intersection(0.5, shape);
+      auto comps = ray_tracer::PrepareComputations(intersection, ray);
+      auto color = ray_tracer::ShadeHit(world, comps);
+      CHECK(comps.GetPoint() == ray_tracer::Point(0, 0, 0.5));
+      CHECK(comps.GetEyeV() == ray_tracer::Vec3(0, 0, -1));
+      CHECK(comps.IsInside() == true);
+      CHECK(utilities::Equal(color.GetRed(), 0.90498));
+      CHECK(utilities::Equal(color.GetGreen(), 0.90498));
+      CHECK(utilities::Equal(color.GetBlue(), 0.90498));
     }
   }
 }

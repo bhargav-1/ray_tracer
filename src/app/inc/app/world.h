@@ -8,6 +8,7 @@ class World {
  public:
   constexpr World() = default;
   void constexpr AddObject(const Sphere& object) { objects_.push_back(object); }
+  void constexpr UpdateObjects(const int index, const Sphere& object) { objects_[index] = object; }
   void constexpr AddLight(const PointLight& light) { lights_.push_back(light); }
   void constexpr ChangeDefaultLight(const PointLight& light) {
     if (lights_.empty()) {

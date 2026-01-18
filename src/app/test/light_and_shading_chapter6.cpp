@@ -92,7 +92,7 @@ SCENARIO("The default material") {
   GIVEN("m = material()") {
     THEN("m.color = color(1,1,1), m.ambient = 0.1, m.diffuse = 0.9, m.specular = 0.9, m.shininess = 200.0") {
       Material const material;
-      CHECK(material.GetColor() == Color(1, 1, 1, 1));
+      CHECK(material.GetColor() == Color(1, 1, 1, 0));
       CHECK(material.GetAmbient() == 0.1);
       CHECK(material.GetDiffuse() == 0.9);
       CHECK(material.GetSpecular() == 0.9);
@@ -105,7 +105,7 @@ SCENARIO("A Sphere has a default material") {
     THEN("m = material()") {
       Sphere const sphere(1);
       Material const material = sphere.GetMaterial();
-      CHECK(material.GetColor() == Color(1, 1, 1, 1));
+      CHECK(material.GetColor() == Color(1, 1, 1, 0));
       CHECK(material.GetAmbient() == 0.1);
       CHECK(material.GetDiffuse() == 0.9);
       CHECK(material.GetSpecular() == 0.9);

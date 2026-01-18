@@ -2,15 +2,15 @@
 #include <algorithm>
 #include <optional>
 #include <vector>
+#include "app/lighting.h"
 #include "app/ray.h"
 #include "app/sphere.h"
 #include "app/world.h"
-#include "app/lighting.h"
 
 namespace ray_tracer {
 class Intersection {
  public:
-  constexpr Intersection(double time, Sphere sphere) : time_(time), sphere_(sphere){};
+  constexpr Intersection(double time, Sphere sphere) : time_(time), sphere_(sphere) {};
   auto friend operator==(Intersection const& lhs, Intersection const& rhs) -> bool;
   [[nodiscard]] constexpr auto GetTime() const { return time_; }
   [[nodiscard]] auto constexpr GetObject() const { return sphere_; }
@@ -46,14 +46,14 @@ constexpr auto Intersect(const Ray& ray, const Sphere& sphere) -> std::vector<In
   return {Intersection(t1_var, sphere), Intersection(t2_var, sphere)};
 }
 
-constexpr auto Intersect( const Ray& ray, const World& world) -> std::vector<Intersection> {
+constexpr auto Intersect(const Ray& ray, const World& world) -> std::vector<Intersection> {
   std::vector<Intersection> intersections;
   for (auto const& object : world.Objects()) {
     auto object_intersections = Intersect(ray, object);
     std::cout << " object_intersections size: " << object_intersections.size() << "\n";
     intersections.insert(intersections.end(), object_intersections.begin(), object_intersections.end());
   }
-  std::ranges::sort(intersections,{},&Intersection::GetTime);
+  std::ranges::sort(intersections, {}, &Intersection::GetTime);
   return intersections;
 }
 
@@ -75,18 +75,13 @@ constexpr auto Hit(const std::vector<Intersection>& intersections) -> std::optio
 
 class Computations {
  public:
-  constexpr Computations(double time,
-               Sphere object,
-               Point point,
-               Vec3 eye_v,
-               Vec3 normal_v,
-               bool inside)
+  constexpr Computations(double time, Sphere object, Point point, Vec3 eye_v, Vec3 normal_v, bool inside)
       : time_(time),
         object_(object),
         point_(std::move(point)),
         eye_v_(std::move(eye_v)),
         normal_v_(std::move(normal_v)),
-        inside_(inside){};
+        inside_(inside) {};
   [[nodiscard]] constexpr auto GetTime() const -> double { return time_; }
   [[nodiscard]] constexpr auto GetObject() const -> Sphere { return object_; }
   [[nodiscard]] constexpr auto GetPoint() const -> Point { return point_; }
@@ -117,10 +112,23 @@ constexpr auto PrepareComputations(const Intersection& intersection, const Ray& 
   return Computations{time, object, point, eye_v, normal_v, inside};
 }
 constexpr auto ShadeHit(const World& world, const Computations& computations) -> Color {
-  Color color{0,0,0};
+  Color color{0, 0, 0 };
   for (auto world_light : world.Lights()) {
-    color = color + Lighting(computations.GetObject().GetMaterial(),world_light, computations.GetPoint(), computations.GetEyeV(), computations.GetNormalV());
+    color = color + Lighting(computations.GetObject().GetMaterial(),
+                             world_light,
+                             computations.GetPoint(),
+                             computations.GetEyeV(),
+                             computations.GetNormalV());
   }
   return color;
+}
+
+constexpr auto ColorAt(const World& world, const Ray& ray) -> Color {
+  auto intersections = Intersect(ray, world);
+  auto hit = Hit(intersections);
+  if (!hit.has_value()) {
+    return Color{0, 0, 0};
+  }
+  return ShadeHit(world, PrepareComputations(hit.value(), ray));
 }
 }  // namespace ray_tracer

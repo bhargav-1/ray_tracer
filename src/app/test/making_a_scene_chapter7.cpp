@@ -1,7 +1,8 @@
-#include <app/matrix.h>
 #include <app/intersection.h>
+#include <app/matrix.h>
 #include <app/sphere.h>
 #include <app/utilities.h>
+#include <app/transformations.h>
 #include <catch2/catch_test_macros.hpp>  // for operator""_catch_sr, Section
 
 namespace ray_tracer {
@@ -25,7 +26,7 @@ SCENARIO("7: The Default world") {
       auto world = ray_tracer::World::DefaultWorld();
       auto sphere1 = ray_tracer::Sphere(1);
       auto sphere2 = ray_tracer::Sphere(2);
-      sphere2.SetTransform(ray_tracer::Matrix<4,4>::Scaling(0.5, 0.5, 0.5));
+      sphere2.SetTransform(ray_tracer::Matrix<4, 4>::Scaling(0.5, 0.5, 0.5));
       CHECK(world.Lights().size() == 1);
       CHECK(world.Objects().size() == 2);
       CHECK(world.Lights()[0] == light);
@@ -38,8 +39,8 @@ SCENARIO("7: Intersect a world with a ray") {
   GIVEN("w = default_world(), r = ray(point(0,0,-5), vector(0,0,1))") {
     THEN("xs = intersect_world(w, r)") {
       auto world = ray_tracer::World::DefaultWorld();
-      auto ray = ray_tracer::Ray(ray_tracer::Point(0, 0, -5), ray_tracer::Vec3(0, 0, 1)) ;
-      auto xs_intersect =ray_tracer::Intersect(ray, world);
+      auto ray = ray_tracer::Ray(ray_tracer::Point(0, 0, -5), ray_tracer::Vec3(0, 0, 1));
+      auto xs_intersect = ray_tracer::Intersect(ray, world);
       CHECK(xs_intersect.size() == 4);
       CHECK(xs_intersect[0].GetTime() == 4);
       CHECK(xs_intersect[1].GetTime() == 4.5);
@@ -87,8 +88,9 @@ SCENARIO("7: The hit, when an intersection occurs on the inside") {
   }
 }
 SCENARIO("7: Shading an intersection") {
-  GIVEN("w = default_world(), r = ray(point(0, 0,-5), vector(0,0,1)), and"
-        "shape = world_.Objects()[1], i = intersection(4,shape), when comps = prepare_computations(i,r)") {
+  GIVEN(
+      "w = default_world(), r = ray(point(0, 0,-5), vector(0,0,1)), and"
+      "shape = world_.Objects()[1], i = intersection(4,shape), when comps = prepare_computations(i,r)") {
     THEN("color = shade_hit(w, comps), color = color(0.38066, 0.47583, 0.2855)") {
       auto world = ray_tracer::World::DefaultWorld();
       auto ray = ray_tracer::Ray(ray_tracer::Point(0, 0, -5), ray_tracer::Vec3(0, 0, 1));
@@ -104,7 +106,9 @@ SCENARIO("7: Shading an intersection") {
 }
 
 SCENARIO("7: Shading an intersection from the inside") {
-  GIVEN("w = default_world(), r = ray(point(0,0,0), vector(0,0,1)), and shape = world_.getObject[1], i = intersection(0.5,shape), when comps = prepare_computations(i,r)") {
+  GIVEN(
+      "w = default_world(), r = ray(point(0,0,0), vector(0,0,1)), and shape = world_.getObject[1], i = "
+      "intersection(0.5,shape), when comps = prepare_computations(i,r)") {
     THEN("color = shade_hit(w, comps), color = color(0.90498, 0.90498, 0.90498)") {
       auto world = ray_tracer::World::DefaultWorld();
       world.ChangeDefaultLight(PointLight(Point(0, 0.25, 0), Color(1, 1, 1)));
@@ -144,7 +148,9 @@ SCENARIO("7: The color when a ray hits") {
   }
 }
 SCENARIO("7: The color with an intersection behind the ray") {
-  GIVEN("w = default_world(), outer = world_.Objects()[0], outer.set_material(ambient(1)), inner = world_.Objects()[1], inner.set_material(ambient(1)), r = ray(point(0,0,0.75), vector(0,0,-1))") {
+  GIVEN(
+      "w = default_world(), outer = world_.Objects()[0], outer.set_material(ambient(1)), inner = world_.Objects()[1], "
+      "inner.set_material(ambient(1)), r = ray(point(0,0,0.75), vector(0,0,-1))") {
     THEN("color = color_at(w, r), color = inner.material.color") {
       auto world = ray_tracer::World::DefaultWorld();
       auto outer = world.Objects()[0];
@@ -160,6 +166,54 @@ SCENARIO("7: The color with an intersection behind the ray") {
       auto ray = ray_tracer::Ray(ray_tracer::Point(0, 0, 0.75), ray_tracer::Vec3(0, 0, -1));
       auto color = ray_tracer::ColorAt(world, ray);
       CHECK(color == inner.GetMaterial().GetColor());
+    }
+  }
+}
+
+SCENARIO("7: The transformation matrix for the default orientation") {
+  GIVEN("from_point = Point(0,0,0), To =Point(0,0,-1), up = Vec3(0,1,0), viewTransform(from_point, to, up) == identity_matrix()") {
+    THEN("viewTransform(from_point, to, up) == identity_matrix()") {
+      constexpr auto kFromPoint = ray_tracer::Point(0, 0, 0);
+      constexpr auto kToPoint = ray_tracer::Point(0, 0, -1);
+      constexpr auto kUpVec = ray_tracer::Vec3(0, 1, 0);
+      auto view_transform = ray_tracer::ViewTransform(kFromPoint, kToPoint, kUpVec);
+      CHECK(view_transform == ray_tracer::Matrix<4,4>::IdentityMatrix());
+    }
+  }
+}
+SCENARIO("7: A view transformation matrix looking in positive z direction") {
+  GIVEN(" from_point = Point(0,0,0), to = Point(0,0,1), up = Vec3(0,1,0)") {
+    THEN("viewTransform(from_point, to, up) == scaling(-1,1,-1)") {
+      constexpr auto kFromPoint = ray_tracer::Point(0, 0, 0);
+      constexpr auto kToPoint = ray_tracer::Point(0, 0, 1);
+      constexpr auto kUpVec = ray_tracer::Vec3(0, 1, 0);
+      auto view_transform = ray_tracer::ViewTransform(kFromPoint, kToPoint, kUpVec);
+      CHECK(view_transform == ray_tracer::Matrix<4, 4>::Scaling(-1, 1, -1));
+    }
+  }
+}
+SCENARIO("7: The view transformation moves the world") {
+  GIVEN("from_point = Point(0,0,8), to = Point(0,0,0), up = Vec3(0,1,0)") {
+    THEN("viewTransform(from_point, to, up) == translation(0,0,-8)") {
+      constexpr auto kFromPoint = ray_tracer::Point(0, 0, 8);
+      constexpr auto kToPoint = ray_tracer::Point(0, 0, 0);
+      constexpr auto kUpVec = ray_tracer::Vec3(0, 1, 0);
+      auto view_transform = ray_tracer::ViewTransform(kFromPoint, kToPoint, kUpVec);
+      CHECK(view_transform == ray_tracer::Matrix<4, 4>::Translation(0, 0, -8));
+    }
+  }
+}
+SCENARIO("7: An arbitrary view transformation") {
+  GIVEN("from_point = Point(1,3,2), to = Point(4,-2,8), up = Vec3(1,1,0)") {
+    THEN("viewTransform(from_point, to, up) == calculated matrix as below") {
+      constexpr auto kFromPoint = ray_tracer::Point(1, 3, 2);
+      constexpr auto kToPoint = ray_tracer::Point(4, -2, 8);
+      constexpr auto kUpVec = ray_tracer::Vec3(1, 1, 0);
+      const auto view_transform = ray_tracer::ViewTransform(kFromPoint, kToPoint, kUpVec);
+      CHECK(view_transform == ray_tracer::Matrix<4, 4>{{-0.50709, 0.50709, 0.67612, -2.36643},
+                                               {0.76772, 0.60609, 0.12122, -2.82843},
+                                               {-0.35857, 0.59761, -0.71714, 0},
+                                               {0, 0, 0, 1}});
     }
   }
 }

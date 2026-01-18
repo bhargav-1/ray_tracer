@@ -8,8 +8,8 @@ class Vec3 : public Tuple {
   constexpr Vec3() noexcept = default;
   constexpr Vec3(double x_coordinate, double y_coordinate, double z_coordinate) : Tuple(x_coordinate, y_coordinate, z_coordinate, 0) {}
   constexpr Vec3(const Tuple& tuple) : Tuple(tuple) {}  // NOLINT // cppcheck-suppress [noExplicitConstructor]
-  [[nodiscard]] auto Magnitude() const -> double { return std::sqrt((x_ * x_) + (y_ * y_) + (z_ * z_)); }
-  [[nodiscard]] auto Normalize() const -> Vec3 { return Vec3{x_ / Magnitude(), y_ / Magnitude(), z_ / Magnitude()}; }
+  [[nodiscard]] constexpr auto Magnitude() const -> double { return std::sqrt((x_ * x_) + (y_ * y_) + (z_ * z_)); }
+  [[nodiscard]] constexpr auto Normalize() const -> Vec3 { return Vec3{x_ / Magnitude(), y_ / Magnitude(), z_ / Magnitude()}; }
   [[nodiscard]] constexpr auto Dot(const Vec3& vec) const -> double {
     return (x_ * vec.x_) + (y_ * vec.y_) + (z_ * vec.z_);
   }

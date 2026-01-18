@@ -3,6 +3,7 @@
 #include <cmath>
 #include <iostream>
 #include "tuple.h"
+#include "utilities.h"
 
 namespace ray_tracer {
 

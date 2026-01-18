@@ -123,4 +123,44 @@ SCENARIO("7: Shading an intersection from the inside") {
   }
 }
 
+SCENARIO("7: The color when a ray misses") {
+  GIVEN("W = default world() And r = ray(point(0,.0,-5), vector(0,1,0))") {
+    THEN("color = color_at(w, r), color = color(0,0,0)") {
+      auto world = ray_tracer::World::DefaultWorld();
+      auto ray = ray_tracer::Ray(ray_tracer::Point(0, 0, -5), ray_tracer::Vec3(0, 1, 0));
+      auto color = ray_tracer::ColorAt(world, ray);
+      CHECK(color == ray_tracer::Color(0, 0, 0));
+    }
+  }
+}
+SCENARIO("7: The color when a ray hits") {
+  GIVEN("w = default_world(), r = ray(point(0,0,-5), vector(0,0,1))") {
+    THEN("color = color_at(w, r), color = color(0.38066, 0.47583, 0.2855)") {
+      auto world = ray_tracer::World::DefaultWorld();
+      auto ray = ray_tracer::Ray(ray_tracer::Point(0, 0, -5), ray_tracer::Vec3(0, 0, 1));
+      auto color = ray_tracer::ColorAt(world, ray);
+      CHECK(color == ray_tracer::Color(0.38066, 0.47583, 0.2855));
+    }
+  }
+}
+SCENARIO("7: The color with an intersection behind the ray") {
+  GIVEN("w = default_world(), outer = world_.Objects()[0], outer.set_material(ambient(1)), inner = world_.Objects()[1], inner.set_material(ambient(1)), r = ray(point(0,0,0.75), vector(0,0,-1))") {
+    THEN("color = color_at(w, r), color = inner.material.color") {
+      auto world = ray_tracer::World::DefaultWorld();
+      auto outer = world.Objects()[0];
+      auto outer_material = outer.GetMaterial();
+      outer_material.SetAmbient(1);
+      outer.SetMaterial(outer_material);
+      world.UpdateObjects(0, outer);
+      auto inner = world.Objects()[1];
+      auto inner_material = inner.GetMaterial();
+      inner_material.SetAmbient(1);
+      inner.SetMaterial(inner_material);
+      world.UpdateObjects(1, inner);
+      auto ray = ray_tracer::Ray(ray_tracer::Point(0, 0, 0.75), ray_tracer::Vec3(0, 0, -1));
+      auto color = ray_tracer::ColorAt(world, ray);
+      CHECK(color == inner.GetMaterial().GetColor());
+    }
+  }
+}
 }  // namespace ray_tracer

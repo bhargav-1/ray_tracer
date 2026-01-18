@@ -3,7 +3,7 @@
 namespace ray_tracer {
 class Material {
  public:
-  constexpr Material() noexcept : color_(1, 1, 1, 1) {}
+  constexpr Material() noexcept : color_(1, 1, 1, 0) {}
   ~Material() = default;
   constexpr auto operator==(const Material& rhs) const -> bool {
     return color_ == rhs.color_ && ambient_ == rhs.ambient_ && diffuse_ == rhs.diffuse_ && specular_ == rhs.specular_ &&

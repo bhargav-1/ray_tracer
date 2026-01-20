@@ -1,9 +1,12 @@
+#include <app/camera.h>
 #include <app/intersection.h>
 #include <app/matrix.h>
 #include <app/sphere.h>
-#include <app/utilities.h>
 #include <app/transformations.h>
+#include <app/utilities.h>
 #include <catch2/catch_test_macros.hpp>  // for operator""_catch_sr, Section
+#include <cmath>
+#include <numbers>
 
 namespace ray_tracer {
 SCENARIO("7: Creating a world") {
@@ -171,13 +174,15 @@ SCENARIO("7: The color with an intersection behind the ray") {
 }
 
 SCENARIO("7: The transformation matrix for the default orientation") {
-  GIVEN("from_point = Point(0,0,0), To =Point(0,0,-1), up = Vec3(0,1,0), viewTransform(from_point, to, up) == identity_matrix()") {
+  GIVEN(
+      "from_point = Point(0,0,0), To =Point(0,0,-1), up = Vec3(0,1,0), viewTransform(from_point, to, up) == "
+      "identity_matrix()") {
     THEN("viewTransform(from_point, to, up) == identity_matrix()") {
       constexpr auto kFromPoint = ray_tracer::Point(0, 0, 0);
       constexpr auto kToPoint = ray_tracer::Point(0, 0, -1);
       constexpr auto kUpVec = ray_tracer::Vec3(0, 1, 0);
       auto view_transform = ray_tracer::ViewTransform(kFromPoint, kToPoint, kUpVec);
-      CHECK(view_transform == ray_tracer::Matrix<4,4>::IdentityMatrix());
+      CHECK(view_transform == ray_tracer::Matrix<4, 4>::IdentityMatrix());
     }
   }
 }
@@ -211,10 +216,85 @@ SCENARIO("7: An arbitrary view transformation") {
       constexpr auto kUpVec = ray_tracer::Vec3(1, 1, 0);
       const auto view_transform = ray_tracer::ViewTransform(kFromPoint, kToPoint, kUpVec);
       CHECK(view_transform == ray_tracer::Matrix<4, 4>{{-0.50709, 0.50709, 0.67612, -2.36643},
-                                               {0.76772, 0.60609, 0.12122, -2.82843},
-                                               {-0.35857, 0.59761, -0.71714, 0},
-                                               {0, 0, 0, 1}});
+                                                       {0.76772, 0.60609, 0.12122, -2.82843},
+                                                       {-0.35857, 0.59761, -0.71714, 0},
+                                                       {0, 0, 0, 1}});
     }
   }
 }
+
+SCENARIO("7: Constructing a camera") {
+  GIVEN("hsize = 160, vsize = 120, field_of_view = pi/2") {
+    THEN("camera.hsize = 160, camera.vsize = 120, camera.field_of_view = pi/2, camera.transform = identity_matrix()") {
+      constexpr int kHsize = 160;
+      constexpr int kVsize = 120;
+      constexpr double kFieldOfView = std::numbers::pi / 2;
+      auto camera = ray_tracer::Camera(kHsize, kVsize, kFieldOfView);
+      CHECK(camera.GetHorizontalSize() == kHsize);
+      CHECK(camera.GetVerticalSize() == kVsize);
+      CHECK(utilities::Equal(camera.GetFieldOfView(), kFieldOfView));
+      CHECK(camera.GetTransform() == ray_tracer::Matrix<4, 4>::IdentityMatrix());
+    }
+  }
+}
+SCENARIO("7: The pixel size for a horizontal canvas") {
+  GIVEN("c = camera(kHsize, kVsize, kFieldOfView)") {
+    THEN("pixel_size = 0.01") {
+      auto camera = ray_tracer::Camera(200, 125, std::numbers::pi / 2);
+      constexpr double kPixelSize = 0.01;
+      CHECK(utilities::Equal(camera.GetPixelSize(), kPixelSize));
+    }
+  }
+}
+
+SCENARIO("7: Constructing a ray through the center of the camera") {
+  GIVEN("c = camera(201, 101, pi/2)") {
+    THEN("ray.origin = (0, 0, 0), ray.direction = (0, 0, -1)") {
+      auto camera = ray_tracer::Camera(201, 101, std::numbers::pi / 2);
+      auto ray = camera.GetRayForPixel(100, 50);
+      CHECK(ray.GetOrigin() == ray_tracer::Point(0, 0, 0));
+      CHECK(ray.GetDirection() == ray_tracer::Vec3(0, 0, -1));
+    }
+  }
+}
+SCENARIO("7: Constructing a ray through a corner of the canvas") {
+  GIVEN("c = camera(201, 101, pi/2)") {
+    THEN("ray.origin = (0, 0, 0), ray.direction = (0.66519, 0.33259, -0.66851)") {
+      auto camera = ray_tracer::Camera(201, 101, std::numbers::pi / 2);
+      auto ray = camera.GetRayForPixel(0, 0);
+      CHECK(ray.GetOrigin() == ray_tracer::Point(0, 0, 0));
+      CHECK(ray.GetDirection() == ray_tracer::Vec3(0.66519, 0.33259, -0.66851));
+    }
+  }
+}
+SCENARIO("7: Constructing a ray when camera is transformed") {
+  GIVEN("c = camera(201, 101, pi/2), transform = translation(0, -2, 5) * rotation_y(pi/4)") {
+    THEN("ray.origin = (0, 2, -5), ray.direction = (sqrt(2)/2, 0, -sqrt(2)/2)") {
+      auto camera = ray_tracer::Camera(201, 101, std::numbers::pi / 2);
+      auto transform =
+          ray_tracer::Matrix<4, 4>::RotationY(std::numbers::pi / 4) * ray_tracer::Matrix<4, 4>::Translation(0, -2, 5);
+      camera.SetTransform(transform);
+      auto ray = camera.GetRayForPixel(100, 50);
+      CHECK(ray.GetOrigin() == ray_tracer::Point(0, 2, -5));
+      CHECK(ray.GetDirection() == ray_tracer::Vec3(std::sqrt(2) / 2, 0, -std::sqrt(2) / 2));
+    }
+  }
+}
+
+SCENARIO("7: Rendering a world with a canvas") {
+  GIVEN(
+      "w = default_world(), c = camera(11, 11, pi/2) from point(0, 0, -5),to Point(0,0,0), "
+      "up (0,1,0) transform (from, to, up, image = render(c,w), pixel_at(image, 5,5) color(0.38066, 0.47583, "
+      "0.2855))") {
+    auto world = ray_tracer::World::DefaultWorld();
+    auto camera = ray_tracer::Camera(11, 11, std::numbers::pi / 2);
+    auto constexpr kFrom = ray_tracer::Point(0, 0, -5);
+    auto constexpr kToPoint = ray_tracer::Point(0, 0, 0);
+    auto constexpr kUpVector = ray_tracer::Vec3(0, 1, 0);
+    camera.SetTransform(ray_tracer::ViewTransform(kFrom, kToPoint, kUpVector));
+    auto image = ray_tracer::Render(camera, world);
+    CHECK((image.ColorAtPixel(5, 5) == ray_tracer::Color(0.38066, 0.47583, 0.2855)));
+  }
+}
+
 }  // namespace ray_tracer

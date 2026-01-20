@@ -6,6 +6,8 @@
 #include "app/ray.h"
 #include "app/sphere.h"
 #include "app/world.h"
+#include "camera.h"
+#include "canvas.h"
 
 namespace ray_tracer {
 class Intersection {
@@ -130,5 +132,17 @@ constexpr auto ColorAt(const World& world, const Ray& ray) -> Color {
     return Color{0, 0, 0};
   }
   return ShadeHit(world, PrepareComputations(hit.value(), ray));
+}
+
+inline auto Render( Camera& camera, const World& world) -> Canvas {
+auto image = Canvas(camera.GetHorizontalSize(), camera.GetVerticalSize()) ;
+  for (auto y_size = 0; y_size < camera.GetVerticalSize(); y_size++) {
+    for (auto x_size = 0; x_size < camera.GetHorizontalSize(); x_size++) {
+      auto ray = camera.GetRayForPixel(x_size, y_size);
+      auto color = ColorAt(world, ray);
+        image.WritePixelColor(x_size, y_size, color);
+    }
+  }
+  return image;
 }
 }  // namespace ray_tracer

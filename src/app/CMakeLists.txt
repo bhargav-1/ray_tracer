@@ -102,6 +102,34 @@ target_link_libraries(light_and_shading_chapter6
         imgui_lib
 )
 
+add_executable(making_a_scene_chapter7)
+target_sources(making_a_scene_chapter7
+        PRIVATE
+        src/world_canvas_chapter7.cpp
+)
+set_source_files_properties(src/world_canvas_chapter7.cpp PROPERTIES
+        SKIP_LINTING ON
+)
+
+target_link_libraries(making_a_scene_chapter7
+        PRIVATE
+        app_lib
+        imgui_lib
+)
+add_executable(making_a_scene_chapter7_imgui)
+target_sources(making_a_scene_chapter7_imgui
+        PRIVATE
+        src/world_imgui_chapter7.cpp
+)
+set_source_files_properties(src/world_imgui_chapter7.cpp inc/app/canvas.h PROPERTIES
+        SKIP_LINTING ON
+)
+
+target_link_libraries(making_a_scene_chapter7_imgui
+        PRIVATE
+        app_lib
+        imgui_lib
+)
 
 add_subdirectory(test)
 

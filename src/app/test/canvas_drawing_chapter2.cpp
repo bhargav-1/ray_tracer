@@ -58,7 +58,7 @@ SCENARIO("Hadamard Multiplication on Colors") {
 SCENARIO("Creating a canvas ") {
   GIVEN("Given Canvas (10,20)") {
     THEN("c.width() = 10,c.height = 20") {
-      Canvas canvas(10, 20);
+      Canvas const canvas(10, 20);
       REQUIRE(canvas.GetWidth() == 10);
       CHECK(canvas.AllPixelsColorCheck(Color(0, 0, 0)));
     }

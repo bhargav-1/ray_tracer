@@ -1,8 +1,9 @@
-#include <thread>
 #include <algorithm>
+#include <atomic>
 #include <cstdio>
 #include <iostream>
 #include <optional>
+#include <thread>
 #include <vector>
 #include "imgui.h"               // NOLINT
 #include "imgui_impl_glfw.h"     // NOLINT
@@ -95,21 +96,42 @@ static void RenderScene(ImDrawList* canvas) {
 
     cached_width = camera.GetHorizontalSize();
     cached_height = camera.GetVerticalSize();
-    std::vector<ray_tracer::Color> pixels;
-    pixels.reserve(static_cast<size_t>(cached_width) * static_cast<size_t>(cached_height));
-    int last_bucket = -1;
-    for (int y = 0; y < cached_height; ++y) {
-      for (int x = 0; x < cached_width; ++x) {
-        const auto ray = camera.GetRayForPixel(x, y);
-        const auto color = ray_tracer::ColorAt(world, ray);
-        pixels.push_back(color);
+    std::vector<ray_tracer::Color> pixels(static_cast<size_t>(cached_width) *
+                                          static_cast<size_t>(cached_height));
+    const unsigned int worker_count = std::max(1U, std::thread::hardware_concurrency());
+    const int rows_per_worker = (cached_height + static_cast<int>(worker_count) - 1) /
+                                static_cast<int>(worker_count);
+    std::atomic<int> rows_done{0};
+    std::atomic<int> last_bucket{-1};
+    std::vector<std::thread> workers;
+    workers.reserve(worker_count);
+    for (unsigned int worker = 0; worker < worker_count; ++worker) {
+      const int start_row = static_cast<int>(worker) * rows_per_worker;
+      if (start_row >= cached_height) {
+        break;
       }
-      const int percent = ((y + 1) * 100) / cached_height;
-      const int bucket = percent / 10;
-      if (bucket != last_bucket) {
-        last_bucket = bucket;
-        std::cout << "Render progress: " << bucket * 10 << "%\n";
-      }
+      const int end_row = std::min(cached_height, start_row + rows_per_worker);
+      workers.emplace_back([&, start_row, end_row]() {
+        for (int y = start_row; y < end_row; ++y) {
+          for (int x = 0; x < cached_width; ++x) {
+            const auto ray = camera.GetRayForPixel(x, y);
+            const auto color = ray_tracer::ColorAt(world, ray);
+            pixels[static_cast<size_t>(y) * static_cast<size_t>(cached_width) + static_cast<size_t>(x)] = color;
+          }
+          const int done = rows_done.fetch_add(1) + 1;
+          const int percent = (done * 100) / cached_height;
+          const int bucket = percent / 10;
+          int last = last_bucket.load();
+          while (bucket > last && !last_bucket.compare_exchange_weak(last, bucket)) {
+          }
+          if (bucket > last) {
+            std::cout << "Render progress: " << bucket * 10 << "%\n";
+          }
+        }
+      });
+    }
+    for (auto& worker : workers) {
+      worker.join();
     }
     cached_pixels = std::move(pixels);
     const auto cache_end = std::chrono::high_resolution_clock::now();

@@ -52,7 +52,7 @@ constexpr auto Intersect(const Ray& ray, const World& world) -> std::vector<Inte
   std::vector<Intersection> intersections;
   for (auto const& object : world.Objects()) {
     auto object_intersections = Intersect(ray, object);
-    std::cout << " object_intersections size: " << object_intersections.size() << "\n";
+    // std::cout << " object_intersections size: " << object_intersections.size() << "\n";
     intersections.insert(intersections.end(), object_intersections.begin(), object_intersections.end());
   }
   std::ranges::sort(intersections, {}, &Intersection::GetTime);
@@ -136,13 +136,28 @@ constexpr auto ColorAt(const World& world, const Ray& ray) -> Color {
 
 inline auto Render( Camera& camera, const World& world) -> Canvas {
 auto image = Canvas(camera.GetHorizontalSize(), camera.GetVerticalSize()) ;
+  int last_bucket = -1;
+  auto start = std::chrono::high_resolution_clock::now();
   for (auto y_size = 0; y_size < camera.GetVerticalSize(); y_size++) {
     for (auto x_size = 0; x_size < camera.GetHorizontalSize(); x_size++) {
       auto ray = camera.GetRayForPixel(x_size, y_size);
       auto color = ColorAt(world, ray);
         image.WritePixelColor(x_size, y_size, color);
     }
+    const int percent = ((y_size + 1) * 100) / camera.GetVerticalSize();
+    if (const int bucket = percent / 10; bucket != last_bucket) {
+      last_bucket = bucket;
+      std::cout << "Render progress: " << bucket * 10 << "%\n";
+    }
   }
+  const auto end = std::chrono::high_resolution_clock::now();
+  std::cout << "Writing Pixel time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms\n";
+
+  std::cout << "Writing Pixels to file\n";
+  auto start_disk_write = std::chrono::high_resolution_clock::now();
+  image.CanvasToPPM("/tmp/chapter7.ppm");
+  auto end_disk_write = std::chrono::high_resolution_clock::now();
+  std::cout << "Writing Pixels to file time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end_disk_write - start_disk_write).count() << "ms\n";
   return image;
 }
 }  // namespace ray_tracer

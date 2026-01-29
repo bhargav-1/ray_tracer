@@ -56,14 +56,14 @@ class Canvas {
   [[nodiscard]] auto GetWidth() const -> int { return width_; }
   [[nodiscard]] auto GetHeight() const -> int { return height_; }
 
-  auto ColorAtPixel(int x_dir, int y_dir) -> Color {
+  [[nodiscard]] auto ColorAtPixel(int x_dir, int y_dir) const -> Color {
     if (x_dir < width_ && y_dir < height_ && x_dir > 0 && y_dir > 0) {
       return pixels_[(width_ * y_dir) + x_dir].color;
     }
     return {0, 0, 0};
   }
 
-  auto AllPixelsColorCheck(const Color& color) -> bool {
+  [[nodiscard]] auto AllPixelsColorCheck(const Color& color) const -> bool {
     for (int y = 0; y < height_; y++) { // NOLINT
       for (int x = 0; x < width_; x++) { // NOLINT
         if (ColorAtPixel(x, y) != color) {
@@ -80,7 +80,7 @@ class Canvas {
     }
   }
 
-  void PrintPixels() {
+  void PrintPixels() const {
     for (int y = 0; y < height_; y++) { // NOLINT
       for (int x = 0; x < width_; x++) { // NOLINT
         auto temp = pixels_[(width_ * y) + x].color.GetRed();

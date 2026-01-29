@@ -1,9 +1,13 @@
 #pragma once
+#include <utility>
+
 #include "color.h"
 namespace ray_tracer {
 class Material {
  public:
   constexpr Material() noexcept : color_(1, 1, 1, 0) {}
+  constexpr explicit Material(Color  color, const double ambient =0.1, const double diffuse =0.9, const double specular =0.9, const double shininess =200) noexcept
+      : color_(std::move(color)), ambient_(ambient), diffuse_(diffuse), specular_(specular), shininess_(shininess) {}
   ~Material() = default;
   constexpr auto operator==(const Material& rhs) const -> bool {
     return color_ == rhs.color_ && ambient_ == rhs.ambient_ && diffuse_ == rhs.diffuse_ && specular_ == rhs.specular_ &&

@@ -28,7 +28,7 @@ inline auto operator==(Intersection const& lhs, Intersection const& rhs) -> bool
 
 // can be constexpr in later cpp23++or cpp20++
 //en.wikipedia.org/wiki/Line–sphere_intersection
-constexpr auto Intersect(const Ray& ray, const Sphere& sphere) -> std::vector<Intersection> {
+inline auto Intersect(const Ray& ray, const Sphere& sphere) -> std::vector<Intersection> {
   // transform the ray to the sphere's coordinate system
   auto transform = sphere.GetTransform().Inverse();
   auto transformed_ray = ray.Transform(transform);
@@ -48,7 +48,7 @@ constexpr auto Intersect(const Ray& ray, const Sphere& sphere) -> std::vector<In
   return {Intersection(t1_var, sphere), Intersection(t2_var, sphere)};
 }
 
-constexpr auto Intersect(const Ray& ray, const World& world) -> std::vector<Intersection> {
+inline auto Intersect(const Ray& ray, const World& world) -> std::vector<Intersection> {
   std::vector<Intersection> intersections;
   for (auto const& object : world.Objects()) {
     auto object_intersections = Intersect(ray, object);
@@ -59,7 +59,7 @@ constexpr auto Intersect(const Ray& ray, const World& world) -> std::vector<Inte
   return intersections;
 }
 
-constexpr auto Hit(const std::vector<Intersection>& intersections) -> std::optional<Intersection> {
+inline auto Hit(const std::vector<Intersection>& intersections) -> std::optional<Intersection> {
   auto current_intersection = std::optional<Intersection>();
   for (const auto& intersection : intersections) {
     if (intersection.GetTime() >= 0) {
@@ -100,7 +100,7 @@ class Computations {
   bool inside_;
 };
 
-constexpr auto PrepareComputations(const Intersection& intersection, const Ray& ray) -> Computations {
+inline auto PrepareComputations(const Intersection& intersection, const Ray& ray) -> Computations {
   const auto time = intersection.GetTime();
   const auto object = intersection.GetObject();
   const auto point = ray.Position(time);
@@ -113,7 +113,7 @@ constexpr auto PrepareComputations(const Intersection& intersection, const Ray& 
   }
   return Computations{time, object, point, eye_v, normal_v, inside};
 }
-constexpr auto ShadeHit(const World& world, const Computations& computations) -> Color {
+inline auto ShadeHit(const World& world, const Computations& computations) -> Color {
   Color color{0, 0, 0 };
   for (auto world_light : world.Lights()) {
     color = color + Lighting(computations.GetObject().GetMaterial(),
@@ -125,7 +125,7 @@ constexpr auto ShadeHit(const World& world, const Computations& computations) ->
   return color;
 }
 
-constexpr auto ColorAt(const World& world, const Ray& ray) -> Color {
+inline auto ColorAt(const World& world, const Ray& ray) -> Color {
   auto intersections = Intersect(ray, world);
   auto hit = Hit(intersections);
   if (!hit.has_value()) {

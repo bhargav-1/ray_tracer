@@ -6,14 +6,14 @@
 
 namespace ray_tracer {
 auto inline Lighting(
-    const Material& material, const PointLight& light, const Point& position, const Vec3& eyev, const Vec3& normalv) -> Color {
+    const Material& material, const PointLight& light, const Point& position, const Vec3& eyev, const Vec3& normalv, bool in_shadow = false) -> Color {
   auto effective_color = material.GetColor() * light.GetIntensity();
   auto lightv = Vec3(light.GetPosition() - position).Normalize();
   auto ambient = effective_color * material.GetAmbient();
   auto light_dot_normal = lightv.Dot(normalv);
   Color diffuse;
   Color specular;
-  if (light_dot_normal < 0) {
+  if (light_dot_normal < 0 || in_shadow) {
     diffuse = Color(0, 0, 0);
     specular = Color(0, 0, 0);
   } else {

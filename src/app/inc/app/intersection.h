@@ -1,5 +1,6 @@
 #pragma once
 #include <algorithm>
+#include <chrono>
 #include <optional>
 #include <vector>
 #include "app/lighting.h"
@@ -114,7 +115,7 @@ inline auto PrepareComputations(const Intersection& intersection, const Ray& ray
   return Computations{time, object, point, eye_v, normal_v, inside};
 }
 inline auto ShadeHit(const World& world, const Computations& computations) -> Color {
-  Color color{0, 0, 0 };
+  Color color{0, 0, 0};
   for (auto world_light : world.Lights()) {
     color = color + Lighting(computations.GetObject().GetMaterial(),
                              world_light,
@@ -134,15 +135,29 @@ inline auto ColorAt(const World& world, const Ray& ray) -> Color {
   return ShadeHit(world, PrepareComputations(hit.value(), ray));
 }
 
-inline auto Render( Camera& camera, const World& world) -> Canvas {
-auto image = Canvas(camera.GetHorizontalSize(), camera.GetVerticalSize()) ;
+inline auto IsShadowed(const World& world, const Point& point) -> bool {
+  for (const auto& light : world.Lights()) {
+    Vec3 const vector_to_light = light.GetPosition() - point;
+    double const distance_to_light = vector_to_light.Magnitude();
+    Vec3 const direction_to_light = vector_to_light.Normalize();
+    Ray const shadow_ray(point, direction_to_light);
+    auto intersections = Intersect(shadow_ray, world);
+    if (auto hit = Hit(intersections); hit.has_value() && hit.value().GetTime() < distance_to_light) {
+      return true;
+    }
+  }
+  return false;
+}
+
+inline auto Render(Camera& camera, const World& world) -> Canvas {
+  auto image = Canvas(camera.GetHorizontalSize(), camera.GetVerticalSize());
   int last_bucket = -1;
   auto start = std::chrono::high_resolution_clock::now();
   for (auto y_size = 0; y_size < camera.GetVerticalSize(); y_size++) {
     for (auto x_size = 0; x_size < camera.GetHorizontalSize(); x_size++) {
       auto ray = camera.GetRayForPixel(x_size, y_size);
       auto color = ColorAt(world, ray);
-        image.WritePixelColor(x_size, y_size, color);
+      image.WritePixelColor(x_size, y_size, color);
     }
     const int percent = ((y_size + 1) * 100) / camera.GetVerticalSize();
     if (const int bucket = percent / 10; bucket != last_bucket) {
@@ -151,13 +166,17 @@ auto image = Canvas(camera.GetHorizontalSize(), camera.GetVerticalSize()) ;
     }
   }
   const auto end = std::chrono::high_resolution_clock::now();
-  std::cout << "Writing Pixel time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms\n";
+  std::cout << "Writing Pixel time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()
+            << "ms\n";
 
   std::cout << "Writing Pixels to file\n";
   auto start_disk_write = std::chrono::high_resolution_clock::now();
   image.CanvasToPPM("/tmp/chapter7.ppm");
   auto end_disk_write = std::chrono::high_resolution_clock::now();
-  std::cout << "Writing Pixels to file time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end_disk_write - start_disk_write).count() << "ms\n";
+  std::cout << "Writing Pixels to file time: "
+            << std::chrono::duration_cast<std::chrono::milliseconds>(end_disk_write - start_disk_write).count()
+            << "ms\n";
   return image;
 }
+
 }  // namespace ray_tracer

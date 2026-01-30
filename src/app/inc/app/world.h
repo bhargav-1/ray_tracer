@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include "color.h"
+#include "sphere.h"
 #include "point_light.h"
 
 namespace ray_tracer {

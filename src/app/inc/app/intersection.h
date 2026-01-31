@@ -8,6 +8,7 @@
 #include "app/sphere.h"
 #include "app/world.h"
 #include "camera.h"
+#include "utilities.h"
 #include "canvas.h"
 
 namespace ray_tracer {
@@ -78,18 +79,20 @@ inline auto Hit(const std::vector<Intersection>& intersections) -> std::optional
 
 class Computations {
  public:
-  constexpr Computations(double time, Sphere object, Point point, Vec3 eye_v, Vec3 normal_v, bool inside)
+  constexpr Computations(double time, Sphere object, Point point, Vec3 eye_v, Vec3 normal_v, bool inside, Point over_point)
       : time_(time),
         object_(object),
         point_(std::move(point)),
         eye_v_(std::move(eye_v)),
         normal_v_(std::move(normal_v)),
-        inside_(inside) {};
+        inside_(inside),
+        over_point_(std::move(over_point)) {};
   [[nodiscard]] constexpr auto GetTime() const -> double { return time_; }
   [[nodiscard]] constexpr auto GetObject() const -> Sphere { return object_; }
   [[nodiscard]] constexpr auto GetPoint() const -> Point { return point_; }
   [[nodiscard]] constexpr auto GetEyeV() const -> Vec3 { return eye_v_; }
   [[nodiscard]] constexpr auto GetNormalV() const -> Vec3 { return normal_v_; }
+  [[nodiscard]] constexpr auto GetOverPoint() const -> Point { return over_point_; }
   [[nodiscard]] constexpr auto IsInside() const -> bool { return inside_; }
 
  private:
@@ -99,6 +102,7 @@ class Computations {
   Vec3 eye_v_;
   Vec3 normal_v_;
   bool inside_;
+  Point over_point_;
 };
 
 inline auto PrepareComputations(const Intersection& intersection, const Ray& ray) -> Computations {
@@ -112,27 +116,8 @@ inline auto PrepareComputations(const Intersection& intersection, const Ray& ray
     inside = true;
     normal_v = -normal_v;
   }
-  return Computations{time, object, point, eye_v, normal_v, inside};
-}
-inline auto ShadeHit(const World& world, const Computations& computations) -> Color {
-  Color color{0, 0, 0};
-  for (auto world_light : world.Lights()) {
-    color = color + Lighting(computations.GetObject().GetMaterial(),
-                             world_light,
-                             computations.GetPoint(),
-                             computations.GetEyeV(),
-                             computations.GetNormalV());
-  }
-  return color;
-}
-
-inline auto ColorAt(const World& world, const Ray& ray) -> Color {
-  auto intersections = Intersect(ray, world);
-  auto hit = Hit(intersections);
-  if (!hit.has_value()) {
-    return Color{0, 0, 0};
-  }
-  return ShadeHit(world, PrepareComputations(hit.value(), ray));
+  const auto over_point = point + normal_v * utilities::kEpsilon;
+  return Computations{time, object, point, eye_v, normal_v, inside, over_point};
 }
 
 inline auto IsShadowed(const World& world, const Point& point) -> bool {
@@ -148,6 +133,30 @@ inline auto IsShadowed(const World& world, const Point& point) -> bool {
   }
   return false;
 }
+
+inline auto ShadeHit(const World& world, const Computations& computations) -> Color {
+  Color color{0, 0, 0};
+  for (auto world_light : world.Lights()) {
+    color = color + Lighting(computations.GetObject().GetMaterial(),
+                             world_light,
+                             computations.GetPoint(),
+                             computations.GetEyeV(),
+                             computations.GetNormalV(),
+                             IsShadowed(world, computations.GetOverPoint()));
+  }
+  return color;
+}
+
+inline auto ColorAt(const World& world, const Ray& ray) -> Color {
+  auto intersections = Intersect(ray, world);
+  auto hit = Hit(intersections);
+  if (!hit.has_value()) {
+    return Color{0, 0, 0};
+  }
+  return ShadeHit(world, PrepareComputations(hit.value(), ray));
+}
+
+
 
 inline auto Render(Camera& camera, const World& world) -> Canvas {
   auto image = Canvas(camera.GetHorizontalSize(), camera.GetVerticalSize());

@@ -130,6 +130,20 @@ target_link_libraries(making_a_scene_chapter7_imgui
         app_lib
         imgui_lib
 )
+add_executable(eclipse_chapter8)
+target_sources(eclipse_chapter8
+        PRIVATE
+        src/shadows_eclipse_chapter_8.cpp
+)
+set_source_files_properties(src/shadows_eclipse_chapter_8.cpp PROPERTIES
+        SKIP_LINTING ON
+)
+
+target_link_libraries(eclipse_chapter8
+        PRIVATE
+        app_lib
+        imgui_lib
+)
 
 add_subdirectory(test)
 

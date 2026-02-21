@@ -5,6 +5,7 @@
 #define GL_SILENCE_DEPRECATION
 #include <GLFW/glfw3.h>  // Will drag system OpenGL headers
 #include <app/intersection.h>
+#include <app/ray_tracing_engine.h>
 #include <app/sphere.h>
 #include <fmt/base.h>
 #include <chrono>

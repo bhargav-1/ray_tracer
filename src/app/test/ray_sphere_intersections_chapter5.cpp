@@ -1,4 +1,5 @@
 #include <app/intersection.h>            // for Intersection
+#include <app/ray_tracing_engine.h>     // for Intersect, Hit
 #include <app/matrix.h>                  // for matrix
 #include <app/point.h>                   // for tuple
 #include <app/ray.h>                     // for Ray
@@ -87,7 +88,7 @@ SCENARIO("An intersection encapsulates t and object") {
     const ray_tracer::Sphere sphe(1);
     const ray_tracer::Intersection intersectn(3.5, sphe);
     THEN("i.t = 3.5") { CHECK(intersectn.GetTime() == 3.5); }
-    THEN("i.object = s") { CHECK(intersectn.GetObject() == sphe); }
+    THEN("i.object = s") { CHECK(*intersectn.GetObject() == sphe); }
   }
 }
 
@@ -110,8 +111,8 @@ SCENARIO("Intersect sets the object on the intersection") {
     const ray_tracer::Sphere s_sphere(1);
     auto xs_intersect = Intersect(ray, s_sphere);
     THEN("xs.count = 2") { CHECK(xs_intersect.size() == 2); }
-    THEN("xs[0].object = s") { CHECK(xs_intersect[0].GetObject() == s_sphere); }
-    THEN("xs[1].object = s") { CHECK(xs_intersect[1].GetObject() == s_sphere); }
+    THEN("xs[0].object = s") { CHECK(*xs_intersect[0].GetObject() == s_sphere); }
+    THEN("xs[1].object = s") { CHECK(*xs_intersect[1].GetObject() == s_sphere); }
   }
 }
 

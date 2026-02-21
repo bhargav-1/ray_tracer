@@ -13,6 +13,7 @@ target_sources(app_lib_tests
         light_and_shading_chapter6.cpp
         making_a_scene_chapter7.cpp
         shadows_chapter8.cpp
+        planes_chapter9.cpp
 )
 
 target_link_libraries(app_lib_tests

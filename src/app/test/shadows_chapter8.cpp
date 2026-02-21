@@ -1,6 +1,7 @@
 #include <app/color.h>
 #include <app/world.h>
 #include <app/intersection.h>
+#include <app/ray_tracing_engine.h>
 #include <app/lighting.h>
 #include <app/sphere.h>
 #include <app/matrix.h>
@@ -30,7 +31,7 @@ SCENARIO("8: Lighting with the surface in shadow") {
     }
   }
 }
-SCENARIO("8: There is no shadow when nothing is collinear with point and light") {
+SCENARIO("8: No shadow when nothing is collinear with point and light") {
   GIVEN("point(0,10,0), light = point_light(point(0,0,-10), color(1,1,1))") {
     constexpr auto kPoint = ray_tracer::Point(0, 10, 0);
     const auto world = ray_tracer::World::DefaultWorld();
@@ -50,7 +51,7 @@ SCENARIO("8: The shadow when an object is between the point and the light") {
   }
 }
 
-SCENARIO("8: There is no shadow when an object is between the point and the light") {
+SCENARIO("8: There is no shadow when an object is behind the light") {
   GIVEN("w =defaultWorld, point(-20,20,-20))") {
     constexpr auto kPoint = ray_tracer::Point(-20, 20, -20);
     const auto world = ray_tracer::World::DefaultWorld();

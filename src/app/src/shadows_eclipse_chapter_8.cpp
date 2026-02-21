@@ -19,6 +19,8 @@
 #include "app/sphere.h"
 #include "app/transformations.h"
 #include "app/world.h"
+#include "app/computations.h"
+#include "app/ray_tracing_engine.h"
 
 static void GlfwErrorCallback(int error, const char* description) {
   fprintf(stderr, "GLFW Error %d: %s\n", error, description);

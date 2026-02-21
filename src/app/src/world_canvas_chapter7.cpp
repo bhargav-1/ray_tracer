@@ -10,6 +10,7 @@
 #include <chrono>
 
 #include "app/intersection.h"
+#include "app/ray_tracing_engine.h"
 
 using namespace ray_tracer;    // NOLINT
 auto main() noexcept -> int {  // NOLINT

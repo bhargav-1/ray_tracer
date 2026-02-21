@@ -3,34 +3,36 @@
 #include "matrix.h"
 #include "point.h"
 #include "ray.h"
+#include "shape.h"
+#include <cmath>
+#include <vector>
 #include "tuple.h"
 
 namespace ray_tracer {
-
-class Sphere {
+class Intersection;
+class Sphere : public Shape{
  public:
   Sphere() = delete;
-  constexpr explicit Sphere(std::size_t id) : id_(id) {} // NOLINT [readability-identifier-naming]
-  ~Sphere() = default;
-  [[nodiscard]] constexpr auto GetId() const noexcept -> std::size_t { return id_; }
-  friend auto operator==(const Sphere& lhs, const Sphere& rhs) -> bool;
-  [[nodiscard]] auto GetTransform() const -> Matrix<4, 4> { return transform_; }
-  void SetTransform(const Matrix<4, 4>& transform) { transform_ = transform; }
-  [[nodiscard]] auto NormalAt(const ray_tracer::Point& point) const -> Vec3 {
-    const auto object_point = GetTransform().Inverse() * point;
-    auto const object_normal = Vec3(object_point - ray_tracer::Point(0, 0, 0));
-    // https:  //www.scratchapixel.com/lessons/mathematics-physics-for-computer-graphics/geometry/transforming-normals.html
-    Vec3 const world_normal = Transpose(GetTransform().Inverse()) * object_normal;
-    return world_normal.Normalize();
-  };
-  [[nodiscard]] auto GetMaterial() const -> Material { return material_; }
-  void SetMaterial(const Material& material) { material_ = material; }
-
- private:
-  std::size_t id_;
-  Matrix<4, 4> transform_ = Matrix<4, 4>::IdentityMatrix();
-  Material material_;
+  constexpr Sphere(size_t id) : Shape(id)  {} // NOLINT [readability-identifier-naming]
+  ~Sphere() override = default;
+  [[nodiscard]] auto LocalIntersect(const Ray& ray) const -> std::vector<Intersection> override;
 };
 
-inline auto operator==(const Sphere& lhs, const Sphere& rhs) -> bool { return lhs.id_ == rhs.id_; }
+inline auto operator==(const Sphere& lhs, const Sphere& rhs) -> bool { return lhs.GetId() == rhs.GetId(); }
+inline auto Sphere::LocalIntersect(const Ray& transformed_ray) const -> std::vector<Intersection> {
+
+    // following is just the algorithm for ray/sphere intersection
+    const ray_tracer::Vec3 sphere_to_ray = transformed_ray.GetOrigin() - Point(0, 0, 0);
+    const auto a_var = transformed_ray.GetDirection().Dot(transformed_ray.GetDirection());
+    const auto b_var = 2 * transformed_ray.GetDirection().Dot(sphere_to_ray);
+    const auto c_var = sphere_to_ray.Dot(sphere_to_ray) - 1;
+    auto discriminant = (b_var * b_var) - (4 * a_var * c_var);
+    if (discriminant < 0) {
+      return {};
+    }
+    // this t is time/unit in the ray
+    auto t1_var = (-b_var - std::sqrt(discriminant)) / (2 * a_var);
+    auto t2_var = (-b_var + std::sqrt(discriminant)) / (2 * a_var);
+    return {Intersection(t1_var,*this), Intersection(t2_var, *this)};
+}
 }  // namespace ray_tracer

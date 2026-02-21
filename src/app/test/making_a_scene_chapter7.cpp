@@ -1,5 +1,6 @@
 #include <app/camera.h>
 #include <app/intersection.h>
+#include <app/ray_tracing_engine.h>
 #include <app/matrix.h>
 #include <app/sphere.h>
 #include <app/transformations.h>

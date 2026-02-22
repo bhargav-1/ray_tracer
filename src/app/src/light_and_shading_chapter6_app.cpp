@@ -70,7 +70,7 @@ static void RenderScene(ImDrawList* canvas) {
         auto world_x = -kHalf + kPixelSize * x;
         ray_tracer::Point const position{world_x, world_y, wall_z};
         ray_tracer::Ray ray{ray_origin, ray_tracer::Vec3(position - ray_origin).Normalize()};
-        auto xs = Intersect(ray, shape);
+        auto xs = shape.Intersect(ray);
         if (Hit(xs).has_value()) {
           auto point = ray.Position(Hit(xs).value().GetTime());
           auto normal = shape.NormalAt(point);

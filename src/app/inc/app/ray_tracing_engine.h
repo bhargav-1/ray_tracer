@@ -42,7 +42,6 @@ namespace ray_tracer {
 //   auto t2_var = (-b_var + std::sqrt(discriminant)) / (2 * a_var);
 //   return {Intersection(t1_var, sphere), Intersection(t2_var, sphere)};
 // }
-inline auto Intersect(const Ray& ray, const Shape& shape) -> std::vector<Intersection> { return shape.Intersect(ray); }
 
 inline auto Intersect(const Ray& ray, const World& world) -> std::vector<Intersection> {
   std::vector<Intersection> intersections;

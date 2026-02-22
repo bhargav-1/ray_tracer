@@ -1,25 +1,32 @@
-#include "app/shape.h"
+#include <catch2/catch_test_macros.hpp>
+#include <cstddef>
+#include <vector>
+#include "app/point.h"
+#include "app/vec3.h"
+#include "app/intersection.h"
 #include "app/material.h"
 #include "app/matrix.h"
 #include "app/ray.h"
-#include "app/intersection.h"
-#include <vector>
-#include <catch2/catch_test_macros.hpp>
-#include <cstddef>
+#include "app/ray_tracing_engine.h"
+#include "app/shape.h"
+#include <numbers>
 
 namespace ray_tracer {
-class TestShape: public Shape {
+class TestShape : public Shape {
 public:
-explicit TestShape(const std::size_t shape_id): Shape(shape_id) {}
+  explicit TestShape(const std::size_t shape_id) : Shape(shape_id) {}
   ~TestShape() override = default;
   [[nodiscard]] auto LocalIntersect(const Ray& ray) const -> std::vector<Intersection> override {
     (void)ray;
     return {};
   };
+  [[nodiscard]] auto LocalNormalAt(const ray_tracer::Point& point) const -> ray_tracer::Vec3 override {
+    return  {point.GetX(), point.GetY(), point.GetZ()};
+  };
 };
 
 SCENARIO("9: The default material of shape") {
-  GIVEN("s = test_shape"){
+  GIVEN("s = test_shape") {
     THEN("s.material is the default material") {
       TestShape const shape1(1);
       Material default_material;
@@ -29,7 +36,7 @@ SCENARIO("9: The default material of shape") {
 }
 
 SCENARIO("9: The Default Transformation") {
-  GIVEN("s = test_shape"){
+  GIVEN("s = test_shape") {
     THEN("s.transform is the identity matrix") {
       TestShape const shape1(1);
       CHECK(shape1.GetTransform() == ray_tracer::Matrix<4, 4>::IdentityMatrix());
@@ -38,7 +45,7 @@ SCENARIO("9: The Default Transformation") {
 }
 
 SCENARIO("9: Assigning a transformation") {
-  GIVEN("s = test_shape, t = translation(2,3,4)"){
+  GIVEN("s = test_shape, t = translation(2,3,4)") {
     THEN("s.transform = t") {
       TestShape shape1(1);
       constexpr ray_tracer::Matrix<4, 4> kMat = ray_tracer::Matrix<4, 4>::Translation(2, 3, 4);
@@ -57,5 +64,61 @@ SCENARIO("9: Assigning a material") {
     }
   }
 }
+
+SCENARIO("9: Intersecting a scaled shape with a ray") {
+  GIVEN("r =ray(point(0,0,-5), vector(0,0,1)), s = test_shape with scaling(2,2,2)") {
+    THEN("s.saved_ray = ray(point(0,0,-2.5), vector(0,0,0.5))") {
+      TestShape shape1(1);
+      constexpr ray_tracer::Matrix<4, 4> kMat = ray_tracer::Matrix<4, 4>::Scaling(2, 2, 2);
+      shape1.SetTransform(kMat);
+      constexpr auto kRay = ray_tracer::Ray(ray_tracer::Point(0, 0, -5), ray_tracer::Vec3(0, 0, 1));
+      auto const intersections = ray_tracer::Intersect(kRay, shape1);
+      auto const saved_ray = shape1.GetSavedRay();
+      REQUIRE(saved_ray.has_value());
+      if (saved_ray.has_value()) {
+        CHECK(saved_ray->GetOrigin() == ray_tracer::Point(0, 0, -2.5));
+        CHECK(saved_ray->GetDirection() == ray_tracer::Vec3(0, 0, 0.5));
+      } else {
+        FAIL("saved_ray is not set");
+      }
+    }
+  }
 }
 
+SCENARIO("9: Intersecting a translated shape with a ray") {
+  GIVEN("r = ray(point(0,0,-5), vector(0,0,1)), s = test_shape with translation(5,0,0)") {
+    THEN("saved_ray = ray(point(5,0,-5), vector(0,0,1))") {
+      TestShape shape1(1);
+      constexpr ray_tracer::Matrix<4, 4> kMat = ray_tracer::Matrix<4, 4>::Translation(5, 0, 0);
+      shape1.SetTransform(kMat);
+      constexpr auto kRay = ray_tracer::Ray(ray_tracer::Point(0, 0, -5), ray_tracer::Vec3(0, 0, 1));
+      auto const intersections = ray_tracer::Intersect(kRay, shape1);
+      auto const saved_ray = shape1.GetSavedRay();
+      REQUIRE(saved_ray.has_value());
+      if (saved_ray.has_value()) {
+        CHECK(saved_ray->GetOrigin() == ray_tracer::Point(-5, 0, -5));
+        CHECK(saved_ray->GetDirection() == ray_tracer::Vec3(0, 0, 1));
+      }
+    }
+  }
+}
+
+SCENARIO("9: Computing the normal on a translated shape") {
+  GIVEN("s= test_shape(), s.Transform(0,1,0), n = normal_at(s, point(0,1.70711,-0.70711))") {
+    THEN("n = vector(0,0.70711,-0.70711)") {
+      TestShape shape1(1);
+      shape1.SetTransform(ray_tracer::Matrix<4, 4>::Translation(0, 1, 0));
+      CHECK(shape1.NormalAt(ray_tracer::Point(0, 1.70711, -0.70711)) == ray_tracer::Vec3(0, 0.70711, -0.70711));
+    }
+  }
+}
+SCENARIO("9: Computing the normal on a transformed shape") {
+  GIVEN("s = TestShape(), m= scaling(1, 0.5, 1)*rotation_Z(pi/5),s.SetTransform(m), n=normal_at(s, Point(0, 1/sqrt(2), -1/sqrt(2)") {
+    THEN("n = vec3(0, 0.97014,-0.24254") {
+      TestShape shape1(1);
+      shape1.SetTransform(ray_tracer::Matrix<4, 4>::Scaling(1, 0.5, 1) * ray_tracer::Matrix<4, 4>::RotationZ(std::numbers::pi / 5));
+      CHECK(shape1.NormalAt(ray_tracer::Point(0, std::numbers::sqrt2 / 2, -std::numbers::sqrt2 / 2)) == ray_tracer::Vec3(0, 0.97014, -0.24254));
+    }
+  }
+}
+}  // namespace ray_tracer

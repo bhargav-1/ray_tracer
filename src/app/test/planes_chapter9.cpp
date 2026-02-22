@@ -3,6 +3,7 @@
 #include <vector>
 #include "app/point.h"
 #include "app/vec3.h"
+#include "app/plane.h"
 #include "app/intersection.h"
 #include "app/material.h"
 #include "app/matrix.h"
@@ -120,4 +121,61 @@ SCENARIO("9: Computing the normal on a transformed shape") {
     }
   }
 }
+SCENARIO("9: the normal of a plane is constant everywhere") {
+  GIVEN("p = plane()") {
+    WHEN("n1 = local_normal_at(p, point(0,0,0), n2 = local_normal_at(p, point(10, 0, -10), n3 = local_normal_at(p, point(-5, 0, 150)") {
+      THEN("n1 = n2 = n3 = vector(0,1,0)") {
+        const ray_tracer::Plane plane_shape(1);
+        CHECK(plane_shape.NormalAt(ray_tracer::Point(0, 0, 0)) == ray_tracer::Vec3(0, 1, 0));
+        CHECK(plane_shape.NormalAt(ray_tracer::Point(10, 0, -10)) == ray_tracer::Vec3(0, 1, 0));
+        CHECK(plane_shape.NormalAt(ray_tracer::Point(-5, 0, 150)) == ray_tracer::Vec3(0, 1, 0));
+      }
+    }
+  }
+}
+
+SCENARIO("9:Intersect with a ray parallel to the plane") {
+  GIVEN("p = plane(), r = ray(point(0,10,0), vector(0,0,1))") {
+    THEN("there is no intersection") {
+      const ray_tracer::Plane plane_shape(1);
+      constexpr ray_tracer::Ray kRayShape(ray_tracer::Point(0, 10, 0), ray_tracer::Vec3(0, 0, 1));
+      CHECK(plane_shape.LocalIntersect(kRayShape).empty());
+    }
+  }
+}
+SCENARIO("9: Intersect with a coplanar ray") {
+  GIVEN("p = plane(), r = ray(point(0,0,0), vector(0,0,1))") {
+    THEN("local_intersect(p,r).empy()==true") {
+      const ray_tracer::Plane plane_shape(1);
+      constexpr ray_tracer::Ray kRayShape(ray_tracer::Point(0, 0, 0), ray_tracer::Vec3(0, 0, 1));
+      CHECK(plane_shape.LocalIntersect(kRayShape).empty());
+    }
+  }
+}
+
+SCENARIO("9: A ray intersecting a plane from above") {
+  GIVEN("p = plane(), r = ray(point(0,1,0), vector(0,-1,0))") {
+    THEN("local_intersect(p,r) is not empty") {
+      const ray_tracer::Plane plane_shape(1);
+      constexpr ray_tracer::Ray kRayShape(ray_tracer::Point(0, 1, 0), ray_tracer::Vec3(0, -1, 0));
+      auto const intersections = plane_shape.LocalIntersect(kRayShape);
+      REQUIRE(intersections.size() == 1);
+      CHECK(intersections[0].GetTime() == 1);
+      CHECK(*intersections[0].GetObject() == plane_shape);
+    }
+  }
+}
+SCENARIO("9: A ray intersecting a plane from below") {
+  GIVEN("p = plane(), r = ray(point(0,-1,0), vector(0,1,0))") {
+    THEN("local_intersect(p,r) is not empty") {
+      const ray_tracer::Plane plane_shape(1);
+      constexpr ray_tracer::Ray kRayShape(ray_tracer::Point(0, -1, 0), ray_tracer::Vec3(0, 1, 0));
+      auto const intersections = plane_shape.LocalIntersect(kRayShape);
+      REQUIRE(intersections.size() == 1);
+      CHECK(intersections[0].GetTime() == 1);
+      CHECK(*intersections[0].GetObject() == plane_shape);
+    }
+  }
+}
+
 }  // namespace ray_tracer

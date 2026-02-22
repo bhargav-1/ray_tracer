@@ -112,7 +112,7 @@ auto main(int /*unused*/, char* * /*unused*/) -> int {  // NOLINT
         auto world_x = -kHalf + kPixelSize * x;
         ray_tracer::Point const position{world_x, world_y, wall_z};
         ray_tracer::Ray ray{ray_origin, ray_tracer::Vec3(position - ray_origin).Normalize()};
-        auto xs = Intersect(ray, shape);
+        auto xs = shape.Intersect(ray);
         if (Hit(xs).has_value()) {
           canvas->AddRectFilled(ImVec2(x, y), ImVec2(x + 1, y + 1), color);
           // std::cout << "x : " << x << " y : " << y << '\n';

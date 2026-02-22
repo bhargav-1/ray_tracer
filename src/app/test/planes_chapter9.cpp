@@ -7,7 +7,6 @@
 #include "app/material.h"
 #include "app/matrix.h"
 #include "app/ray.h"
-#include "app/ray_tracing_engine.h"
 #include "app/shape.h"
 #include <numbers>
 
@@ -72,7 +71,7 @@ SCENARIO("9: Intersecting a scaled shape with a ray") {
       constexpr ray_tracer::Matrix<4, 4> kMat = ray_tracer::Matrix<4, 4>::Scaling(2, 2, 2);
       shape1.SetTransform(kMat);
       constexpr auto kRay = ray_tracer::Ray(ray_tracer::Point(0, 0, -5), ray_tracer::Vec3(0, 0, 1));
-      auto const intersections = ray_tracer::Intersect(kRay, shape1);
+      auto const intersections = shape1.Intersect(kRay);
       auto const saved_ray = shape1.GetSavedRay();
       REQUIRE(saved_ray.has_value());
       if (saved_ray.has_value()) {
@@ -92,7 +91,7 @@ SCENARIO("9: Intersecting a translated shape with a ray") {
       constexpr ray_tracer::Matrix<4, 4> kMat = ray_tracer::Matrix<4, 4>::Translation(5, 0, 0);
       shape1.SetTransform(kMat);
       constexpr auto kRay = ray_tracer::Ray(ray_tracer::Point(0, 0, -5), ray_tracer::Vec3(0, 0, 1));
-      auto const intersections = ray_tracer::Intersect(kRay, shape1);
+      auto const intersections = shape1.Intersect(kRay);
       auto const saved_ray = shape1.GetSavedRay();
       REQUIRE(saved_ray.has_value());
       if (saved_ray.has_value()) {

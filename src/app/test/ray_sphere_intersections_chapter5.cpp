@@ -35,7 +35,7 @@ SCENARIO("A Ray intersects a sphere at two points") {
   GIVEN("r = Ray(point(0,0,-5), vector(0,0,1)),s=Sphere(),xs=intersect(r,s)") {
     const ray_tracer::Ray ray(ray_tracer::Point(0, 0, -5), ray_tracer::Vec3(0, 0, 1));
     const ray_tracer::Sphere s_spher(1);
-    auto xs_intersect = Intersect(ray, s_spher);
+    auto xs_intersect = s_spher.LocalIntersect(ray);
     THEN("xs.count = 2") { CHECK(xs_intersect.size() == 2); }
     THEN("xs[0] = 4.0") { CHECK(xs_intersect[0].GetTime() == 4.0); }
     THEN("xs[1] = 6.0") { CHECK(xs_intersect[1].GetTime() == 6.0); }
@@ -45,7 +45,7 @@ SCENARIO("A Ray intersects a sphere at a tangent") {
   GIVEN("r = Ray(point(0,1,-5), vector(0,0,1)),s=Sphere(),xs=intersect(r,s)") {
     const ray_tracer::Ray ray(ray_tracer::Point(0, 1, -5), ray_tracer::Vec3(0, 0, 1));
     const ray_tracer::Sphere s_sphere(1);
-    auto xs_intersect = Intersect(ray, s_sphere);
+    auto xs_intersect = s_sphere.LocalIntersect(ray);
     THEN("xs.count = 2") { CHECK(xs_intersect.size() == 2); }
     THEN("xs[0] = 5.0") { CHECK(xs_intersect[0].GetTime() == 5.0); }
     THEN("xs[1] = 5.0") { CHECK(xs_intersect[1].GetTime() == 5.0); }
@@ -56,7 +56,7 @@ SCENARIO("A Ray misses a sphere") {
   GIVEN("r = Ray(point(0,2,-5), vector(0,0,1)),s=Sphere(),xs=intersect(r,s)") {
     const ray_tracer::Ray ray(ray_tracer::Point(0, 2, -5), ray_tracer::Vec3(0, 0, 1));
     const ray_tracer::Sphere s_sphere(1);
-    auto xs_intersect = Intersect(ray, s_sphere);
+    auto xs_intersect = s_sphere.LocalIntersect(ray);
     THEN("xs.count = 0") { CHECK(xs_intersect.empty()); }
   }
 }
@@ -65,7 +65,7 @@ SCENARIO("A Ray originates inside a sphere") {
   GIVEN("r = Ray(point(0,0,0), vector(0,0,1)),s=Sphere(),xs=intersect(r,s)") {
     const ray_tracer::Ray ray(ray_tracer::Point(0, 0, 0), ray_tracer::Vec3(0, 0, 1));
     const ray_tracer::Sphere spere(1);
-    auto xs_interset = Intersect(ray, spere);
+    auto xs_interset = spere.LocalIntersect(ray);
     THEN("xs.count = 2") { CHECK(xs_interset.size() == 2); }
     THEN("xs[0] = -1.0") { CHECK(xs_interset[0].GetTime() == -1.0); }
     THEN("xs[1] = 1.0") { CHECK(xs_interset[1].GetTime() == 1.0); }
@@ -76,7 +76,7 @@ SCENARIO("A sphere is behind a ray") {
   GIVEN("r = Ray(point(0,0,5), vector(0,0,1)),s=Sphere(),xs=intersect(r,s)") {
     const ray_tracer::Ray ray(ray_tracer::Point(0, 0, 5), ray_tracer::Vec3(0, 0, 1));
     const ray_tracer::Sphere sphere(1);
-    auto xs_intersect = Intersect(ray, sphere);
+    auto xs_intersect = sphere.LocalIntersect(ray);
     THEN("xs.count = 2") { CHECK(xs_intersect.size() == 2); }
     THEN("xs[0] = -6.0") { CHECK(xs_intersect[0].GetTime() == -6.0); }
     THEN("xs[1] = -4.0") { CHECK(xs_intersect[1].GetTime() == -4.0); }
@@ -109,7 +109,7 @@ SCENARIO("Intersect sets the object on the intersection") {
   GIVEN("r = Ray(point(0,0,-5), vector(0,0,1)),s=Sphere(),xs=intersect(r,s)") {
     const ray_tracer::Ray ray(ray_tracer::Point(0, 0, -5), ray_tracer::Vec3(0, 0, 1));
     const ray_tracer::Sphere s_sphere(1);
-    auto xs_intersect = Intersect(ray, s_sphere);
+    auto xs_intersect = s_sphere.LocalIntersect(ray);
     THEN("xs.count = 2") { CHECK(xs_intersect.size() == 2); }
     THEN("xs[0].object = s") { CHECK(*xs_intersect[0].GetObject() == s_sphere); }
     THEN("xs[1].object = s") { CHECK(*xs_intersect[1].GetObject() == s_sphere); }
@@ -217,7 +217,8 @@ SCENARIO("5: Intersecting a scaled Sphere with a ray") {
     ray_tracer::Sphere sphe(1);
     sphe.SetTransform(ray_tracer::Matrix<4, 4>::Scaling(2, 2, 2));
     THEN("xs = intersect(s,r)") {
-      auto xs_inter = Intersect(ray, sphe);
+      auto local_ray = ray.Transform(sphe.GetTransform().Inverse());
+      auto xs_inter = sphe.LocalIntersect(local_ray);
       THEN("xs.count = 2") { CHECK(xs_inter.size() == 2); }
       THEN("xs[0].GetTime() = 3") { CHECK(xs_inter[0].GetTime() == 3); }
       THEN("xs[1].GetTime() = 7") { CHECK(xs_inter[1].GetTime() == 7); }
@@ -230,7 +231,8 @@ SCENARIO("5: Intersecting a translated Sphere with a ray") {
     ray_tracer::Sphere sphe(1);
     sphe.SetTransform(ray_tracer::Matrix<4, 4>::Translation(5, 0, 0));
     THEN("xs = intersect(s,r)") {
-      auto xs_inter = Intersect(ray, sphe);
+      auto local_ray = ray.Transform(sphe.GetTransform().Inverse());
+      auto xs_inter = sphe.LocalIntersect(local_ray);
       THEN("xs.count = 0") { CHECK(xs_inter.empty()); }
     }
   }

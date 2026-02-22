@@ -6,6 +6,7 @@
 #include "tuple.h"
 #include "intersection.h"
 #include <vector>
+#include <optional>
 
 namespace ray_tracer {
 
@@ -20,7 +21,7 @@ public:
   void SetTransform(const Matrix<4, 4>& transform) { transform_ = transform; }
   [[nodiscard]] auto NormalAt(const ray_tracer::Point& point) const -> Vec3 {
     const auto object_point = GetTransform().Inverse() * point;
-    auto const object_normal = Vec3(object_point - ray_tracer::Point(0, 0, 0));
+    auto const object_normal = LocalNormalAt(object_point);
     // https:  //www.scratchapixel.com/lessons/mathematics-physics-for-computer-graphics/geometry/transforming-normals.html
     Vec3 const world_normal = Transpose(GetTransform().Inverse()) * object_normal;
     return world_normal.Normalize();
@@ -29,14 +30,18 @@ public:
   void SetMaterial(const Material& material) { material_ = material; }
   [[nodiscard]] auto Intersect(const Ray& ray) const -> std::vector<Intersection> {
     const auto local_ray = ray.Transform(GetTransform().Inverse());
+    saved_ray_ = local_ray;
     return LocalIntersect(local_ray);
   };
+  [[nodiscard]] auto GetSavedRay() const -> std::optional<Ray> { return saved_ray_; }
   [[nodiscard]] virtual auto LocalIntersect(const Ray& ray) const -> std::vector<Intersection> = 0;
+  [[nodiscard]] virtual auto LocalNormalAt(const ray_tracer::Point& point) const -> ray_tracer::Vec3 = 0;
 
 private:
   std::size_t id_;
   Matrix<4, 4> transform_ = Matrix<4, 4>::IdentityMatrix();
   Material material_;
+  mutable std::optional<Ray> saved_ray_;
 };
 
 inline auto operator==(const Shape& lhs, const Shape& rhs) -> bool { return lhs.id_ == rhs.id_; }

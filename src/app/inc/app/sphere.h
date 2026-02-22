@@ -16,6 +16,7 @@ class Sphere : public Shape{
   constexpr Sphere(size_t id) : Shape(id)  {} // NOLINT [readability-identifier-naming]
   ~Sphere() override = default;
   [[nodiscard]] auto LocalIntersect(const Ray& ray) const -> std::vector<Intersection> override;
+  [[nodiscard]] auto LocalNormalAt(const ray_tracer::Point& point) const -> ray_tracer::Vec3 override;
 };
 
 inline auto operator==(const Sphere& lhs, const Sphere& rhs) -> bool { return lhs.GetId() == rhs.GetId(); }
@@ -34,5 +35,9 @@ inline auto Sphere::LocalIntersect(const Ray& transformed_ray) const -> std::vec
     auto t1_var = (-b_var - std::sqrt(discriminant)) / (2 * a_var);
     auto t2_var = (-b_var + std::sqrt(discriminant)) / (2 * a_var);
     return {Intersection(t1_var,*this), Intersection(t2_var, *this)};
+}
+inline auto Sphere::LocalNormalAt(const ray_tracer::Point& point) const -> ray_tracer::Vec3 {
+  // all centers are at 0,0,0
+  return {point - ray_tracer::Point(0, 0, 0)};
 }
 }  // namespace ray_tracer

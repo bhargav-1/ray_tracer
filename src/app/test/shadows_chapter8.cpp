@@ -14,6 +14,7 @@
 #include <app/vec3.h>                    // for vector
 #include <catch2/catch_test_macros.hpp>  // for operator""_catch_sr, Section
 #include <cmath>
+#include <memory>
 
 
 namespace ray_tracer {
@@ -78,8 +79,8 @@ SCENARIO("8: ShadeHit() is given an intersection in shadow") {
     auto sphere1 = Sphere(1);
     auto sphere2 = Sphere(2);
     sphere2.SetTransform(Matrix<4, 4>::Translation(0, 0, 10));
-    world.AddObject(sphere1);
-    world.AddObject(sphere2);
+    world.AddObject(std::make_shared<Sphere>(sphere1));
+    world.AddObject(std::make_shared<Sphere>(sphere2));
     constexpr Ray kRay(Point(0, 0, 5), Vec3(0, 0, 1));
     Intersection const given_intersection(4, sphere2);
     auto comps = PrepareComputations(given_intersection, kRay);

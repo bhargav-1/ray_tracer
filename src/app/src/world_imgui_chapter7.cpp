@@ -5,6 +5,7 @@
 #include <optional>
 #include <thread>
 #include <vector>
+#include <memory>
 #include "imgui.h"               // NOLINT
 #include "imgui_impl_glfw.h"     // NOLINT
 #include "imgui_impl_opengl3.h"  // NOLINT
@@ -79,15 +80,15 @@ static void RenderScene(ImDrawList* canvas) {
                         ray_tracer::Matrix<4, 4>::Scaling(0.8, 0.8, 0.8));
     left_3.SetMaterial(ray_tracer::Material{ray_tracer::Color{1, 0.8, 0.1}, 0.1, 0.7, 0.3, 200});
 
-    world.AddObject(floor);
-    world.AddObject(left_wall);
-    world.AddObject(right_wall);
-    world.AddObject(middle);
-    world.AddObject(right);
-    world.AddObject(left);
-    world.AddObject(left_1);
-    world.AddObject(left_2);
-    world.AddObject(left_3);
+    world.AddObject(std::make_shared<ray_tracer::Sphere>(floor));
+    world.AddObject(std::make_shared<ray_tracer::Sphere>(left_wall));
+    world.AddObject(std::make_shared<ray_tracer::Sphere>(right_wall));
+    world.AddObject(std::make_shared<ray_tracer::Sphere>(middle));
+    world.AddObject(std::make_shared<ray_tracer::Sphere>(right));
+    world.AddObject(std::make_shared<ray_tracer::Sphere>(left));
+    world.AddObject(std::make_shared<ray_tracer::Sphere>(left_1));
+    world.AddObject(std::make_shared<ray_tracer::Sphere>(left_2));
+    world.AddObject(std::make_shared<ray_tracer::Sphere>(left_3));
 
     world.AddLight(ray_tracer::PointLight(ray_tracer::Point(-10, 10, -10), ray_tracer::Color(1, 1, 1)));
     auto camera = ray_tracer::Camera(1000, 500, std::numbers::pi / 3);

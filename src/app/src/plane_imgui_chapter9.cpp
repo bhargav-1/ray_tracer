@@ -6,6 +6,8 @@
 #include <thread>
 #include <vector>
 #include <memory>
+#include <array>
+#include <cmath>
 #include "imgui.h"               // NOLINT
 #include "imgui_impl_glfw.h"     // NOLINT
 #include "imgui_impl_opengl3.h"  // NOLINT
@@ -34,40 +36,67 @@ static void RenderScene(ImDrawList* canvas) {
   if (!cached_pixels.has_value()) {
     const auto cache_start = std::chrono::high_resolution_clock::now();
     ray_tracer::World world{};
+    constexpr double kWallRadius = 3.5;
+    constexpr double kCeilingHeight = 8.0;
+    constexpr double kWallSphereRadius = 0.45;
+
     auto floor = ray_tracer::Plane(1);
-    floor.SetTransform(ray_tracer::Matrix<4, 4>::RotationY(std::numbers::pi/2));
-    floor.SetMaterial(ray_tracer::Material{ray_tracer::Color{1, 0.9, 0.9}, 0.1, 0.9, 0.0, 200});
-
-    auto back_wall = ray_tracer::Plane(2);
-    back_wall.SetTransform(ray_tracer::Matrix<4,4>::Translation(0,0,10)* ray_tracer::Matrix<4, 4>::RotationX(std::numbers::pi/2));
-    back_wall.SetMaterial(ray_tracer::Material{ray_tracer::Color{0, 0.9, 0.9}, 0.1, 0.9, 0.0, 200});
-
-    auto middle = ray_tracer::Sphere(4);
-    middle.SetTransform(ray_tracer::Matrix<4, 4>::Translation(-0.5, 1, 0.5));
-    middle.SetMaterial(ray_tracer::Material{ray_tracer::Color{0.1, 1, 0.5}, 0.1, 0.7, 0.3, 200});
-
-    auto right = ray_tracer::Sphere(5);
-    right.SetTransform(ray_tracer::Matrix<4, 4>::Translation(1.5, 0.5, -0.5) *
-                       ray_tracer::Matrix<4, 4>::Scaling(0.5, 0.5, 0.5));
-    right.SetMaterial(ray_tracer::Material{ray_tracer::Color{0.5, 1, 0.1}, 0.1, 0.7, 0.3, 200});
-
-    auto left = ray_tracer::Sphere(6);
-    left.SetTransform(ray_tracer::Matrix<4, 4>::Translation(-1.5, 0.25, -0.75) *
-                      ray_tracer::Matrix<4, 4>::Scaling(0.3, 0.3, 0.3));
-    left.SetMaterial(ray_tracer::Material{ray_tracer::Color{1, 0.8, 0.1}, 0.1, 0.7, 0.3, 200});
-
-
+    floor.SetMaterial(ray_tracer::Material{ray_tracer::Color{0.9, 0.9, 0.9}, 0.2, 0.8, 0.0, 200});
     world.AddObject(std::make_shared<ray_tracer::Plane>(floor));
-    world.AddObject(std::make_shared<ray_tracer::Plane>(back_wall));
-    world.AddObject(std::make_shared<ray_tracer::Sphere>(middle));
-    world.AddObject(std::make_shared<ray_tracer::Sphere>(middle));
-    world.AddObject(std::make_shared<ray_tracer::Sphere>(right));
-    world.AddObject(std::make_shared<ray_tracer::Sphere>(left));
 
-    world.AddLight(ray_tracer::PointLight(ray_tracer::Point(-10, 10, -10), ray_tracer::Color(1, 1, 1)));
-    auto camera = ray_tracer::Camera(1000, 900, std::numbers::pi / 3);
-    camera.SetTransform(ray_tracer::ViewTransform(ray_tracer::Point(0, 1.5, -5),
-                                                  ray_tracer::Point(0, 1, 0),
+    auto ceiling = ray_tracer::Plane(30);
+    ceiling.SetTransform(ray_tracer::Matrix<4, 4>::Translation(0, kCeilingHeight, 0) *
+    ray_tracer::Matrix<4, 4>::RotationX(std::numbers::pi));
+    ceiling.SetMaterial(ray_tracer::Material{ray_tracer::Color{0.95, 0.95, 0.98}, 0.2, 0.7, 0.0, 100});
+    world.AddObject(std::make_shared<ray_tracer::Plane>(ceiling));
+
+    constexpr std::array<ray_tracer::Color, 6> kWallColors = {
+        ray_tracer::Color(1.0, 0.6, 0.6),
+        ray_tracer::Color(1.0, 0.8, 0.6),
+        ray_tracer::Color(0.9, 1.0, 0.6),
+        ray_tracer::Color(0.6, 1.0, 0.8),
+        ray_tracer::Color(0.6, 0.8, 1.0),
+        ray_tracer::Color(0.8, 0.6, 1.0),
+    };
+
+    for (std::size_t wall_index = 0; wall_index < kWallColors.size(); ++wall_index) {
+      auto wall = ray_tracer::Plane(2 + wall_index);
+      const auto angle = static_cast<double>(wall_index) * (std::numbers::pi / 3.0);
+      wall.SetTransform(ray_tracer::Matrix<4, 4>::RotationY(angle) *
+                        ray_tracer::Matrix<4, 4>::Translation(kWallRadius, 0, 0) *
+                        ray_tracer::Matrix<4, 4>::RotationZ(std::numbers::pi / 2.0));
+      wall.SetMaterial(ray_tracer::Material{kWallColors[wall_index], 0.15, 0.85, 0.0, 50});
+      world.AddObject(std::make_shared<ray_tracer::Plane>(wall));
+
+      // One sphere per wall center, pushed slightly behind the wall to embed it.
+      const double cos_angle = std::cos(angle);
+      const double sin_angle = std::sin(angle);
+      const ray_tracer::Vec3 inward_normal(-cos_angle, 0, sin_angle);
+      const ray_tracer::Point wall_center(kWallRadius * cos_angle, 0.9, -kWallRadius * sin_angle);
+      const ray_tracer::Point sphere_center = wall_center - inward_normal * (kWallSphereRadius * 0.65);
+
+      auto wall_sphere = ray_tracer::Sphere(100 + wall_index);
+      wall_sphere.SetTransform(ray_tracer::Matrix<4, 4>::Translation(sphere_center.GetX(),
+                                                                      sphere_center.GetY(),
+                                                                      sphere_center.GetZ()) *
+                              ray_tracer::Matrix<4, 4>::Scaling(kWallSphereRadius,
+                                                                 kWallSphereRadius,
+                                                                 kWallSphereRadius));
+      wall_sphere.SetMaterial(ray_tracer::Material{kWallColors[wall_index], 0.2, 0.75, 0.3, 120});
+      world.AddObject(std::make_shared<ray_tracer::Sphere>(wall_sphere));
+    }
+
+    auto marker = ray_tracer::Sphere(20);
+    marker.SetTransform(ray_tracer::Matrix<4, 4>::Translation(2, 0, 2) *
+                        ray_tracer::Matrix<4, 4>::Scaling(0.5, 0.5, 0.5));
+    marker.SetMaterial(ray_tracer::Material{ray_tracer::Color{0.2, 0.9, 0.9}, 0.2, 0.7, 0.3, 100});
+    world.AddObject(std::make_shared<ray_tracer::Sphere>(marker));
+
+    // Keep lights below the ceiling per chapter guidance.
+    world.AddLight(ray_tracer::PointLight(ray_tracer::Point(0, 2.8, 2), ray_tracer::Color(1.0, 1.0, 1.0)));
+    auto camera = ray_tracer::Camera(1000, 1000, std::numbers::pi / 3);
+    camera.SetTransform(ray_tracer::ViewTransform(ray_tracer::Point(0, 1.5, 0),
+                                                  ray_tracer::Point(0, 0, 0.1),
                                                   ray_tracer::Vec3(0, 1, 0)));
 
     cached_width = camera.GetHorizontalSize();

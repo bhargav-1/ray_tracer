@@ -5,6 +5,7 @@
 #include <optional>
 #include <thread>
 #include <vector>
+#include <memory>
 #include "imgui.h"               // NOLINT
 #include "imgui_impl_glfw.h"     // NOLINT
 #include "imgui_impl_opengl3.h"  // NOLINT
@@ -43,8 +44,8 @@ static void RenderScene(ImDrawList* canvas) {
                         ray_tracer::Matrix<4, 4>::Scaling(9.8, 9.8, 9.8));
     // Moon: dark and matte.
     sphere2.SetMaterial(ray_tracer::Material{ray_tracer::Color{0.1, 0.1, 0.1}, 0.05, 0.7, 0.0, 10});
-    world.AddObject(sphere1);
-    world.AddObject(sphere2);
+    world.AddObject(std::make_shared<ray_tracer::Sphere>(sphere1));
+    world.AddObject(std::make_shared<ray_tracer::Sphere>(sphere2));
 
     world.AddLight(
         ray_tracer::PointLight(ray_tracer::Point(0, 0, 10), ray_tracer::Color(1.3, 1.3, 1.3)));

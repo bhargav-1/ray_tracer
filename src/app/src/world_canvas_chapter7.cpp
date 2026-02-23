@@ -1,6 +1,7 @@
 // #include <imgui.h>
 
 #include <numbers>
+#include <memory>
 #include "app/camera.h"
 #include "app/matrix.h"
 #include "app/sphere.h"
@@ -54,15 +55,15 @@ auto main() noexcept -> int {  // NOLINT
   left_3.SetTransform(Matrix<4, 4>::Translation(-1.5, 2.1, -0.75) * Matrix<4, 4>::Scaling(0.8, 0.8, 0.8));
   left_3.SetMaterial(Material{Color{1, 0.8, 0.1}, 0.1, 0.7, 0.3, 200});
 
-  world.AddObject(floor);
-  world.AddObject(left_wall);
-  world.AddObject(right_wall);
-  world.AddObject(middle);
-  world.AddObject(right);
-  world.AddObject(left);
-  world.AddObject(left_1);
-  world.AddObject(left_2);
-  world.AddObject(left_3);
+  world.AddObject(std::make_shared<Sphere>(floor));
+  world.AddObject(std::make_shared<Sphere>(left_wall));
+  world.AddObject(std::make_shared<Sphere>(right_wall));
+  world.AddObject(std::make_shared<Sphere>(middle));
+  world.AddObject(std::make_shared<Sphere>(right));
+  world.AddObject(std::make_shared<Sphere>(left));
+  world.AddObject(std::make_shared<Sphere>(left_1));
+  world.AddObject(std::make_shared<Sphere>(left_2));
+  world.AddObject(std::make_shared<Sphere>(left_3));
 
   world.AddLight(PointLight(Point(-10, 10, -10), Color(1, 1, 1)));
   auto camera = Camera(1000, 500, std::numbers::pi / 3);

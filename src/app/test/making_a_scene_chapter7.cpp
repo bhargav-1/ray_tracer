@@ -34,8 +34,8 @@ SCENARIO("7: The Default world") {
       CHECK(world.Lights().size() == 1);
       CHECK(world.Objects().size() == 2);
       CHECK(world.Lights()[0] == light);
-      CHECK(world.Objects()[0] == sphere1);
-      CHECK(world.Objects()[1] == sphere2);
+      CHECK(*world.Objects()[0] == sphere1);
+      CHECK(*world.Objects()[1] == sphere2);
     }
   }
 }
@@ -99,7 +99,7 @@ SCENARIO("7: Shading an intersection") {
       auto world = ray_tracer::World::DefaultWorld();
       auto ray = ray_tracer::Ray(ray_tracer::Point(0, 0, -5), ray_tracer::Vec3(0, 0, 1));
       auto shape = world.Objects()[0];
-      auto intersection = ray_tracer::Intersection(4, shape);
+      auto intersection = ray_tracer::Intersection(4, *shape);
       auto comps = ray_tracer::PrepareComputations(intersection, ray);
       auto color = ray_tracer::ShadeHit(world, comps);
       CHECK(utilities::Equal(color.GetRed(), 0.38066));
@@ -118,7 +118,7 @@ SCENARIO("7: Shading an intersection from the inside") {
       world.ChangeDefaultLight(PointLight(Point(0, 0.25, 0), Color(1, 1, 1)));
       auto ray = ray_tracer::Ray(ray_tracer::Point(0, 0, 0), ray_tracer::Vec3(0, 0, 1));
       auto shape = world.Objects()[1];
-      auto intersection = ray_tracer::Intersection(0.5, shape);
+      auto intersection = ray_tracer::Intersection(0.5, *shape);
       auto comps = ray_tracer::PrepareComputations(intersection, ray);
       auto color = ray_tracer::ShadeHit(world, comps);
       CHECK(comps.GetPoint() == ray_tracer::Point(0, 0, 0.5));
@@ -158,18 +158,16 @@ SCENARIO("7: The color with an intersection behind the ray") {
     THEN("color = color_at(w, r), color = inner.material.color") {
       auto world = ray_tracer::World::DefaultWorld();
       auto outer = world.Objects()[0];
-      auto outer_material = outer.GetMaterial();
+      auto outer_material = outer->GetMaterial();
       outer_material.SetAmbient(1);
-      outer.SetMaterial(outer_material);
-      world.UpdateObjects(0, outer);
+      outer->SetMaterial(outer_material);
       auto inner = world.Objects()[1];
-      auto inner_material = inner.GetMaterial();
+      auto inner_material = inner->GetMaterial();
       inner_material.SetAmbient(1);
-      inner.SetMaterial(inner_material);
-      world.UpdateObjects(1, inner);
+      inner->SetMaterial(inner_material);
       auto ray = ray_tracer::Ray(ray_tracer::Point(0, 0, 0.75), ray_tracer::Vec3(0, 0, -1));
       auto color = ray_tracer::ColorAt(world, ray);
-      CHECK(color == inner.GetMaterial().GetColor());
+      CHECK(color == inner->GetMaterial().GetColor());
     }
   }
 }

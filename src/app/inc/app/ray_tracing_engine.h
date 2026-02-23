@@ -21,32 +21,10 @@
 
 namespace ray_tracer {
 
-// can be constexpr in later cpp23++or cpp20++
-//en.wikipedia.org/wiki/Line–sphere_intersection
-// inline auto Intersect(const Ray& ray, const Sphere& sphere) -> std::vector<Intersection> {
-//   // transform the ray to the sphere's coordinate system
-//   const auto transform = sphere.GetTransform().Inverse();
-//   const auto transformed_ray = ray.Transform(transform);
-//
-//   // following is just the algorithm for ray/sphere intersection
-//   const ray_tracer::Vec3 sphere_to_ray = transformed_ray.GetOrigin() - Point(0, 0, 0);
-//   const auto a_var = transformed_ray.GetDirection().Dot(transformed_ray.GetDirection());
-//   const auto b_var = 2 * transformed_ray.GetDirection().Dot(sphere_to_ray);
-//   const auto c_var = sphere_to_ray.Dot(sphere_to_ray) - 1;
-//   auto discriminant = (b_var * b_var) - (4 * a_var * c_var);
-//   if (discriminant < 0) {
-//     return {};
-//   }
-//   // this t is time/unit in the ray
-//   auto t1_var = (-b_var - std::sqrt(discriminant)) / (2 * a_var);
-//   auto t2_var = (-b_var + std::sqrt(discriminant)) / (2 * a_var);
-//   return {Intersection(t1_var, sphere), Intersection(t2_var, sphere)};
-// }
-
 inline auto Intersect(const Ray& ray, const World& world) -> std::vector<Intersection> {
   std::vector<Intersection> intersections;
   for (auto const& object : world.Objects()) {
-    auto object_intersections = object.Intersect(ray);
+    auto object_intersections = object->Intersect(ray);
     // std::cout << " object_intersections size: " << object_intersections.size() << "\n";
     intersections.insert(intersections.end(), object_intersections.begin(), object_intersections.end());
   }

@@ -144,7 +144,19 @@ target_link_libraries(eclipse_chapter8
         app_lib
         imgui_lib
 )
-
+add_executable(plane_chapter9)
+target_sources(plane_chapter9
+        PRIVATE
+        src/plane_imgui_chapter9.cpp
+)
+set_source_files_properties(src/plane_imgui_chapter9.cpp PROPERTIES
+        SKIP_LINTING ON
+)
+target_link_libraries(plane_chapter9
+        PRIVATE
+        app_lib
+        imgui_lib
+)
 add_subdirectory(test)
 
 install(TARGETS app_lib

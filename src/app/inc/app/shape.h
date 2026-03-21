@@ -17,19 +17,23 @@ public:
   virtual ~Shape() = default;
   [[nodiscard]] constexpr auto GetId() const noexcept -> std::size_t { return id_; }
   friend auto operator==(const Shape& lhs, const Shape& rhs) -> bool;
-  [[nodiscard]] auto GetTransform() const -> Matrix<4, 4> { return transform_; }
-  void SetTransform(const Matrix<4, 4>& transform) { transform_ = transform; }
+  [[nodiscard]] auto GetTransform() const -> const Matrix<4, 4>& { return transform_; }
+  [[nodiscard]] auto GetInverseTransform() const -> const Matrix<4, 4>& { return inverse_transform_; }
+  void SetTransform(const Matrix<4, 4>& transform) {
+    transform_ = transform;
+    inverse_transform_ = transform.Inverse();
+  }
   [[nodiscard]] auto NormalAt(const ray_tracer::Point& point) const -> Vec3 {
-    const auto object_point = GetTransform().Inverse() * point;
+    const auto object_point = inverse_transform_ * point;
     auto const object_normal = LocalNormalAt(object_point);
     // https:  //www.scratchapixel.com/lessons/mathematics-physics-for-computer-graphics/geometry/transforming-normals.html
-    Vec3 const world_normal = Transpose(GetTransform().Inverse()) * object_normal;
+    Vec3 const world_normal = Transpose(inverse_transform_) * object_normal;
     return world_normal.Normalize();
   };
-  [[nodiscard]] auto GetMaterial() const -> Material { return material_; }
+  [[nodiscard]] auto GetMaterial() const -> const Material& { return material_; }
   void SetMaterial(const Material& material) { material_ = material; }
   [[nodiscard]] auto Intersect(const Ray& ray) const -> std::vector<Intersection> {
-    const auto local_ray = ray.Transform(GetTransform().Inverse());
+    const auto local_ray = ray.Transform(inverse_transform_);
     saved_ray_ = local_ray;
     return LocalIntersect(local_ray);
   };
@@ -40,6 +44,7 @@ public:
 private:
   std::size_t id_;
   Matrix<4, 4> transform_ = Matrix<4, 4>::IdentityMatrix();
+  Matrix<4, 4> inverse_transform_ = Matrix<4, 4>::IdentityMatrix();
   Material material_;
   mutable std::optional<Ray> saved_ray_;
 };

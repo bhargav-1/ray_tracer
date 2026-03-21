@@ -8,6 +8,8 @@
 #include <app/ray_tracing_engine.h>
 #include <app/sphere.h>
 #include <fmt/base.h>
+#include <algorithm>
+#include <array>
 #include <chrono>
 #include <mutex>
 #include <thread>
@@ -25,31 +27,25 @@ static void GlfwErrorCallback(int error, const char* description) {
   fprintf(stderr, "GLFW Error %d: %s\n", error, description);
 }
 
-static void RenderScene(ImDrawList* canvas) {
-  const ImVec2 pos = ImGui::GetCursorScreenPos();
-  const ImVec2 window_size = ImGui::GetWindowSize();
+static void RenderScene() {
+  static GLuint texture_id = 0;
+  static bool rendered = false;
+  if (rendered) {
+    const ImVec2 avail = ImGui::GetContentRegionAvail();
+    constexpr int kCanvasPixels = 1000;
+    const float img_scale = std::min(avail.x / kCanvasPixels, avail.y / kCanvasPixels);
+    // NOLINTNEXTLINE(performance-no-int-to-ptr): ImGui stores an opaque OpenGL handle.
+    ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uintptr_t>(texture_id)),
+                 ImVec2(kCanvasPixels * img_scale, kCanvasPixels * img_scale));
+    return;
+  }
+
   auto ray_origin = ray_tracer::Point(0, 0, -5);
   auto wall_z = 1000.0;
   constexpr auto kWallSize = 700.0;
   constexpr auto kCanvasPixels = 1000;
   constexpr auto kPixelSize = kWallSize / kCanvasPixels;
   constexpr auto kHalf = kWallSize / 2;
-
-  float const center_x = pos.x + (window_size.x / 2);
-  float const center_y = pos.y + (window_size.y / 2);
-  ray_tracer::Matrix<4, 4> const canvas_transform =
-      ray_tracer::Matrix<4, 4>::IdentityMatrix().Translate(center_x, center_y, 0);
-
-  constexpr ray_tracer::Color kRed{255, 0, 0, 255};
-  ImColor color = ImColor(static_cast<int>(kRed.GetRed()),
-                          static_cast<int>(kRed.GetGreen()),
-                          static_cast<int>(kRed.GetBlue()),
-                          static_cast<int>(kRed.GetW()));
-  ray_tracer::Point origin{0, 0, 0};
-  auto print_center = canvas_transform * origin;
-  ImVec2 center_vec = {static_cast<float>(print_center.GetX()), static_cast<float>(print_center.GetY())};
-  std::cout << print_center << "\n";
-  canvas->AddCircleFilled(center_vec, 10, color);
 
   ray_tracer::Sphere shape(1);
   ray_tracer::Material material;
@@ -59,13 +55,14 @@ static void RenderScene(ImDrawList* canvas) {
   auto light_position = ray_tracer::Point{-10, 10, -10};
   auto light_color = ray_tracer::Color{1, 1, 1, 1};
   auto light = ray_tracer::PointLight{light_position, light_color};
+
+  std::vector<unsigned char> rgb(kCanvasPixels * kCanvasPixels * 3, 0);
   std::vector<std::thread> workers;
-  std::mutex canvas_mutex;
+  std::mutex rgb_mutex;
   for (auto y = 0; y < kCanvasPixels; ++y) {
     auto world_y = kHalf - kPixelSize * y;
-
-    workers.emplace_back([=, &canvas, &canvas_mutex]() {
-      std::vector<std::pair<int, ImColor>> pixel_batch;
+    workers.emplace_back([=, &shape, &light, &material, &rgb, &rgb_mutex]() {
+      std::vector<std::pair<int, std::array<unsigned char, 3>>> row_pixels;
       for (auto x = 0; x < kCanvasPixels; ++x) {
         auto world_x = -kHalf + kPixelSize * x;
         ray_tracer::Point const position{world_x, world_y, wall_z};
@@ -76,27 +73,40 @@ static void RenderScene(ImDrawList* canvas) {
           auto normal = shape.NormalAt(point);
           auto eye = -ray.GetDirection();
           auto sphere_color = ray_tracer::Lighting(material, shape, light, point, eye, normal);
-          ImColor render_color = ImColor(static_cast<int>(sphere_color.GetRed() * 255),
-                                         static_cast<int>(sphere_color.GetGreen() * 255),
-                                         static_cast<int>(sphere_color.GetBlue() * 255),
-                                         255);
-          pixel_batch.emplace_back(x, render_color);
+          row_pixels.push_back({x, {
+            static_cast<unsigned char>(std::clamp(sphere_color.GetRed(), 0.0, 1.0) * 255.0),
+            static_cast<unsigned char>(std::clamp(sphere_color.GetGreen(), 0.0, 1.0) * 255.0),
+            static_cast<unsigned char>(std::clamp(sphere_color.GetBlue(), 0.0, 1.0) * 255.0)
+          }});
         }
       }
       {
-        std::lock_guard<std::mutex> lock(canvas_mutex);
-        for (const auto& [x, color] : pixel_batch) {
-          canvas->AddRectFilled(ImVec2(x, y), ImVec2(x + 1, y + 1), color);
+        std::lock_guard<std::mutex> lock(rgb_mutex);
+        for (const auto& [x, c] : row_pixels) {
+          const auto rgb_offset = (static_cast<size_t>(y) * kCanvasPixels + x) * 3;
+          rgb[rgb_offset + 0] = c[0];
+          rgb[rgb_offset + 1] = c[1];
+          rgb[rgb_offset + 2] = c[2];
         }
       }
     });
-    if (y % 10 == 0) {
-      glfwPollEvents();
-    }
   }
   for (auto& worker : workers) {
     worker.join();
   }
+
+  glGenTextures(1, &texture_id);
+  glBindTexture(GL_TEXTURE_2D, texture_id);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, kCanvasPixels, kCanvasPixels, 0, GL_RGB, GL_UNSIGNED_BYTE, rgb.data());
+  rendered = true;
+
+  const ImVec2 avail = ImGui::GetContentRegionAvail();
+  const float img_scale = std::min(avail.x / kCanvasPixels, avail.y / kCanvasPixels);
+  // NOLINTNEXTLINE(performance-no-int-to-ptr): ImGui stores an opaque OpenGL handle.
+  ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uintptr_t>(texture_id)),
+               ImVec2(kCanvasPixels * img_scale, kCanvasPixels * img_scale));
 }
 
 // Main code
@@ -150,10 +160,8 @@ auto main(int /*unused*/, char* * /*unused*/) -> int {  // NOLINT
     ImGui::SetNextWindowSize(ImVec2(1000, 900), ImGuiCond_Once);
     ImGui::Begin("Ray Casting:");
 
-    ImDrawList* canvas = ImGui::GetWindowDrawList();
-
     auto start_time = std::chrono::high_resolution_clock::now();
-    RenderScene(canvas);
+    RenderScene();
     auto end_time = std::chrono::high_resolution_clock::now();
     std::cout << "Rendering Time: "
               << std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count() << "ms \n";

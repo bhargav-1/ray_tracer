@@ -16,7 +16,7 @@ constexpr ray_tracer::Color kBlack{0, 0, 0};
 
 class TestPattern : public Pattern {
 public:
-  [[nodiscard]] auto ColorAt(const Point& point) const -> Color override {
+  [[nodiscard]] auto LocalColorAt(const Point& point) const -> Color override {
     return {point.GetX(), point.GetY(), point.GetZ()};
   }
 };

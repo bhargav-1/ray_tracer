@@ -10,6 +10,7 @@ class Pattern{
         virtual ~Pattern() = default;
         [[nodiscard]] virtual auto GetA() const -> Color = 0;
         [[nodiscard]] virtual auto GetB() const -> Color = 0;
+        [[nodiscard]] virtual auto ColorAt(const Point& point) const -> Color = 0;
 };
 
 class StripePattern : public Pattern {
@@ -21,7 +22,7 @@ public:
   [[nodiscard]] auto GetB() const -> Color override {
     return color_b_;
   }
-  [[nodiscard]] auto StripeAt(const Point& point) const -> Color {
+  [[nodiscard]] auto ColorAt(const Point& point) const -> Color override {
    if (static_cast<int>(std::floor(point.GetX())) % 2 == 0) {
      return color_a_;
    }

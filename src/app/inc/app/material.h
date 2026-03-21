@@ -25,9 +25,8 @@ class Material {
   constexpr void SetSpecular(const double specular) { specular_ = specular; }
   [[nodiscard]] constexpr auto GetShininess() const -> double { return shininess_; }
   constexpr void SetShininess(const double shininess) { shininess_ = shininess; }
-  [[nodiscard]] constexpr auto HasPattern() const -> bool { return has_pattern_; }
+  [[nodiscard]] auto HasPattern() const -> bool { return pattern_ != nullptr; }
   auto SetPattern(std::shared_ptr<Pattern> pattern) -> void {
-    has_pattern_ = true;
     pattern_ = std::move(pattern);
   }
   [[nodiscard]] auto GetPattern() const -> const Pattern* { return pattern_.get(); }
@@ -38,7 +37,6 @@ class Material {
   double diffuse_{0.9};
   double specular_{0.9};
   double shininess_{200.0};
-  bool has_pattern_{false};
   std::shared_ptr<Pattern> pattern_;
 };
 }  // namespace ray_tracer

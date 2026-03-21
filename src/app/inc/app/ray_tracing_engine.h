@@ -82,6 +82,7 @@ inline auto ShadeHit(const World& world, const Computations& computations) -> Co
   Color color{0, 0, 0};
   for (auto world_light : world.Lights()) {
     color = color + Lighting(computations.GetObject()->GetMaterial(),
+                             *computations.GetObject(),
                              world_light,
                              computations.GetPoint(),
                              computations.GetEyeV(),

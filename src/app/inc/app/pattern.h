@@ -2,15 +2,18 @@
 #include <utility>
 
 #include "color.h"
+#include "matrix.h"
 #include "point.h"
 
 namespace ray_tracer{
+class Shape;
 class Pattern{
   public:
         virtual ~Pattern() = default;
         [[nodiscard]] virtual auto GetA() const -> Color = 0;
         [[nodiscard]] virtual auto GetB() const -> Color = 0;
         [[nodiscard]] virtual auto ColorAt(const Point& point) const -> Color = 0;
+        [[nodiscard]] virtual auto GetPatternTransform() const -> Matrix<4, 4> =0;
 };
 
 class StripePattern : public Pattern {
@@ -28,8 +31,14 @@ public:
    }
     return color_b_;
   }
+  [[nodiscard]] auto GetPatternTransform() const -> Matrix<4, 4> override {
+    return transform_;
+  }
+  void SetPatternTransform(const Matrix<4, 4>& transform) { transform_ = transform; }
 private:
   Color color_a_;
   Color color_b_;
+  Matrix<4, 4> transform_ = Matrix<4, 4>::IdentityMatrix();
 };
+
 }

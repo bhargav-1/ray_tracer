@@ -75,7 +75,7 @@ static void RenderScene(ImDrawList* canvas) {
           auto point = ray.Position(Hit(xs).value().GetTime());
           auto normal = shape.NormalAt(point);
           auto eye = -ray.GetDirection();
-          auto sphere_color = ray_tracer::Lighting(material, light, point, eye, normal);
+          auto sphere_color = ray_tracer::Lighting(material, shape, light, point, eye, normal);
           ImColor render_color = ImColor(static_cast<int>(sphere_color.GetRed() * 255),
                                          static_cast<int>(sphere_color.GetGreen() * 255),
                                          static_cast<int>(sphere_color.GetBlue() * 255),

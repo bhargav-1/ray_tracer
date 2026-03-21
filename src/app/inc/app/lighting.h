@@ -3,15 +3,28 @@
 #include "pattern.h"
 #include "point.h"
 #include "point_light.h"
+#include "shape.h"
 #include "vec3.h"
 
 namespace ray_tracer {
-auto inline Lighting(
-    const Material& material, const PointLight& light, const Point& position, const Vec3& eyev, const Vec3& normalv, bool in_shadow = false) -> Color {
+
+inline auto ColorAtObject(const Pattern& pattern, const Shape& object, const Point& point) -> Color {
+  const auto object_point = object.GetTransform().Inverse() * point;
+  const auto pattern_point = pattern.GetPatternTransform().Inverse() * object_point;
+  return pattern.ColorAt(pattern_point);
+}
+
+auto inline Lighting(const Material& material,
+                     const Shape& shape,
+                     const PointLight& light,
+                     const Point& position,
+                     const Vec3& eyev,
+                     const Vec3& normalv,
+                     bool in_shadow = false) -> Color {
   Color color;
-  if (material.HasPattern()) {
-   color = material.GetPattern()->ColorAt(position);
-  }else {
+  if (const auto* pattern = material.GetPattern()) {
+    color = ColorAtObject(*pattern, shape, position);
+  } else {
     color = material.GetColor();
   }
   const auto effective_color = color * light.GetIntensity();

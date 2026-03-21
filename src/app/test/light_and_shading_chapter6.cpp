@@ -130,7 +130,8 @@ SCENARIO("lighting with the eye between the light and the surface") {
     auto light = ray_tracer::PointLight(ray_tracer::Point(0, 0, -10), ray_tracer::Color(1, 1, 1));
     auto material = ray_tracer::Material();
     auto position = ray_tracer::Point(0, 0, 0);
-    auto result = Lighting(material, light, position, eyev, normalv);
+    Sphere const sphere(1);
+    auto result = Lighting(material, sphere, light, position, eyev, normalv);
     THEN("result = lighting(m, s, light, position, eyev, normalv)") {
       CHECK(result == ray_tracer::Color(1.9, 1.9, 1.9));
     }
@@ -143,7 +144,8 @@ SCENARIO("lIghting with the eye between light and surface,eye offset 45 deg") {
     auto light = ray_tracer::PointLight(ray_tracer::Point(0, 0, -10), ray_tracer::Color(1, 1, 1));
     auto material = ray_tracer::Material();
     auto position = ray_tracer::Point(0, 0, 0);
-    auto result = Lighting(material, light, position, eyev, normalv);
+    Sphere const sphere(1);
+    auto result = Lighting(material, sphere, light, position, eyev, normalv);
     THEN("result = lighting(m, s, light, position, eyev, normalv)") {
       CHECK(result == ray_tracer::Color(1.0, 1.0, 1.0));
     }
@@ -156,7 +158,8 @@ SCENARIO("lighting with eye opposite surface, light offset 45 deg") {
     auto light = ray_tracer::PointLight(ray_tracer::Point(0, 10, -10), ray_tracer::Color(1, 1, 1));
     auto material = ray_tracer::Material();
     auto position = ray_tracer::Point(0, 0, 0);
-    auto result = Lighting(material, light, position, eyev, normalv);
+    Sphere const sphere(1);
+    auto result = Lighting(material, sphere, light, position, eyev, normalv);
     THEN("result = lighting(m, s, light, position, eyev, normalv)") {
       CHECK(result == ray_tracer::Color(0.7364, 0.7364, 0.7364));
     }
@@ -170,7 +173,8 @@ SCENARIO("lighting with eye in the path of the reflection vector") {
     auto light = ray_tracer::PointLight(ray_tracer::Point(0, 10, -10), ray_tracer::Color(1, 1, 1));
     auto material = ray_tracer::Material();
     auto position = ray_tracer::Point(0, 0, 0);
-    auto result = Lighting(material, light, position, eyev, normalv);
+    Sphere const sphere(1);
+    auto result = Lighting(material, sphere, light, position, eyev, normalv);
     THEN("result = lighting(m, s, light, position, eyev, normalv)") {
       CHECK(result == ray_tracer::Color(1.6364, 1.6364, 1.6364));
     }
@@ -183,7 +187,8 @@ SCENARIO("lighting with light behind the surface") {
     auto light = ray_tracer::PointLight(ray_tracer::Point(0, 0, 10), ray_tracer::Color(1, 1, 1, 1));
     auto material = ray_tracer::Material();
     auto position = ray_tracer::Point(0, 0, 0);
-    auto result = Lighting(material, light, position, eyev, normalv);
+    Sphere const sphere(1);
+    auto result = Lighting(material, sphere, light, position, eyev, normalv);
     THEN("result = lighting(m, s, light, position, eyev, normalv)") {
       CHECK(result == ray_tracer::Color(0.1, 0.1, 0.1));
     }

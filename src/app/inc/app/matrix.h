@@ -263,10 +263,11 @@ constexpr auto Matrix<Rows, Cols>::Inverse() const -> Matrix<Rows, Cols> {
   //   throw std::logic_error("Matrix is not invertible");
   // }
   Matrix<Rows, Cols> inverse;
+  const double det = Determinant();
   for (size_t i = 0; i < Rows; i++) {
     for (size_t j = 0; j < Cols; j++) {
       const double cofactor = Cofactor(i, j);
-      inverse.matrix_[j][i] = cofactor / Determinant();
+      inverse.matrix_[j][i] = cofactor / det;
     }
   }
   return inverse;
@@ -445,9 +446,11 @@ auto constexpr operator*(const Matrix<R, C>& lhs, const Matrix<R2, C2>& rhs) -> 
 template <size_t R, size_t C>
 auto constexpr operator*(const Matrix<R, C>& lhs, const Tuple& tuple) -> Tuple {
   static_assert(C == 4, "Matrix must be 4x4 for multiplication with Tuple");
-  const Matrix<R, 1> temp(tuple);
-  Matrix<R, 1> temp2 = lhs * temp;
-  return Tuple(temp2[0][0], temp2[1][0], temp2[2][0], temp2[3][0]);
+  return Tuple(
+      lhs.matrix_[0][0] * tuple.GetX() + lhs.matrix_[0][1] * tuple.GetY() + lhs.matrix_[0][2] * tuple.GetZ() + lhs.matrix_[0][3] * tuple.GetW(),
+      lhs.matrix_[1][0] * tuple.GetX() + lhs.matrix_[1][1] * tuple.GetY() + lhs.matrix_[1][2] * tuple.GetZ() + lhs.matrix_[1][3] * tuple.GetW(),
+      lhs.matrix_[2][0] * tuple.GetX() + lhs.matrix_[2][1] * tuple.GetY() + lhs.matrix_[2][2] * tuple.GetZ() + lhs.matrix_[2][3] * tuple.GetW(),
+      lhs.matrix_[3][0] * tuple.GetX() + lhs.matrix_[3][1] * tuple.GetY() + lhs.matrix_[3][2] * tuple.GetZ() + lhs.matrix_[3][3] * tuple.GetW());
 }
 
 template <size_t R, size_t C, size_t R2, size_t C2>

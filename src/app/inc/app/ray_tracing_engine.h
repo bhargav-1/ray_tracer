@@ -23,6 +23,7 @@ namespace ray_tracer {
 
 inline auto Intersect(const Ray& ray, const World& world) -> std::vector<Intersection> {
   std::vector<Intersection> intersections;
+  intersections.reserve(world.Objects().size() * 2);
   for (auto const& object : world.Objects()) {
     auto object_intersections = object->Intersect(ray);
     // std::cout << " object_intersections size: " << object_intersections.size() << "\n";

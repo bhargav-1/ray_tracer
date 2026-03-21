@@ -36,71 +36,75 @@ static void RenderScene(ImDrawList* canvas) {
     const auto cache_start = std::chrono::high_resolution_clock::now();
     ray_tracer::World world{};
 
-    // Floor plane with stripe pattern
+    // Floor plane with checkers
     auto floor = ray_tracer::Plane(1);
+    auto floor_pat = ray_tracer::CheckersPattern(
+        ray_tracer::Color{0.9, 0.9, 0.9}, ray_tracer::Color{0.3, 0.3, 0.3});
     auto floor_mat = ray_tracer::Material{ray_tracer::Color{1, 0.9, 0.9}, 0.1, 0.9, 0.0, 200};
-    floor_mat.SetPattern(std::make_shared<ray_tracer::StripePattern>(
-        ray_tracer::Color{0.9, 0.9, 0.9}, ray_tracer::Color{0.4, 0.4, 0.4}));
+    floor_mat.SetPattern(std::make_shared<ray_tracer::CheckersPattern>(floor_pat));
     floor.SetMaterial(floor_mat);
     world.AddObject(std::make_shared<ray_tracer::Plane>(floor));
 
-    // Left wall plane
+    // Left wall plane with gradient
     auto left_wall = ray_tracer::Plane(2);
     left_wall.SetTransform(ray_tracer::Matrix<4, 4>::Translation(0, 0, 5) *
                            ray_tracer::Matrix<4, 4>::RotationY(-std::numbers::pi / 4) *
                            ray_tracer::Matrix<4, 4>::RotationX(std::numbers::pi / 2));
+    auto lwall_pat = ray_tracer::GradientPattern(
+        ray_tracer::Color{0.2, 0.2, 0.8}, ray_tracer::Color{0.8, 0.2, 0.2});
+    lwall_pat.SetPatternTransform(ray_tracer::Matrix<4, 4>::Scaling(2, 1, 1));
     auto wall_mat = ray_tracer::Material{ray_tracer::Color{1, 0.9, 0.9}, 0.1, 0.9, 0.0, 200};
-    wall_mat.SetPattern(std::make_shared<ray_tracer::StripePattern>(
-        ray_tracer::Color{0.8, 0.8, 1.0}, ray_tracer::Color{0.5, 0.5, 0.7}));
+    wall_mat.SetPattern(std::make_shared<ray_tracer::GradientPattern>(lwall_pat));
     left_wall.SetMaterial(wall_mat);
     world.AddObject(std::make_shared<ray_tracer::Plane>(left_wall));
 
-    // Right wall plane
+    // Right wall plane with stripes
     auto right_wall = ray_tracer::Plane(3);
     right_wall.SetTransform(ray_tracer::Matrix<4, 4>::Translation(0, 0, 5) *
                             ray_tracer::Matrix<4, 4>::RotationY(std::numbers::pi / 4) *
                             ray_tracer::Matrix<4, 4>::RotationX(std::numbers::pi / 2));
+    auto rwall_pat = ray_tracer::StripePattern(
+        ray_tracer::Color{0.8, 0.6, 0.2}, ray_tracer::Color{0.4, 0.3, 0.1});
+    rwall_pat.SetPatternTransform(ray_tracer::Matrix<4, 4>::Scaling(0.5, 0.5, 0.5));
     auto rwall_mat = ray_tracer::Material{ray_tracer::Color{1, 0.9, 0.9}, 0.1, 0.9, 0.0, 200};
-    rwall_mat.SetPattern(std::make_shared<ray_tracer::StripePattern>(
-        ray_tracer::Color{1.0, 0.8, 0.8}, ray_tracer::Color{0.7, 0.5, 0.5}));
+    rwall_mat.SetPattern(std::make_shared<ray_tracer::StripePattern>(rwall_pat));
     right_wall.SetMaterial(rwall_mat);
     world.AddObject(std::make_shared<ray_tracer::Plane>(right_wall));
 
-    // Large sphere (center) — diagonal stripes via rotation + scaling
+    // Large sphere (center) — ring pattern with rotation
     auto large = ray_tracer::Sphere(4);
     large.SetTransform(ray_tracer::Matrix<4, 4>::Translation(-0.5, 1, 0.5));
-    auto large_pat = ray_tracer::StripePattern(
+    auto large_pat = ray_tracer::RingPattern(
         ray_tracer::Color{0.1, 0.3, 0.8}, ray_tracer::Color{0.05, 0.15, 0.4});
-    large_pat.SetPatternTransform(ray_tracer::Matrix<4, 4>::Scaling(0.2, 0.2, 0.2) *
-                                  ray_tracer::Matrix<4, 4>::RotationY(std::numbers::pi / 4));
+    large_pat.SetPatternTransform(ray_tracer::Matrix<4, 4>::Scaling(0.15, 0.15, 0.15) *
+                                  ray_tracer::Matrix<4, 4>::RotationX(std::numbers::pi / 3));
     auto large_mat = ray_tracer::Material{ray_tracer::Color{0.1, 0.3, 0.8}, 0.1, 0.7, 0.3, 200};
-    large_mat.SetPattern(std::make_shared<ray_tracer::StripePattern>(large_pat));
+    large_mat.SetPattern(std::make_shared<ray_tracer::RingPattern>(large_pat));
     large.SetMaterial(large_mat);
     world.AddObject(std::make_shared<ray_tracer::Sphere>(large));
 
-    // Medium sphere (right) — horizontal-ish stripes via Z rotation + scaling
+    // Medium sphere (right) — checkers with rotation
     auto medium = ray_tracer::Sphere(5);
     medium.SetTransform(ray_tracer::Matrix<4, 4>::Translation(1.5, 0.5, -0.5) *
-                        ray_tracer::Matrix<4, 4>::Scaling(0.5, 0.5, 0.5));
-    auto med_pat = ray_tracer::StripePattern(
-        ray_tracer::Color{0.8, 0.2, 0.1}, ray_tracer::Color{0.4, 0.1, 0.05});
-    med_pat.SetPatternTransform(ray_tracer::Matrix<4, 4>::Scaling(0.15, 0.15, 0.15) *
-                                ray_tracer::Matrix<4, 4>::RotationZ(std::numbers::pi / 3));
+                        ray_tracer::Matrix<4, 4>::Scaling(0.5, 0.5, 0.5) *
+                        ray_tracer::Matrix<4, 4>::RotationY(std::numbers::pi / 6));
+    auto med_pat = ray_tracer::CheckersPattern(
+        ray_tracer::Color{0.8, 0.2, 0.1}, ray_tracer::Color{1.0, 0.8, 0.6});
+    med_pat.SetPatternTransform(ray_tracer::Matrix<4, 4>::Scaling(0.3, 0.3, 0.3));
     auto med_mat = ray_tracer::Material{ray_tracer::Color{0.8, 0.2, 0.1}, 0.1, 0.7, 0.3, 200};
-    med_mat.SetPattern(std::make_shared<ray_tracer::StripePattern>(med_pat));
+    med_mat.SetPattern(std::make_shared<ray_tracer::CheckersPattern>(med_pat));
     medium.SetMaterial(med_mat);
     world.AddObject(std::make_shared<ray_tracer::Sphere>(medium));
 
-    // Small sphere (left) — vertical stripes scaled down
+    // Small sphere (left) — gradient with rotation
     auto small = ray_tracer::Sphere(6);
     small.SetTransform(ray_tracer::Matrix<4, 4>::Translation(-1.5, 0.33, -0.75) *
-                       ray_tracer::Matrix<4, 4>::Scaling(0.33, 0.33, 0.33));
-    auto small_pat = ray_tracer::StripePattern(
-        ray_tracer::Color{0.2, 0.8, 0.3}, ray_tracer::Color{0.1, 0.4, 0.15});
-    small_pat.SetPatternTransform(ray_tracer::Matrix<4, 4>::Scaling(0.1, 0.1, 0.1) *
-                                  ray_tracer::Matrix<4, 4>::RotationY(-std::numbers::pi / 6));
+                       ray_tracer::Matrix<4, 4>::Scaling(0.33, 0.33, 0.33) *
+                       ray_tracer::Matrix<4, 4>::RotationZ(std::numbers::pi / 4));
+    auto small_pat = ray_tracer::GradientPattern(
+        ray_tracer::Color{0.2, 0.8, 0.3}, ray_tracer::Color{0.8, 0.2, 0.8});
     auto small_mat = ray_tracer::Material{ray_tracer::Color{0.2, 0.8, 0.3}, 0.1, 0.7, 0.3, 200};
-    small_mat.SetPattern(std::make_shared<ray_tracer::StripePattern>(small_pat));
+    small_mat.SetPattern(std::make_shared<ray_tracer::GradientPattern>(small_pat));
     small.SetMaterial(small_mat);
     world.AddObject(std::make_shared<ray_tracer::Sphere>(small));
 

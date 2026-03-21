@@ -22,12 +22,13 @@ public:
   void SetTransform(const Matrix<4, 4>& transform) {
     transform_ = transform;
     inverse_transform_ = transform.Inverse();
+    transpose_inverse_ = Transpose(inverse_transform_);
   }
   [[nodiscard]] auto NormalAt(const ray_tracer::Point& point) const -> Vec3 {
     const auto object_point = inverse_transform_ * point;
     auto const object_normal = LocalNormalAt(object_point);
     // https:  //www.scratchapixel.com/lessons/mathematics-physics-for-computer-graphics/geometry/transforming-normals.html
-    Vec3 const world_normal = Transpose(inverse_transform_) * object_normal;
+    Vec3 const world_normal = transpose_inverse_ * object_normal;
     return world_normal.Normalize();
   };
   [[nodiscard]] auto GetMaterial() const -> const Material& { return material_; }
@@ -45,6 +46,7 @@ private:
   std::size_t id_;
   Matrix<4, 4> transform_ = Matrix<4, 4>::IdentityMatrix();
   Matrix<4, 4> inverse_transform_ = Matrix<4, 4>::IdentityMatrix();
+  Matrix<4, 4> transpose_inverse_ = Matrix<4, 4>::IdentityMatrix();
   Material material_;
   mutable std::optional<Ray> saved_ray_;
 };

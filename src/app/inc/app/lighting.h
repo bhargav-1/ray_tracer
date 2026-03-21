@@ -1,5 +1,6 @@
 #pragma once
 #include "material.h"
+#include "pattern.h"
 #include "point.h"
 #include "point_light.h"
 #include "vec3.h"
@@ -7,10 +8,16 @@
 namespace ray_tracer {
 auto inline Lighting(
     const Material& material, const PointLight& light, const Point& position, const Vec3& eyev, const Vec3& normalv, bool in_shadow = false) -> Color {
-  auto effective_color = material.GetColor() * light.GetIntensity();
-  auto lightv = Vec3(light.GetPosition() - position).Normalize();
-  auto ambient = effective_color * material.GetAmbient();
-  auto light_dot_normal = lightv.Dot(normalv);
+  Color color;
+  if (material.HasPattern()) {
+   color = material.GetPattern()->ColorAt(position);
+  }else {
+    color = material.GetColor();
+  }
+  const auto effective_color = color * light.GetIntensity();
+  const auto lightv = Vec3(light.GetPosition() - position).Normalize();
+  const auto ambient = effective_color * material.GetAmbient();
+  const auto light_dot_normal = lightv.Dot(normalv);
   Color diffuse;
   Color specular;
   if (light_dot_normal < 0 || in_shadow) {

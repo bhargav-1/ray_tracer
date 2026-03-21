@@ -85,13 +85,13 @@ class Matrix {
 
   template <size_t R, size_t C>
   friend auto constexpr Transpose(const Matrix<R, C>& lhs) -> Matrix<C, R>;  // NOLINT [redundant]
-  constexpr auto Determinant() -> double;
-  constexpr auto MinorDeterminant() -> double;
-  constexpr auto Minor(const size_t& row, const size_t& col) -> double;
-  constexpr auto Cofactor(const size_t& row, const size_t& col) -> double;
-  constexpr auto SpotSubMatrix(const size_t& row, const size_t& col) -> Matrix<Rows - 1, Cols - 1>;
-  constexpr auto Invertible() -> bool;
-  constexpr auto Inverse() -> Matrix<Rows, Cols>;
+  [[nodiscard]] constexpr auto Determinant() const -> double;
+  [[nodiscard]] constexpr auto MinorDeterminant() const -> double;
+  [[nodiscard]] constexpr auto Minor(const size_t& row, const size_t& col) const -> double;
+  [[nodiscard]] constexpr auto Cofactor(const size_t& row, const size_t& col) const -> double;
+  [[nodiscard]] constexpr auto SpotSubMatrix(const size_t& row, const size_t& col) const -> Matrix<Rows - 1, Cols - 1>;
+  [[nodiscard]] constexpr auto Invertible() const -> bool;
+  [[nodiscard]] constexpr auto Inverse() const -> Matrix<Rows, Cols>;
 
   static constexpr auto Translation(const double& x_dir, const double& y_dir, const double& z_dir)
       -> ray_tracer::Matrix<4, 4>;
@@ -149,7 +149,7 @@ constexpr auto Matrix<Rows, Cols>::IdentityMatrix() -> Matrix<Rows, Cols> {
 }
 
 template <size_t Rows, size_t Cols>
-constexpr auto Matrix<Rows, Cols>::Determinant() -> double {
+constexpr auto Matrix<Rows, Cols>::Determinant() const -> double {
   static_assert(Rows == Cols, "Determinant matrix must be square");
   static_assert(Rows > 0, "Determinant matrix must be at least 1x1");
   double determinant = 0;
@@ -179,12 +179,12 @@ constexpr auto Matrix<Rows, Cols>::Determinant() -> double {
 }
 
 template <size_t Rows, size_t Cols>
-constexpr auto Matrix<Rows, Cols>::MinorDeterminant() -> double {
+constexpr auto Matrix<Rows, Cols>::MinorDeterminant() const -> double {
   static_assert(Rows == Cols, "Determinant matrix must be square");
   return matrix_[0][0] * matrix_[1][1] - matrix_[0][1] * matrix_[1][0];
 }
 template <size_t Rows, size_t Cols>
-constexpr auto Matrix<Rows, Cols>::Minor(const size_t& row, const size_t& col) -> double {
+constexpr auto Matrix<Rows, Cols>::Minor(const size_t& row, const size_t& col) const -> double {
   static_assert(Rows == Cols, "Determinant matrix must be square");
   static_assert(Rows >= 3, "Minor needs matrix must be >=3");
   if constexpr (Rows <= 2) {
@@ -206,7 +206,7 @@ constexpr auto Matrix<Rows, Cols>::Minor(const size_t& row, const size_t& col) -
 }
 
 template <size_t Rows, size_t Cols>
-constexpr auto Matrix<Rows, Cols>::Cofactor(const size_t& row, const size_t& col) -> double {
+constexpr auto Matrix<Rows, Cols>::Cofactor(const size_t& row, const size_t& col) const -> double {
   static_assert(Rows == Cols, "Determinant matrix must be square");
 
   // if (row >= Rows || col >= Cols) {
@@ -221,7 +221,7 @@ constexpr auto Matrix<Rows, Cols>::Cofactor(const size_t& row, const size_t& col
 }
 
 template <size_t Rows, size_t Cols>
-constexpr auto Matrix<Rows, Cols>::SpotSubMatrix(const size_t& row, const size_t& col) -> Matrix<Rows - 1, Cols - 1> {
+constexpr auto Matrix<Rows, Cols>::SpotSubMatrix(const size_t& row, const size_t& col) const -> Matrix<Rows - 1, Cols - 1> {
   static_assert(Rows == Cols, "Determinant matrix must be square");
   // following doesn't actually let template know they cannot be 1 or 0;it doesnt compile for 1/0
   static_assert(Rows <= 1000 && Cols <= 1000, "Cannot create a submatrix for matrices smaller than 2x2.");
@@ -253,11 +253,11 @@ constexpr auto Matrix<Rows, Cols>::SpotSubMatrix(const size_t& row, const size_t
 }
 
 template <size_t Rows, size_t Cols>
-constexpr auto Matrix<Rows, Cols>::Invertible() -> bool {
+constexpr auto Matrix<Rows, Cols>::Invertible() const -> bool {
   return Determinant() != 0;
 }
 template <size_t Rows, size_t Cols>
-constexpr auto Matrix<Rows, Cols>::Inverse() -> Matrix<Rows, Cols> {
+constexpr auto Matrix<Rows, Cols>::Inverse() const -> Matrix<Rows, Cols> {
   static_assert(Rows == Cols, "Determinant matrix must be square");
   // if (!Invertible()) {
   //   throw std::logic_error("Matrix is not invertible");

@@ -4,8 +4,10 @@
 #include "color.h"
 #include "matrix.h"
 #include "point.h"
+#include "utilities.h"
 
 namespace ray_tracer {
+
 class Shape;
 class Pattern {
  public:
@@ -24,7 +26,7 @@ class StripePattern : public Pattern {
   [[nodiscard]] auto GetA() const -> Color { return color_a_; }
   [[nodiscard]] auto GetB() const -> Color { return color_b_; }
   [[nodiscard]] auto ColorAt(const Point& point) const -> Color override {
-    if (static_cast<int>(std::floor(point.GetX())) % 2 == 0) {
+    if (static_cast<int>(std::floor(point.GetX() + utilities::kEpsilon)) % 2 == 0) {
       return color_a_;
     }
     return color_b_;
@@ -36,49 +38,54 @@ class StripePattern : public Pattern {
 };
 
 class GradientPattern : public Pattern {
-public:
+ public:
   GradientPattern(Color color_a, Color color_b) : Pattern(), color_a_(std::move(color_a)), color_b_(std::move(color_b)) {}
   [[nodiscard]] auto GetA() const -> Color { return color_a_; }
   [[nodiscard]] auto GetB() const -> Color { return color_b_; }
   [[nodiscard]] auto ColorAt(const Point& point) const -> Color override {
     const auto distance = color_b_ - color_a_;
-    const auto fraction = (point.GetX() - std::floor(point.GetX()));
+    const auto fraction = (point.GetX() - std::floor(point.GetX() + utilities::kEpsilon));
     return Color(color_a_ + distance * fraction);
   }
 
-private:
+ private:
   Color color_a_;
   Color color_b_;
-
 };
-class RingPattern: public Pattern {
-public:
+
+class RingPattern : public Pattern {
+ public:
   RingPattern(Color color_a, Color color_b) : Pattern(), color_a_(std::move(color_a)), color_b_(std::move(color_b)) {}
   [[nodiscard]] auto GetA() const -> Color { return color_a_; }
   [[nodiscard]] auto GetB() const -> Color { return color_b_; }
   [[nodiscard]] auto ColorAt(const Point& point) const -> Color override {
-    if (static_cast<int>(std::floor(std::sqrt((point.GetX() * point.GetX()) + (point.GetZ() * point.GetZ())))) % 2 == 0) {
+    const auto radius = std::sqrt((point.GetX() * point.GetX()) + (point.GetZ() * point.GetZ()));
+    if (static_cast<int>(std::floor(radius + utilities::kEpsilon)) % 2 == 0) {
       return color_a_;
     }
     return color_b_;
   }
-private:
+
+ private:
   Color color_a_;
   Color color_b_;
 };
 
-class CheckersPattern: public Pattern {
-public:
+class CheckersPattern : public Pattern {
+ public:
   CheckersPattern(Color color_a, Color color_b) : Pattern(), color_a_(std::move(color_a)), color_b_(std::move(color_b)) {}
   [[nodiscard]] auto GetA() const -> Color { return color_a_; }
   [[nodiscard]] auto GetB() const -> Color { return color_b_; }
   [[nodiscard]] auto ColorAt(const Point& point) const -> Color override {
-   if ((static_cast<int>(std::floor(point.GetX()) + std::floor(point.GetY()) + std::floor(point.GetZ()))) % 2 == 0) {
+    if ((static_cast<int>(std::floor(point.GetX() + utilities::kEpsilon) +
+                          std::floor(point.GetY() + utilities::kEpsilon) +
+                          std::floor(point.GetZ() + utilities::kEpsilon))) % 2 == 0) {
       return color_a_;
     }
     return color_b_;
   }
-private:
+
+ private:
   Color color_a_;
   Color color_b_;
 };

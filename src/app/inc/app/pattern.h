@@ -14,8 +14,7 @@ class Pattern {
  public:
   virtual ~Pattern() = default;
   [[nodiscard]] auto ColorAt(const Point& point) const -> Color {
-    auto inv = transform_;
-    const auto local_point = inv.Inverse() * point;
+    const auto local_point = transform_.Inverse() * point;
     return LocalColorAt(local_point);
   }
   [[nodiscard]] virtual auto LocalColorAt(const Point& point) const -> Color = 0;

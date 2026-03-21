@@ -1,3 +1,28 @@
+// Chapter 10 — Patterns showcase
+//
+// Scene layout:
+//   Camera at (1, 3, -7) looking at (1, 0.5, 0), FOV 60°
+//
+//   Floor (Plane):
+//     CheckersPattern of two RadialGradientPatterns
+//       Tile A: cream → brown concentric rings (scale 0.15)
+//       Tile B: light blue → dark blue concentric rings (scale 0.15)
+//
+//   Front row (left to right, z=0):
+//     Sphere 1  r=0.4  x=-3.2  StripePattern (red/white, rotated 45°)
+//     Sphere 2  r=0.6  x=-1.8  GradientPattern (green → purple)
+//     Sphere 3  r=0.8  x=-0.2  RingPattern (blue/yellow, tilted 60°)
+//     Sphere 4  r=1.0  x= 1.5  CheckersPattern (red/cream, scale 0.3)
+//     Sphere 5  r=0.7  x= 3.2  RadialGradientPattern (gold → purple, scale 0.25)
+//     Sphere 6  r=0.5  x= 4.6  BlendedPattern (red/yellow stripes + blue/green stripes = plaid)
+//
+//   Back row (z=4):
+//     Sphere 7  r=1.5  x= 1.0  Nested CheckersPattern of two StripePatterns
+//                                 Tile A: green stripes (scale 0.15)
+//                                 Tile B: orange/purple stripes rotated 90° (scale 0.15)
+//
+//   Light: point light at (-10, 10, -10), white
+
 #include <algorithm>
 #include <atomic>
 #include <cstdio>
@@ -36,82 +61,120 @@ static void RenderScene(ImDrawList* canvas) {
     const auto cache_start = std::chrono::high_resolution_clock::now();
     ray_tracer::World world{};
 
-    // Floor plane with checkers
+    // Floor plane — checkers of two radial gradients
     auto floor = ray_tracer::Plane(1);
-    auto floor_pat = ray_tracer::CheckersPattern(
-        ray_tracer::Color{0.9, 0.9, 0.9}, ray_tracer::Color{0.3, 0.3, 0.3});
+    auto floor_a = std::make_shared<ray_tracer::RadialGradientPattern>(
+        ray_tracer::Color{0.9, 0.9, 0.85}, ray_tracer::Color{0.4, 0.2, 0.1});
+    floor_a->SetPatternTransform(ray_tracer::Matrix<4, 4>::Scaling(0.15, 0.15, 0.15));
+    auto floor_b = std::make_shared<ray_tracer::RadialGradientPattern>(
+        ray_tracer::Color{0.6, 0.8, 0.9}, ray_tracer::Color{0.1, 0.2, 0.4});
+    floor_b->SetPatternTransform(ray_tracer::Matrix<4, 4>::Scaling(0.15, 0.15, 0.15));
+    auto floor_pat = ray_tracer::CheckersPattern(floor_a, floor_b);
     auto floor_mat = ray_tracer::Material{ray_tracer::Color{1, 0.9, 0.9}, 0.1, 0.9, 0.0, 200};
     floor_mat.SetPattern(std::make_shared<ray_tracer::CheckersPattern>(floor_pat));
     floor.SetMaterial(floor_mat);
     world.AddObject(std::make_shared<ray_tracer::Plane>(floor));
 
-    // Left wall plane with gradient
-    auto left_wall = ray_tracer::Plane(2);
-    left_wall.SetTransform(ray_tracer::Matrix<4, 4>::Translation(0, 0, 5) *
-                           ray_tracer::Matrix<4, 4>::RotationY(-std::numbers::pi / 4) *
-                           ray_tracer::Matrix<4, 4>::RotationX(std::numbers::pi / 2));
-    auto lwall_pat = ray_tracer::GradientPattern(
-        ray_tracer::Color{0.2, 0.2, 0.8}, ray_tracer::Color{0.8, 0.2, 0.2});
-    lwall_pat.SetPatternTransform(ray_tracer::Matrix<4, 4>::Scaling(2, 1, 1));
-    auto wall_mat = ray_tracer::Material{ray_tracer::Color{1, 0.9, 0.9}, 0.1, 0.9, 0.0, 200};
-    wall_mat.SetPattern(std::make_shared<ray_tracer::GradientPattern>(lwall_pat));
-    left_wall.SetMaterial(wall_mat);
-    world.AddObject(std::make_shared<ray_tracer::Plane>(left_wall));
+    // Sphere 1 — stripe
+    auto s1 = ray_tracer::Sphere(2);
+    s1.SetTransform(ray_tracer::Matrix<4, 4>::Translation(-3.2, 0.4, 0) *
+                    ray_tracer::Matrix<4, 4>::Scaling(0.4, 0.4, 0.4));
+    auto s1_pat = ray_tracer::StripePattern(
+        ray_tracer::Color{1, 0.2, 0.2}, ray_tracer::Color{1, 1, 1});
+    s1_pat.SetPatternTransform(ray_tracer::Matrix<4, 4>::Scaling(0.2, 0.2, 0.2) *
+                               ray_tracer::Matrix<4, 4>::RotationZ(std::numbers::pi / 4));
+    auto s1_mat = ray_tracer::Material{ray_tracer::Color{1, 1, 1}, 0.1, 0.7, 0.3, 200};
+    s1_mat.SetPattern(std::make_shared<ray_tracer::StripePattern>(s1_pat));
+    s1.SetMaterial(s1_mat);
+    world.AddObject(std::make_shared<ray_tracer::Sphere>(s1));
 
-    // Right wall plane with stripes
-    auto right_wall = ray_tracer::Plane(3);
-    right_wall.SetTransform(ray_tracer::Matrix<4, 4>::Translation(0, 0, 5) *
-                            ray_tracer::Matrix<4, 4>::RotationY(std::numbers::pi / 4) *
-                            ray_tracer::Matrix<4, 4>::RotationX(std::numbers::pi / 2));
-    auto rwall_pat = ray_tracer::StripePattern(
-        ray_tracer::Color{0.8, 0.6, 0.2}, ray_tracer::Color{0.4, 0.3, 0.1});
-    rwall_pat.SetPatternTransform(ray_tracer::Matrix<4, 4>::Scaling(0.5, 0.5, 0.5));
-    auto rwall_mat = ray_tracer::Material{ray_tracer::Color{1, 0.9, 0.9}, 0.1, 0.9, 0.0, 200};
-    rwall_mat.SetPattern(std::make_shared<ray_tracer::StripePattern>(rwall_pat));
-    right_wall.SetMaterial(rwall_mat);
-    world.AddObject(std::make_shared<ray_tracer::Plane>(right_wall));
-
-    // Large sphere (center) — ring pattern with rotation
-    auto large = ray_tracer::Sphere(4);
-    large.SetTransform(ray_tracer::Matrix<4, 4>::Translation(-0.5, 1, 0.5));
-    auto large_pat = ray_tracer::RingPattern(
-        ray_tracer::Color{0.1, 0.3, 0.8}, ray_tracer::Color{0.05, 0.15, 0.4});
-    large_pat.SetPatternTransform(ray_tracer::Matrix<4, 4>::Scaling(0.15, 0.15, 0.15) *
-                                  ray_tracer::Matrix<4, 4>::RotationX(std::numbers::pi / 3));
-    auto large_mat = ray_tracer::Material{ray_tracer::Color{0.1, 0.3, 0.8}, 0.1, 0.7, 0.3, 200};
-    large_mat.SetPattern(std::make_shared<ray_tracer::RingPattern>(large_pat));
-    large.SetMaterial(large_mat);
-    world.AddObject(std::make_shared<ray_tracer::Sphere>(large));
-
-    // Medium sphere (right) — checkers with rotation
-    auto medium = ray_tracer::Sphere(5);
-    medium.SetTransform(ray_tracer::Matrix<4, 4>::Translation(1.5, 0.5, -0.5) *
-                        ray_tracer::Matrix<4, 4>::Scaling(0.5, 0.5, 0.5) *
-                        ray_tracer::Matrix<4, 4>::RotationY(std::numbers::pi / 6));
-    auto med_pat = ray_tracer::CheckersPattern(
-        ray_tracer::Color{0.8, 0.2, 0.1}, ray_tracer::Color{1.0, 0.8, 0.6});
-    med_pat.SetPatternTransform(ray_tracer::Matrix<4, 4>::Scaling(0.3, 0.3, 0.3));
-    auto med_mat = ray_tracer::Material{ray_tracer::Color{0.8, 0.2, 0.1}, 0.1, 0.7, 0.3, 200};
-    med_mat.SetPattern(std::make_shared<ray_tracer::CheckersPattern>(med_pat));
-    medium.SetMaterial(med_mat);
-    world.AddObject(std::make_shared<ray_tracer::Sphere>(medium));
-
-    // Small sphere (left) — gradient with rotation
-    auto small = ray_tracer::Sphere(6);
-    small.SetTransform(ray_tracer::Matrix<4, 4>::Translation(-1.5, 0.33, -0.75) *
-                       ray_tracer::Matrix<4, 4>::Scaling(0.33, 0.33, 0.33) *
-                       ray_tracer::Matrix<4, 4>::RotationZ(std::numbers::pi / 4));
-    auto small_pat = ray_tracer::GradientPattern(
+    // Sphere 2 — gradient
+    auto s2 = ray_tracer::Sphere(3);
+    s2.SetTransform(ray_tracer::Matrix<4, 4>::Translation(-1.8, 0.6, 0) *
+                    ray_tracer::Matrix<4, 4>::Scaling(0.6, 0.6, 0.6));
+    auto s2_pat = ray_tracer::GradientPattern(
         ray_tracer::Color{0.2, 0.8, 0.3}, ray_tracer::Color{0.8, 0.2, 0.8});
-    auto small_mat = ray_tracer::Material{ray_tracer::Color{0.2, 0.8, 0.3}, 0.1, 0.7, 0.3, 200};
-    small_mat.SetPattern(std::make_shared<ray_tracer::GradientPattern>(small_pat));
-    small.SetMaterial(small_mat);
-    world.AddObject(std::make_shared<ray_tracer::Sphere>(small));
+    auto s2_mat = ray_tracer::Material{ray_tracer::Color{1, 1, 1}, 0.1, 0.7, 0.3, 200};
+    s2_mat.SetPattern(std::make_shared<ray_tracer::GradientPattern>(s2_pat));
+    s2.SetMaterial(s2_mat);
+    world.AddObject(std::make_shared<ray_tracer::Sphere>(s2));
+
+    // Sphere 3 — ring
+    auto s3 = ray_tracer::Sphere(4);
+    s3.SetTransform(ray_tracer::Matrix<4, 4>::Translation(-0.2, 0.8, 0) *
+                    ray_tracer::Matrix<4, 4>::Scaling(0.8, 0.8, 0.8));
+    auto s3_pat = ray_tracer::RingPattern(
+        ray_tracer::Color{0.1, 0.3, 0.8}, ray_tracer::Color{0.9, 0.9, 0.2});
+    s3_pat.SetPatternTransform(ray_tracer::Matrix<4, 4>::Scaling(0.12, 0.12, 0.12) *
+                               ray_tracer::Matrix<4, 4>::RotationX(std::numbers::pi / 3));
+    auto s3_mat = ray_tracer::Material{ray_tracer::Color{1, 1, 1}, 0.1, 0.7, 0.3, 200};
+    s3_mat.SetPattern(std::make_shared<ray_tracer::RingPattern>(s3_pat));
+    s3.SetMaterial(s3_mat);
+    world.AddObject(std::make_shared<ray_tracer::Sphere>(s3));
+
+    // Sphere 4 — checkers (largest)
+    auto s4 = ray_tracer::Sphere(5);
+    s4.SetTransform(ray_tracer::Matrix<4, 4>::Translation(1.5, 1.0, 0) *
+                    ray_tracer::Matrix<4, 4>::Scaling(1.0, 1.0, 1.0));
+    auto s4_pat = ray_tracer::CheckersPattern(
+        ray_tracer::Color{0.8, 0.2, 0.1}, ray_tracer::Color{0.0, 0.9, 1});
+    s4_pat.SetPatternTransform(ray_tracer::Matrix<4, 4>::Scaling(0.3, 0.3, 0.3));
+    auto s4_mat = ray_tracer::Material{ray_tracer::Color{1, 1, 1}, 0.1, 0.7, 0.3, 200};
+    s4_mat.SetPattern(std::make_shared<ray_tracer::CheckersPattern>(s4_pat));
+    s4.SetMaterial(s4_mat);
+    world.AddObject(std::make_shared<ray_tracer::Sphere>(s4));
+
+    // Sphere 5 — radial gradient
+    auto s5 = ray_tracer::Sphere(6);
+    s5.SetTransform(ray_tracer::Matrix<4, 4>::Translation(3.2, 0.7, 0) *
+                    ray_tracer::Matrix<4, 4>::Scaling(0.7, 0.7, 0.7));
+    auto s5_pat = ray_tracer::RadialGradientPattern(
+        ray_tracer::Color{1.0, 0.8, 0.0}, ray_tracer::Color{0.2, 0.0, 0.6});
+    s5_pat.SetPatternTransform(ray_tracer::Matrix<4, 4>::Scaling(0.25, 0.25, 0.25));
+    auto s5_mat = ray_tracer::Material{ray_tracer::Color{1, 1, 1}, 0.1, 0.7, 0.3, 200};
+    s5_mat.SetPattern(std::make_shared<ray_tracer::RadialGradientPattern>(s5_pat));
+    s5.SetMaterial(s5_mat);
+    world.AddObject(std::make_shared<ray_tracer::Sphere>(s5));
+
+    // Sphere 6 — blended (plaid)
+    auto s6 = ray_tracer::Sphere(7);
+    s6.SetTransform(ray_tracer::Matrix<4, 4>::Translation(4.6, 0.5, 0) *
+                    ray_tracer::Matrix<4, 4>::Scaling(0.5, 0.5, 0.5));
+    auto bl_a = std::make_shared<ray_tracer::StripePattern>(
+        ray_tracer::Color{0.9, 0.1, 0.1}, ray_tracer::Color{0.9, 0.9, 0.2});
+    bl_a->SetPatternTransform(ray_tracer::Matrix<4, 4>::Scaling(0.05, 0.05, 0.05));
+    auto bl_b = std::make_shared<ray_tracer::StripePattern>(
+        ray_tracer::Color{0.1, 0.1, 0.9}, ray_tracer::Color{0.2, 0.9, 0.2});
+    bl_b->SetPatternTransform(ray_tracer::Matrix<4, 4>::Scaling(0.05, 0.05, 0.05) *
+                              ray_tracer::Matrix<4, 4>::RotationZ(std::numbers::pi / 2));
+    auto s6_pat = ray_tracer::BlendedPattern(bl_a, bl_b);
+    auto s6_mat = ray_tracer::Material{ray_tracer::Color{1, 1, 1}, 0.1, 0.7, 0.3, 200};
+    s6_mat.SetPattern(std::make_shared<ray_tracer::BlendedPattern>(s6_pat));
+    s6.SetMaterial(s6_mat);
+    world.AddObject(std::make_shared<ray_tracer::Sphere>(s6));
+
+    // Sphere 7 — nested (checkers of stripes), behind the row
+    auto s7 = ray_tracer::Sphere(8);
+    s7.SetTransform(ray_tracer::Matrix<4, 4>::Translation(1.0, 1.5, 4) *
+                    ray_tracer::Matrix<4, 4>::Scaling(1.5, 1.5, 1.5));
+    auto n_a = std::make_shared<ray_tracer::StripePattern>(
+        ray_tracer::Color{0.1, 0.8, 0.1}, ray_tracer::Color{0.0, 0.3, 0.0});
+    n_a->SetPatternTransform(ray_tracer::Matrix<4, 4>::Scaling(0.15, 0.15, 0.15));
+    auto n_b = std::make_shared<ray_tracer::StripePattern>(
+        ray_tracer::Color{0.9, 0.5, 0.0}, ray_tracer::Color{0.5, 0.0, 0.9});
+    n_b->SetPatternTransform(ray_tracer::Matrix<4, 4>::Scaling(0.15, 0.15, 0.15) *
+                             ray_tracer::Matrix<4, 4>::RotationY(std::numbers::pi / 2));
+    auto s7_pat = ray_tracer::CheckersPattern(n_a, n_b);
+    s7_pat.SetPatternTransform(ray_tracer::Matrix<4, 4>::Scaling(0.5, 0.5, 0.5));
+    auto s7_mat = ray_tracer::Material{ray_tracer::Color{1, 1, 1}, 0.1, 0.7, 0.3, 200};
+    s7_mat.SetPattern(std::make_shared<ray_tracer::CheckersPattern>(s7_pat));
+    s7.SetMaterial(s7_mat);
+    world.AddObject(std::make_shared<ray_tracer::Sphere>(s7));
 
     world.AddLight(ray_tracer::PointLight(ray_tracer::Point(-10, 10, -10), ray_tracer::Color(1, 1, 1)));
-    auto camera = ray_tracer::Camera(1000, 500, std::numbers::pi / 3);
-    camera.SetTransform(ray_tracer::ViewTransform(ray_tracer::Point(0, 1.5, -5),
-                                                  ray_tracer::Point(0, 1, 0),
+    auto camera = ray_tracer::Camera(1000, 1000, std::numbers::pi / 3);
+    camera.SetTransform(ray_tracer::ViewTransform(ray_tracer::Point(1.0, 3.5, -9),
+                                                  ray_tracer::Point(1.0, 0.5, 0),
                                                   ray_tracer::Vec3(0, 1, 0)));
 
     cached_width = camera.GetHorizontalSize();
@@ -238,7 +301,7 @@ auto main(int /*unused*/, char** /*unused*/) -> int {  // NOLINT
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
-    ImGui::SetNextWindowSize(ImVec2(1000, 900), ImGuiCond_Once);
+    ImGui::SetNextWindowSize(ImVec2(1000, 1000), ImGuiCond_Once);
     ImGui::Begin("Ray Casting:");
 
     ImDrawList* canvas = ImGui::GetWindowDrawList();

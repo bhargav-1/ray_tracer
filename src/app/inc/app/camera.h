@@ -25,17 +25,20 @@ class Camera {
   [[nodiscard]] constexpr auto GetHorizontalSize() const -> int { return horizontal_size_; }
   [[nodiscard]] constexpr auto GetVerticalSize() const -> int { return vertical_size_; }
   [[nodiscard]] constexpr auto GetFieldOfView() const -> double { return field_of_view_; }
-  [[nodiscard]] constexpr auto GetTransform() const -> ray_tracer::Matrix<4, 4> {
+  [[nodiscard]] constexpr auto GetTransform() const -> const ray_tracer::Matrix<4, 4>& {
     return transform_;
   }
-  constexpr void SetTransform(const ray_tracer::Matrix<4, 4>& transform) { transform_ = transform; }
+  constexpr void SetTransform(const ray_tracer::Matrix<4, 4>& transform) {
+    transform_ = transform;
+    inverse_transform_ = transform.Inverse();
+  }
   [[nodiscard]] constexpr auto GetRayForPixel(const int pixel_x, const int pixel_y) -> ray_tracer::Ray {
     auto const x_offset = (pixel_x + 0.5) * pixel_size_;
     auto const y_offset = (pixel_y + 0.5) * pixel_size_;
     auto const world_x = half_width_ - x_offset;
     auto const world_y = half_height_ - y_offset;
-    const Point pixel = transform_.Inverse() * ray_tracer::Point(world_x, world_y, -1);
-    Point const origin= transform_.Inverse() * ray_tracer::Point(0,0, 0);
+    const Point pixel = inverse_transform_ * ray_tracer::Point(world_x, world_y, -1);
+    Point const origin= inverse_transform_ * ray_tracer::Point(0,0, 0);
     return {origin, Vec3(pixel- origin).Normalize()};
   }
 
@@ -50,5 +53,6 @@ class Camera {
   double aspect_ratio_;
   double pixel_size_;
   ray_tracer::Matrix<4, 4> transform_ = ray_tracer::Matrix<4, 4>::IdentityMatrix();
+  ray_tracer::Matrix<4, 4> inverse_transform_ = ray_tracer::Matrix<4, 4>::IdentityMatrix();
 };
 }  // namespace ray_tracer

@@ -157,6 +157,19 @@ target_link_libraries(plane_chapter9
         app_lib
         imgui_lib
 )
+add_executable(patterns_chapter10)
+target_sources(patterns_chapter10
+        PRIVATE
+        src/chapter_10_patterns.cpp
+)
+set_source_files_properties(src/chapter_10_patterns.cpp PROPERTIES
+        SKIP_LINTING ON
+)
+target_link_libraries(patterns_chapter10
+        PRIVATE
+        app_lib
+        imgui_lib
+)
 add_subdirectory(test)
 
 install(TARGETS app_lib

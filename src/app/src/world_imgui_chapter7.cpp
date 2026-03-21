@@ -26,7 +26,7 @@ static void GlfwErrorCallback(int error, const char* description) {
   fprintf(stderr, "GLFW Error %d: %s\n", error, description);
 }
 
-static void RenderScene(ImDrawList* canvas) {
+static void RenderScene() {
   static std::optional<std::vector<ray_tracer::Color>> cached_pixels;
   static int cached_width = 0;
   static int cached_height = 0;
@@ -141,8 +141,29 @@ static void RenderScene(ImDrawList* canvas) {
               << std::chrono::duration_cast<std::chrono::milliseconds>(cache_end - cache_start).count() << "ms\n";
   }
 
-  const auto& pixels = *cached_pixels;
-  const ImVec2 start = ImGui::GetCursorScreenPos();
+  static GLuint texture_id = 0;
+  static bool texture_created = false;
+  if (!texture_created) {
+    const auto& pixels = *cached_pixels;
+    std::vector<unsigned char> rgb(static_cast<size_t>(cached_width) * cached_height * 3);
+    for (int y = 0; y < cached_height; ++y) {
+      for (int x = 0; x < cached_width; ++x) {
+        const auto pixel_index = static_cast<size_t>(y) * cached_width + x;
+        const auto& color = pixels[pixel_index];
+        const auto rgb_offset = pixel_index * 3;
+        rgb[rgb_offset + 0] = static_cast<unsigned char>(std::clamp(color.GetRed(), 0.0, 1.0) * 255.0);
+        rgb[rgb_offset + 1] = static_cast<unsigned char>(std::clamp(color.GetGreen(), 0.0, 1.0) * 255.0);
+        rgb[rgb_offset + 2] = static_cast<unsigned char>(std::clamp(color.GetBlue(), 0.0, 1.0) * 255.0);
+      }
+    }
+    glGenTextures(1, &texture_id);
+    glBindTexture(GL_TEXTURE_2D, texture_id);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, cached_width, cached_height, 0, GL_RGB, GL_UNSIGNED_BYTE, rgb.data());
+    texture_created = true;
+  }
+
   const ImVec2 avail = ImGui::GetContentRegionAvail();
   const float width = static_cast<float>(cached_width);
   const float height = static_cast<float>(cached_height);
@@ -153,30 +174,15 @@ static void RenderScene(ImDrawList* canvas) {
   if (scale <= 0.0F) {
     scale = 1.0F;
   }
-  ImVec2 offset = start;
-  if (avail.x > width * scale) {
-    offset.x += (avail.x - width * scale) * 0.5F;
+  const ImVec2 image_size{width * scale, height * scale};
+  if (avail.x > image_size.x) {
+    ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (avail.x - image_size.x) * 0.5F);
   }
-  if (avail.y > height * scale) {
-    offset.y += (avail.y - height * scale) * 0.5F;
+  if (avail.y > image_size.y) {
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + (avail.y - image_size.y) * 0.5F);
   }
-
-  for (int y = 0; y < cached_height; ++y) {
-    for (int x = 0; x < cached_width; ++x) {
-      const auto& color = pixels[static_cast<size_t>(y) * static_cast<size_t>(cached_width) +
-                                 static_cast<size_t>(x)];
-      const auto red = static_cast<int>(std::clamp(color.GetRed(), 0.0, 1.0) * 255.0);
-      const auto green = static_cast<int>(std::clamp(color.GetGreen(), 0.0, 1.0) * 255.0);
-      const auto blue = static_cast<int>(std::clamp(color.GetBlue(), 0.0, 1.0) * 255.0);
-      const ImU32 packed = IM_COL32(red, green, blue, 255);
-      const ImVec2 min_point{offset.x + static_cast<float>(x) * scale,
-                             offset.y + static_cast<float>(y) * scale};
-      const ImVec2 max_point{min_point.x + scale, min_point.y + scale};
-      canvas->AddRectFilled(min_point, max_point, packed);
-    }
-  }
-
-  ImGui::Dummy(ImVec2(width * scale, height * scale));
+  // NOLINTNEXTLINE(performance-no-int-to-ptr): ImGui stores an opaque OpenGL handle.
+  ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uintptr_t>(texture_id)), image_size);
 }
 
 // Main code
@@ -230,9 +236,7 @@ auto main(int /*unused*/, char** /*unused*/) -> int {  // NOLINT
     ImGui::SetNextWindowSize(ImVec2(1000, 900), ImGuiCond_Once);
     ImGui::Begin("Ray Casting:");
 
-    ImDrawList* canvas = ImGui::GetWindowDrawList();
-
-    RenderScene(canvas);
+    RenderScene();
     ImGui::End();
 
     // Rendering

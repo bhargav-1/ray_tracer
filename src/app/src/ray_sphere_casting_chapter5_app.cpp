@@ -72,54 +72,56 @@ auto main(int /*unused*/, char* * /*unused*/) -> int {  // NOLINT
     ImGui::SetNextWindowSize(ImVec2(1000, 900), ImGuiCond_Once);
     ImGui::Begin("Ray Casting:");
 
-    ImDrawList* canvas = ImGui::GetWindowDrawList();
-    const ImVec2 pos = ImGui::GetCursorScreenPos();
-    const ImVec2 window_size = ImGui::GetWindowSize();
-    auto ray_origin = ray_tracer::Point(0, 0, -5);
-    auto wall_z = 1000.0;
-    constexpr auto kWallSize = 700.0;
-    constexpr auto kCanvasPixels = 1000;
-    constexpr auto kPixelSize = kWallSize / kCanvasPixels;
-    constexpr auto kHalf = kWallSize / 2;
+    static GLuint texture_id = 0;
+    static bool rendered = false;
+    if (!rendered) {
+      auto ray_origin = ray_tracer::Point(0, 0, -5);
+      auto wall_z = 1000.0;
+      constexpr auto kWallSize = 700.0;
+      constexpr auto kCanvasPixels = 1000;
+      constexpr auto kPixelSize = kWallSize / kCanvasPixels;
+      constexpr auto kHalf = kWallSize / 2;
 
-    float const center_x = pos.x + (window_size.x / 2);
-    float const center_y = pos.y + (window_size.y / 2);
-    ray_tracer::Matrix<4, 4> const canvas_transform =
-        ray_tracer::Matrix<4, 4>::IdentityMatrix().Translate(center_x, center_y, 0);
+      ray_tracer::Sphere shape(1);
+      auto transform = ray_tracer::Matrix<4, 4>::Scaling(1, 1, 1);
+      transform =
+          transform * ray_tracer::Matrix<4, 4>::Shearing(
+                          {.proportion_to_y = 1, .proportion_to_z = 0}, {.proportion_to_x = 0, .proportion_to_z = 0}, {});
+      shape.SetTransform(transform);
 
-    constexpr ray_tracer::Color kRed{255, 0, 0, 255};
-    ImColor color = ImColor(static_cast<int>(kRed.GetRed()),
-                            static_cast<int>(kRed.GetGreen()),
-                            static_cast<int>(kRed.GetBlue()),
-                            static_cast<int>(kRed.GetW()));
-    ray_tracer::Point origin{0, 0, 0};
-    auto print_center = canvas_transform * origin;
-    ImVec2 center_vec = {static_cast<float>(print_center.GetX()), static_cast<float>(print_center.GetY())};
-    std::cout << print_center << "\n";
-    canvas->AddCircleFilled(center_vec, 10, color);
-
-    ray_tracer::Sphere shape(1);
-    auto transform = ray_tracer::Matrix<4, 4>::Scaling(1, 1, 1);
-    transform =
-        transform * ray_tracer::Matrix<4, 4>::Shearing(
-                        {.proportion_to_y = 1, .proportion_to_z = 0}, {.proportion_to_x = 0, .proportion_to_z = 0}, {});
-    shape.SetTransform(transform);
-    // shape.SetTransform(ray_tracer::Matrix<4, 4>::Shearing(1, 0, 0, 0, 0, 0) *
-                       // ray_tracer::Matrix<4, 4>::Scaling(2, 2, 2));
-    for (auto y = 0; y < kCanvasPixels; ++y) {
-      auto world_y = kHalf - kPixelSize * y;
-      for (auto x = 0; x < kCanvasPixels; ++x) {
-        auto world_x = -kHalf + kPixelSize * x;
-        ray_tracer::Point const position{world_x, world_y, wall_z};
-        ray_tracer::Ray ray{ray_origin, ray_tracer::Vec3(position - ray_origin).Normalize()};
-        auto xs = shape.Intersect(ray);
-        if (Hit(xs).has_value()) {
-          canvas->AddRectFilled(ImVec2(x, y), ImVec2(x + 1, y + 1), color);
-          // std::cout << "x : " << x << " y : " << y << '\n';
+      constexpr ray_tracer::Color kRed{255, 0, 0, 255};
+      std::vector<unsigned char> rgb(kCanvasPixels * kCanvasPixels * 3, 0);
+      for (auto y = 0; y < kCanvasPixels; ++y) {
+        auto world_y = kHalf - kPixelSize * y;
+        for (auto x = 0; x < kCanvasPixels; ++x) {
+          auto world_x = -kHalf + kPixelSize * x;
+          ray_tracer::Point const position{world_x, world_y, wall_z};
+          ray_tracer::Ray ray{ray_origin, ray_tracer::Vec3(position - ray_origin).Normalize()};
+          auto xs = shape.Intersect(ray);
+          if (Hit(xs).has_value()) {
+            const auto rgb_offset = (static_cast<size_t>(y) * kCanvasPixels + x) * 3;
+            rgb[rgb_offset + 0] = static_cast<unsigned char>(kRed.GetRed());
+            rgb[rgb_offset + 1] = static_cast<unsigned char>(kRed.GetGreen());
+            rgb[rgb_offset + 2] = static_cast<unsigned char>(kRed.GetBlue());
+          }
         }
       }
+      glGenTextures(1, &texture_id);
+      glBindTexture(GL_TEXTURE_2D, texture_id);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, kCanvasPixels, kCanvasPixels, 0, GL_RGB, GL_UNSIGNED_BYTE, rgb.data());
+      rendered = true;
+      std::cout << " Rendering Complete \n";
     }
-    std::cout << " Rendering Complete \n";
+    {
+      constexpr int kCanvasPixels = 1000;
+      const ImVec2 avail = ImGui::GetContentRegionAvail();
+      const float img_scale = std::min(avail.x / kCanvasPixels, avail.y / kCanvasPixels);
+      // NOLINTNEXTLINE(performance-no-int-to-ptr): ImGui stores an opaque OpenGL handle.
+      ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uintptr_t>(texture_id)),
+                   ImVec2(kCanvasPixels * img_scale, kCanvasPixels * img_scale));
+    }
     ImGui::End();
 
     // Rendering

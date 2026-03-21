@@ -9,7 +9,7 @@
 namespace ray_tracer {
 
 inline auto ColorAtShape(const Pattern& pattern, const Shape& object, const Point& point) -> Color {
-  const auto object_point = object.GetTransform().Inverse() * point;
+  const auto object_point = object.GetInverseTransform() * point;
   return pattern.ColorAt(object_point);
 }
 

@@ -104,7 +104,7 @@ SCENARIO("A Sphere has a default material") {
   GIVEN("s = sphere(), m=s.material") {
     THEN("m = material()") {
       Sphere const sphere(1);
-      Material const material = sphere.GetMaterial();
+      Material const& material = sphere.GetMaterial();
       CHECK(material.GetColor() == Color(1, 1, 1, 0));
       CHECK(material.GetAmbient() == 0.1);
       CHECK(material.GetDiffuse() == 0.9);

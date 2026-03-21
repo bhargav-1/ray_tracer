@@ -14,15 +14,19 @@ class Pattern {
  public:
   virtual ~Pattern() = default;
   [[nodiscard]] auto ColorAt(const Point& point) const -> Color {
-    const auto local_point = transform_.Inverse() * point;
+    const auto local_point = inverse_transform_ * point;
     return LocalColorAt(local_point);
   }
   [[nodiscard]] virtual auto LocalColorAt(const Point& point) const -> Color = 0;
-  [[nodiscard]] auto GetPatternTransform() const -> Matrix<4, 4> { return transform_; }
-  void SetPatternTransform(const Matrix<4, 4>& transform) { transform_ = transform; }
+  [[nodiscard]] auto GetPatternTransform() const -> const Matrix<4, 4>& { return transform_; }
+  void SetPatternTransform(const Matrix<4, 4>& transform) {
+    transform_ = transform;
+    inverse_transform_ = transform.Inverse();
+  }
 
  private:
   Matrix<4, 4> transform_ = Matrix<4, 4>::IdentityMatrix();
+  Matrix<4, 4> inverse_transform_ = Matrix<4, 4>::IdentityMatrix();
 };
 
 class SolidPattern : public Pattern {

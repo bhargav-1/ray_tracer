@@ -15,7 +15,7 @@ constexpr ray_tracer::Color kWhite{1, 1, 1};
 constexpr ray_tracer::Color kBlack{0, 0, 0};
 
 class TestPattern : public Pattern {
- public:
+public:
   [[nodiscard]] auto ColorAt(const Point& point) const -> Color override {
     return {point.GetX(), point.GetY(), point.GetZ()};
   }
@@ -149,6 +149,87 @@ SCENARIO("10: A pattern with both an object and a pattern transformation") {
     pattern.SetPatternTransform(ray_tracer::Matrix<4, 4>::Translation(0.5, 1, 1.5));
     THEN("pattern_at_shape(pattern, object, point(2.5,3,3.5)) = color(0.75,0.5,0.25)") {
       CHECK(ColorAtShape(pattern, object, ray_tracer::Point(2.5, 3, 3.5)) == ray_tracer::Color(0.75, 0.5, 0.25));
+    }
+  }
+}
+
+SCENARIO("10: A gradient linearly interpolates between colors") {
+  GIVEN("pattern = gradientPattern(white, black)"){
+    const ray_tracer::GradientPattern pattern(kWhite, kBlack);
+    THEN("pattern_at(pattern, point(0,0,0) = white") {
+      CHECK(pattern.ColorAt(ray_tracer::Point(0, 0, 0)) == kWhite);
+    }
+    THEN("pattern_at(pattern, point(0.25,0,0) = color(0.75,0.75,0.75)") {
+      CHECK(pattern.ColorAt(ray_tracer::Point(0.25, 0, 0)) == ray_tracer::Color(0.75, 0.75, 0.75));
+    }
+    THEN("pattern_at(pattern, point(0.5,0,0) = color(0.5,0.5,0.5)") {
+      CHECK(pattern.ColorAt(ray_tracer::Point(0.5, 0, 0)) == ray_tracer::Color(0.5, 0.5, 0.5));
+    }
+    THEN("pattern_at(pattern, point(0.75,0,0) = color(0.25,0.25,0.25)") {
+      CHECK(pattern.ColorAt(ray_tracer::Point(0.75, 0, 0)) == ray_tracer::Color(0.25, 0.25, 0.25));
+    }
+  }
+}
+
+SCENARIO("10: A ring should extend in both x and z") {
+  GIVEN("pattern = ring_pattern(white, black)") {
+    const ray_tracer::RingPattern pattern(kWhite, kBlack);
+    THEN("pattern_at(pattern, point(0,0,0) = white") {
+      CHECK(pattern.ColorAt(ray_tracer::Point(0, 0, 0)) == kWhite);
+    }
+    THEN("pattern_at(pattern, point(1,0,0) = black") {
+      CHECK(pattern.ColorAt(ray_tracer::Point(1, 0, 0)) == kBlack);
+    }
+    THEN("pattern_at(pattern, point(0,0,1) = black") {
+      CHECK(pattern.ColorAt(ray_tracer::Point(0, 0, 1)) == kBlack);
+    }
+    THEN("pattern_at(pattern, point(0.708,0,0.708) = black") {
+      CHECK(pattern.ColorAt(ray_tracer::Point(0.708, 0, 0.708)) == kBlack);
+    }
+  }
+}
+
+SCENARIO("10: Checkers should repeat in x") {
+  GIVEN("pattern = checkers_pattern(white, black)") {
+    const ray_tracer::CheckersPattern pattern(kWhite, kBlack);
+    THEN("pattern_at(pattern, point(0,0,0) = white") {
+      CHECK(pattern.ColorAt(ray_tracer::Point(0, 0, 0)) == kWhite);
+    }
+    THEN("pattern_at(pattern, point(0.99,0,0) = white") {
+      CHECK(pattern.ColorAt(ray_tracer::Point(0.99, 0, 0)) == kWhite);
+    }
+    THEN("pattern_at(pattern, point(1.01,0,0) = black") {
+      CHECK(pattern.ColorAt(ray_tracer::Point(1.01, 0, 0)) == kBlack);
+    }
+  }
+}
+
+SCENARIO("10: Checkers should repear in y") {
+  GIVEN("pattern = checkers_pattern(white, black)") {
+    const ray_tracer::CheckersPattern pattern(kWhite, kBlack);
+    THEN("pattern_at(pattern, point(0,0,0) = white") {
+      CHECK(pattern.ColorAt(ray_tracer::Point(0, 0, 0)) == kWhite);
+    }
+    THEN("pattern_at(pattern, point(0,0.99,0) = white") {
+      CHECK(pattern.ColorAt(ray_tracer::Point(0, 0.99, 0)) == kWhite);
+    }
+    THEN("pattern_at(pattern, point(0,1.01,0) = black") {
+      CHECK(pattern.ColorAt(ray_tracer::Point(0, 1.01, 0)) == kBlack);
+    }
+  }
+}
+
+SCENARIO("10: Checkers should repeat in z") {
+  GIVEN("pattern = checkers_pattern(white, black)") {
+    const ray_tracer::CheckersPattern pattern(kWhite, kBlack);
+    THEN("pattern_at(pattern, point(0,0,0) = white") {
+      CHECK(pattern.ColorAt(ray_tracer::Point(0, 0, 0)) == kWhite);
+    }
+    THEN("pattern_at(pattern, point(0,0,0.99) = white") {
+      CHECK(pattern.ColorAt(ray_tracer::Point(0, 0, 0.99)) == kWhite);
+    }
+    THEN("pattern_at(pattern, point(0,0,1.01) = black") {
+      CHECK(pattern.ColorAt(ray_tracer::Point(0, 0, 1.01)) == kBlack);
     }
   }
 }

@@ -14,6 +14,13 @@ namespace ray_tracer {
 constexpr ray_tracer::Color kWhite{1, 1, 1};
 constexpr ray_tracer::Color kBlack{0, 0, 0};
 
+class TestPattern : public Pattern {
+ public:
+  [[nodiscard]] auto ColorAt(const Point& point) const -> Color override {
+    return {point.GetX(), point.GetY(), point.GetZ()};
+  }
+};
+
 SCENARIO("10: Creating a Stripe pattern") {
   GIVEN("pattern = stripe_pattern(white, black)") {
     const ray_tracer::StripePattern pattern(kWhite, kBlack);
@@ -93,37 +100,55 @@ SCENARIO("10: Lighting with a pattern applied") {
   }
 }
 
-SCENARIO("10: Stripes with an object Transformation") {
-  GIVEN("object.transform = scaling(2,2,2), pattern = stripe_pattern(white, black)") {
-    const ray_tracer::StripePattern pattern(kWhite, kBlack);
-    constexpr ray_tracer::Matrix<4, 4> kMat = ray_tracer::Matrix<4, 4>::Scaling(2, 2, 2);
-    ray_tracer::Sphere object(1);
-    object.SetTransform(kMat);
-    THEN("color_at(pattern, object, point(1.5,0,0)) = white") {
-      CHECK(ColorAtObject(pattern, object, ray_tracer::Point(1.5, 0, 0)) == kWhite);
+SCENARIO("10: The default pattern transformation") {
+  GIVEN("pattern = test_pattern()") {
+    THEN("pattern.transform = identity_matrix") {
+      const ray_tracer::TestPattern pattern;
+      CHECK(pattern.GetPatternTransform() == ray_tracer::Matrix<4, 4>::IdentityMatrix());
     }
   }
 }
-SCENARIO("10: Stripes with a pattern transformation") {
-  GIVEN("object = sphere(), pattern = stripe_pattern(white, black), pattern.transform = scaling(2,2,2)") {
-    ray_tracer::StripePattern pattern(kWhite, kBlack);
-    constexpr ray_tracer::Matrix<4, 4> kMat = ray_tracer::Matrix<4, 4>::Scaling(2, 2, 2);
-    pattern.SetPatternTransform(kMat);
-    ray_tracer::Sphere const object(1);
-    THEN("color_at(pattern, object, point(1.5,0,0)) = white") {
-      CHECK(ColorAtObject(pattern, object, ray_tracer::Point(1.5, 0, 0)) == kWhite);
-    }}
+
+SCENARIO("10: Assigning a transformation") {
+  GIVEN("pattern = test_pattern(), set_pattern_transform(pattern, translation(1,2,3))") {
+    ray_tracer::TestPattern pattern;
+    pattern.SetPatternTransform(ray_tracer::Matrix<4, 4>::Translation(1, 2, 3));
+    THEN("pattern.transform = translation(1,2,3)") {
+      CHECK(pattern.GetPatternTransform() == ray_tracer::Matrix<4, 4>::Translation(1, 2, 3));
+    }
+  }
 }
-SCENARIO("10: Stripes with both an object and a pattern transformation") {
-  GIVEN("object.transform = scaling(2,2,2), pattern = stripe_pattern(white, black), pattern.transform = translation(0.5,0,0)") {
-    ray_tracer::StripePattern pattern(kWhite, kBlack);
-    constexpr ray_tracer::Matrix<4, 4> kObjMat = ray_tracer::Matrix<4, 4>::Scaling(2, 2, 2);
-    constexpr ray_tracer::Matrix<4, 4> kPatMat = ray_tracer::Matrix<4, 4>::Translation(0.5, 0, 0);
+
+SCENARIO("10: A pattern with an object transformation") {
+  GIVEN("object.transform = scaling(2,2,2), pattern = test_pattern()") {
     ray_tracer::Sphere object(1);
-    object.SetTransform(kObjMat);
-    pattern.SetPatternTransform(kPatMat);
-    THEN("color_at(pattern, object, point(2.5,0,0)) = white") {
-      CHECK(ColorAtObject(pattern, object, ray_tracer::Point(2.5, 0, 0)) == kWhite);
+    object.SetTransform(ray_tracer::Matrix<4, 4>::Scaling(2, 2, 2));
+    THEN("pattern_at_shape(pattern, object, point(2,3,4)) = color(1,1.5,2)") {
+      const ray_tracer::TestPattern pattern;
+      CHECK(ColorAtShape(pattern, object, ray_tracer::Point(2, 3, 4)) == ray_tracer::Color(1, 1.5, 2));
+    }
+  }
+}
+
+SCENARIO("10: A pattern with a pattern transformation") {
+  GIVEN("pattern = test_pattern(), pattern.transform = scaling(2,2,2)") {
+    ray_tracer::TestPattern pattern;
+    pattern.SetPatternTransform(ray_tracer::Matrix<4, 4>::Scaling(2, 2, 2));
+    ray_tracer::Sphere const object(1);
+    THEN("pattern_at_shape(pattern, object, point(2,3,4)) = color(1,1.5,2)") {
+      CHECK(ColorAtShape(pattern, object, ray_tracer::Point(2, 3, 4)) == ray_tracer::Color(1, 1.5, 2));
+    }
+  }
+}
+
+SCENARIO("10: A pattern with both an object and a pattern transformation") {
+  GIVEN("object.transform = scaling(2,2,2), pattern.transform = translation(0.5,1,1.5)") {
+    ray_tracer::Sphere object(1);
+    object.SetTransform(ray_tracer::Matrix<4, 4>::Scaling(2, 2, 2));
+    ray_tracer::TestPattern pattern;
+    pattern.SetPatternTransform(ray_tracer::Matrix<4, 4>::Translation(0.5, 1, 1.5));
+    THEN("pattern_at_shape(pattern, object, point(2.5,3,3.5)) = color(0.75,0.5,0.25)") {
+      CHECK(ColorAtShape(pattern, object, ray_tracer::Point(2.5, 3, 3.5)) == ray_tracer::Color(0.75, 0.5, 0.25));
     }
   }
 }

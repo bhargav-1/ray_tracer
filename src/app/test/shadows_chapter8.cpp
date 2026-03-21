@@ -26,7 +26,8 @@ SCENARIO("8: Lighting with the surface in shadow") {
     const auto material = ray_tracer::Material();
     constexpr auto kPosition = ray_tracer::Point(0, 0, 0);
     constexpr bool kInShadow = true;
-    auto result = Lighting(material, kLight, kPosition, kEyev, kNormalv, kInShadow);
+    Sphere const sphere(1);
+    auto result = Lighting(material, sphere, kLight, kPosition, kEyev, kNormalv, kInShadow);
     THEN("result = lighting(m, s, light, position, eyev, normalv, in_shadow)") {
       CHECK(result == ray_tracer::Color(0.1, 0.1, 0.1));
     }

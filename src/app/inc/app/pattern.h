@@ -1,5 +1,8 @@
 #pragma once
+#include <algorithm>
+#include <cmath>
 #include <memory>
+#include <numbers>
 #include <utility>
 
 #include "color.h"
@@ -147,6 +150,32 @@ class BlendedPattern : public Pattern {
   }
 
  private:
+  std::shared_ptr<Pattern> pattern_a_;
+  std::shared_ptr<Pattern> pattern_b_;
+};
+
+// http://docs.jamisbuck.org/bonus/texture-mapping.html
+class UVCheckersPattern : public Pattern {
+ public:
+  UVCheckersPattern(int width, int height, const Color& color_a, const Color& color_b)
+      : width_(width), height_(height), pattern_a_(MakeSolid(color_a)), pattern_b_(MakeSolid(color_b)) {}
+  UVCheckersPattern(int width, int height, std::shared_ptr<Pattern> pattern_a, std::shared_ptr<Pattern> pattern_b)
+      : width_(width), height_(height), pattern_a_(std::move(pattern_a)), pattern_b_(std::move(pattern_b)) {}
+  [[nodiscard]] auto LocalColorAt(const Point& point) const -> Color override {
+    const auto tex_u = 0.5 + (std::atan2(point.GetX(), point.GetZ()) / (2.0 * std::numbers::pi));
+    const auto tex_v = 0.5 - (std::asin(std::clamp(point.GetY(), -1.0, 1.0)) / std::numbers::pi);
+    if ((static_cast<int>(std::floor((tex_u * width_) + utilities::kEpsilon)) +
+         static_cast<int>(std::floor((tex_v * height_) + utilities::kEpsilon))) %
+            2 ==
+        0) {
+      return pattern_a_->ColorAt(point);
+    }
+    return pattern_b_->ColorAt(point);
+  }
+
+ private:
+  int width_;
+  int height_;
   std::shared_ptr<Pattern> pattern_a_;
   std::shared_ptr<Pattern> pattern_b_;
 };

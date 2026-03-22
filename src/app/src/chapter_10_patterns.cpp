@@ -12,7 +12,7 @@
 //     Sphere 1  r=0.4  x=-3.2  StripePattern (red/white, rotated 45°)
 //     Sphere 2  r=0.6  x=-1.8  GradientPattern (green → purple)
 //     Sphere 3  r=0.8  x=-0.2  RingPattern (blue/yellow, tilted 60°)
-//     Sphere 4  r=1.0  x= 1.5  CheckersPattern (red/cream, scale 0.3)
+//     Sphere 4  r=1.0  x= 1.5  UVCheckersPattern (red/cyan, 16×8)
 //     Sphere 5  r=0.7  x= 3.2  RadialGradientPattern (gold → purple, scale 0.25)
 //     Sphere 6  r=0.5  x= 4.6  BlendedPattern (red/yellow stripes + blue/green stripes = plaid)
 //
@@ -112,15 +112,14 @@ static void RenderScene() {
     s3.SetMaterial(s3_mat);
     world.AddObject(std::make_shared<ray_tracer::Sphere>(s3));
 
-    // Sphere 4 — checkers (largest)
+    // Sphere 4 — UV checkers (largest)
     auto s4 = ray_tracer::Sphere(5);
     s4.SetTransform(ray_tracer::Matrix<4, 4>::Translation(1.5, 1.0, 0) *
                     ray_tracer::Matrix<4, 4>::Scaling(1.0, 1.0, 1.0));
-    auto s4_pat = ray_tracer::CheckersPattern(
-        ray_tracer::Color{0.8, 0.2, 0.1}, ray_tracer::Color{0.0, 0.9, 1});
-    s4_pat.SetPatternTransform(ray_tracer::Matrix<4, 4>::Scaling(0.3, 0.3, 0.3));
+    auto s4_pat = ray_tracer::UVCheckersPattern(
+        16, 8, ray_tracer::Color{0.8, 0.2, 0.1}, ray_tracer::Color{0.0, 0.9, 1});
     auto s4_mat = ray_tracer::Material{ray_tracer::Color{1, 1, 1}, 0.1, 0.7, 0.3, 200};
-    s4_mat.SetPattern(std::make_shared<ray_tracer::CheckersPattern>(s4_pat));
+    s4_mat.SetPattern(std::make_shared<ray_tracer::UVCheckersPattern>(s4_pat));
     s4.SetMaterial(s4_mat);
     world.AddObject(std::make_shared<ray_tracer::Sphere>(s4));
 
@@ -171,7 +170,7 @@ static void RenderScene() {
     s7.SetMaterial(s7_mat);
     world.AddObject(std::make_shared<ray_tracer::Sphere>(s7));
 
-    world.AddLight(ray_tracer::PointLight(ray_tracer::Point(-10, 10, -10), ray_tracer::Color(1, 1, 1)));
+    world.AddLight(ray_tracer::PointLight(ray_tracer::Point(10, 10, -10), ray_tracer::Color(1, 1, 1)));
     auto camera = ray_tracer::Camera(1000, 1000, std::numbers::pi / 3);
     camera.SetTransform(ray_tracer::ViewTransform(ray_tracer::Point(1.0, 3.5, -9),
                                                   ray_tracer::Point(1.0, 0.5, 0),

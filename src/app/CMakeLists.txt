@@ -170,6 +170,20 @@ target_link_libraries(patterns_chapter10
         app_lib
         imgui_lib
 )
+
+add_executable(patterns_chapter10_perturbed)
+target_sources(patterns_chapter10_perturbed
+        PRIVATE
+        src/chapter_10_patterns_perturbed.cpp
+)
+set_source_files_properties(src/chapter_10_patterns_perturbed.cpp PROPERTIES
+        SKIP_LINTING ON
+)
+target_link_libraries(patterns_chapter10_perturbed
+        PRIVATE
+        app_lib
+        imgui_lib
+)
 add_subdirectory(test)
 
 install(TARGETS app_lib

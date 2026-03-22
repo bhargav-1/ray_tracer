@@ -7,6 +7,7 @@
 
 #include "color.h"
 #include "matrix.h"
+#include "perlin.h"
 #include "point.h"
 #include "utilities.h"
 
@@ -178,6 +179,24 @@ class UVCheckersPattern : public Pattern {
   int height_;
   std::shared_ptr<Pattern> pattern_a_;
   std::shared_ptr<Pattern> pattern_b_;
+};
+
+class PerturbedPattern : public Pattern {
+ public:
+  explicit PerturbedPattern(std::shared_ptr<Pattern> pattern, double scale = 0.2)
+      : pattern_(std::move(pattern)), scale_(scale) {}
+  [[nodiscard]] auto LocalColorAt(const Point& point) const -> Color override {
+    const auto noise_x = Perlin::Turbulence(point.GetX(), point.GetY(), point.GetZ());
+    const auto noise_y = Perlin::Turbulence(point.GetX() + 1.3, point.GetY() + 1.3, point.GetZ() + 1.3);
+    const auto noise_z = Perlin::Turbulence(point.GetX() + 2.7, point.GetY() + 2.7, point.GetZ() + 2.7);
+    const Point perturbed{point.GetX() + noise_x * scale_, point.GetY() + noise_y * scale_,
+                          point.GetZ() + noise_z * scale_};
+    return pattern_->ColorAt(perturbed);
+  }
+
+ private:
+  std::shared_ptr<Pattern> pattern_;
+  double scale_;
 };
 
 }  // namespace ray_tracer

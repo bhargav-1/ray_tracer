@@ -15,6 +15,7 @@ target_sources(app_lib_tests
         shadows_chapter8.cpp
         planes_chapter9.cpp
         patterns_chapter10.cpp
+        reflection_refraction_chapter11.cpp
 )
 
 target_link_libraries(app_lib_tests

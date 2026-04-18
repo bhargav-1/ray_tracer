@@ -6,18 +6,18 @@
 #include <optional>
 #include <vector>
 
+#include "camera.h"
+#include "canvas.h"
+#include "computations.h"
 #include "intersection.h"
+#include "lighting.h"
 #include "point.h"
 #include "ray.h"
-#include "sphere.h"
 #include "shape.h"
+#include "sphere.h"
 #include "utilities.h"
 #include "vec3.h"
 #include "world.h"
-#include "computations.h"
-#include "lighting.h"
-#include "camera.h"
-#include "canvas.h"
 
 namespace ray_tracer {
 
@@ -32,7 +32,6 @@ inline auto Intersect(const Ray& ray, const World& world) -> std::vector<Interse
   std::ranges::sort(intersections, {}, &Intersection::GetTime);
   return intersections;
 }
-
 
 inline auto Hit(const std::vector<Intersection>& intersections) -> std::optional<Intersection> {
   auto current_intersection = std::optional<Intersection>();
@@ -66,8 +65,6 @@ inline auto PrepareComputations(const Intersection& intersection, const Ray& ray
   return Computations{time, object, point, eye_v, normal_v, inside, over_point, reflect_v};
 }
 
-
-
 inline auto IsShadowed(const World& world, const Point& point) -> bool {
   for (const auto& light : world.Lights()) {
     Vec3 const vector_to_light = light.GetPosition() - point;
@@ -81,40 +78,45 @@ inline auto IsShadowed(const World& world, const Point& point) -> bool {
   }
   return false;
 }
+auto GetReflectedColor(const World& world, const Computations& computations, int remaining = 5) -> Color;
 
-inline auto ShadeHit(const World& world, const Computations& computations) -> Color {
+inline auto ShadeHit(const World& world, const Computations& computations, const int remaining = 5) -> Color {
   Color color{0, 0, 0};
   for (auto world_light : world.Lights()) {
+    const auto shadowed = IsShadowed(world, computations.GetOverPoint());
     color = color + Lighting(computations.GetObject()->GetMaterial(),
                              *computations.GetObject(),
                              world_light,
                              computations.GetPoint(),
                              computations.GetEyeV(),
                              computations.GetNormalV(),
-                             IsShadowed(world, computations.GetOverPoint()));
+                             shadowed);
+    auto reflected = GetReflectedColor(world, computations, remaining);
+    color = color + reflected;
   }
   return color;
 }
 
-inline auto ColorAt(const World& world, const Ray& ray) -> Color {
+inline auto ColorAt(const World& world, const Ray& ray, const int remaining = 5) -> Color {
   auto intersections = Intersect(ray, world);
   auto hit = Hit(intersections);
   if (!hit.has_value()) {
     return Color{0, 0, 0};
   }
-  return ShadeHit(world, PrepareComputations(hit.value(), ray));
+  return ShadeHit(world, PrepareComputations(hit.value(), ray), remaining);
 }
 
-inline auto GetReflectedColor(const World& world, const Computations& computations ) -> Color {
+inline auto GetReflectedColor(const World& world, const Computations& computations, const int remaining) -> Color {
   if (computations.GetObject()->GetMaterial().GetReflective() == 0) {
     return Color{0, 0, 0};
   }
+  if (remaining <= 0) {
+    return Color{0, 0, 0};
+  }
   const auto reflect_ray = Ray(computations.GetOverPoint(), computations.GetReflectV());
-  const auto color = ColorAt(world, reflect_ray);
+  const auto color = ColorAt(world, reflect_ray, remaining - 1);
   return color * computations.GetObject()->GetMaterial().GetReflective();
 }
-
-
 
 inline auto Render(Camera& camera, const World& world) -> Canvas {
   auto image = Canvas(camera.GetHorizontalSize(), camera.GetVerticalSize());
@@ -146,4 +148,4 @@ inline auto Render(Camera& camera, const World& world) -> Canvas {
   return image;
 }
 
-}
+}  // namespace ray_tracer

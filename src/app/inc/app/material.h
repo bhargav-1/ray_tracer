@@ -8,8 +8,8 @@ namespace ray_tracer {
 class Material {
  public:
   constexpr Material() noexcept : color_(1, 1, 1, 0) {}
-  constexpr explicit Material(Color  color, const double ambient =0.1, const double diffuse =0.9, const double specular =0.9, const double shininess =200) noexcept
-      : color_(std::move(color)), ambient_(ambient), diffuse_(diffuse), specular_(specular), shininess_(shininess) {}
+  constexpr explicit Material(Color  color, const double ambient =0.1, const double diffuse =0.9, const double specular =0.9, const double shininess =200, const double reflective = 0.0) noexcept
+      : color_(std::move(color)), ambient_(ambient), diffuse_(diffuse), specular_(specular), shininess_(shininess) , reflective_(reflective){}
   ~Material() = default;
   constexpr auto operator==(const Material& rhs) const -> bool {
     return color_ == rhs.color_ && ambient_ == rhs.ambient_ && diffuse_ == rhs.diffuse_ && specular_ == rhs.specular_ &&
@@ -30,6 +30,8 @@ class Material {
     pattern_ = std::move(pattern);
   }
   [[nodiscard]] auto GetPattern() const -> const Pattern* { return pattern_.get(); }
+  [[nodiscard]] auto GetReflective() const -> double { return reflective_; }
+  constexpr void SetReflective(const double reflective) { reflective_ = reflective; }
 
  private:
   Color color_;
@@ -37,6 +39,7 @@ class Material {
   double diffuse_{0.9};
   double specular_{0.9};
   double shininess_{200.0};
+  double reflective_{0.0};
   std::shared_ptr<Pattern> pattern_;
 };
 }  // namespace ray_tracer

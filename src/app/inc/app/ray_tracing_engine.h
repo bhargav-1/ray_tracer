@@ -49,7 +49,39 @@ inline auto Hit(const std::vector<Intersection>& intersections) -> std::optional
   return current_intersection;
 }
 
-inline auto PrepareComputations(const Intersection& intersection, const Ray& ray) -> Computations {
+inline auto PrepareComputations(const Intersection& intersection,
+                                const Ray& ray,
+                                std::vector<Intersection> intersections_xs = {}) -> Computations {
+  std::vector<const Shape*> kContainers{};
+  double refractive_index_n1 = 1.0;
+  double refractive_index_n2 = 1.0;
+  if (intersections_xs.empty()) {
+    intersections_xs = std::vector<Intersection>{intersection};
+  }
+  for (auto const& each_intersection : intersections_xs) {
+    if (each_intersection == intersection) {
+      if (kContainers.empty()) {
+        refractive_index_n1 = 1.0;
+      } else {
+        refractive_index_n1 = kContainers.back()->GetMaterial().GetRefractiveIndex();
+      }
+    }
+    if (std::ranges::find(kContainers, each_intersection.GetObject()) != kContainers.end()) {
+      std::erase(kContainers, each_intersection.GetObject());
+    } else {
+      const auto* object = each_intersection.GetObject();
+      kContainers.push_back(object);
+    }
+
+    if (each_intersection == intersection) {
+      if (kContainers.empty()) {
+        refractive_index_n2 = 1;
+      } else {
+        refractive_index_n2 = kContainers.back()->GetMaterial().GetRefractiveIndex();
+      }
+      break;
+    }
+  }
   const auto time = intersection.GetTime();
   const auto* object = intersection.GetObject();
   const auto point = ray.Position(time);
@@ -61,8 +93,19 @@ inline auto PrepareComputations(const Intersection& intersection, const Ray& ray
     normal_v = -normal_v;
   }
   const auto over_point = point + normal_v * utilities::kEpsilon;
+  const auto under_point = point - normal_v * utilities::kEpsilon;
   const auto reflect_v = ray.GetDirection().Reflect(normal_v);
-  return Computations{time, object, point, eye_v, normal_v, inside, over_point, reflect_v};
+  return Computations{time,
+                      object,
+                      point,
+                      eye_v,
+                      normal_v,
+                      inside,
+                      over_point,
+                      reflect_v,
+                      refractive_index_n1,
+                      refractive_index_n2,
+                      under_point};
 }
 
 inline auto IsShadowed(const World& world, const Point& point) -> bool {
@@ -79,7 +122,7 @@ inline auto IsShadowed(const World& world, const Point& point) -> bool {
   return false;
 }
 auto GetReflectedColor(const World& world, const Computations& computations, int remaining = 5) -> Color;
-
+auto GetRefractedColor(const World& world, const Computations& computations, int remaining = 5) -> Color;
 inline auto ShadeHit(const World& world, const Computations& computations, const int remaining = 5) -> Color {
   Color color{0, 0, 0};
   for (auto world_light : world.Lights()) {
@@ -92,7 +135,7 @@ inline auto ShadeHit(const World& world, const Computations& computations, const
                              computations.GetNormalV(),
                              shadowed);
     auto reflected = GetReflectedColor(world, computations, remaining);
-    color = color + reflected;
+    color = color + reflected + GetRefractedColor(world, computations, remaining);
   }
   return color;
 }
@@ -103,7 +146,7 @@ inline auto ColorAt(const World& world, const Ray& ray, const int remaining = 5)
   if (!hit.has_value()) {
     return Color{0, 0, 0};
   }
-  return ShadeHit(world, PrepareComputations(hit.value(), ray), remaining);
+  return ShadeHit(world, PrepareComputations(hit.value(), ray, intersections), remaining);
 }
 
 inline auto GetReflectedColor(const World& world, const Computations& computations, const int remaining) -> Color {
@@ -116,6 +159,30 @@ inline auto GetReflectedColor(const World& world, const Computations& computatio
   const auto reflect_ray = Ray(computations.GetOverPoint(), computations.GetReflectV());
   const auto color = ColorAt(world, reflect_ray, remaining - 1);
   return color * computations.GetObject()->GetMaterial().GetReflective();
+}
+
+inline auto GetRefractedColor(const World& world, const Computations& computations, int remaining) -> Color {
+  if (computations.GetObject()->GetMaterial().GetTransparency() == 0) { // NOLINT
+    return Color{0, 0, 0};
+  }
+  if (remaining <= 0) {
+    return Color{0, 0, 0};
+  }
+  // sin (theta_i) / sin(theta_t) = n2/n1
+  auto n_ratio = computations.GetRefractiveIndexN1() / computations.GetRefractiveIndexN2();
+  auto cos_theta_i = computations.GetNormalV().Dot(computations.GetEyeV());
+  auto sin_theta_i = std::sqrt(1 - cos_theta_i * cos_theta_i);
+  auto sin_theta_t = n_ratio * sin_theta_i;
+
+  // total interal reflection
+  if (sin_theta_t * sin_theta_t >=1) {
+    return Color{0, 0, 0};
+  }
+  auto cos_theta_t = std::sqrt(1 - sin_theta_t * sin_theta_t);
+  auto direction = computations.GetNormalV() * (n_ratio * cos_theta_i - cos_theta_t) - computations.GetEyeV()*n_ratio;
+  auto refracted_ray = Ray(computations.GetUnderPoint(), direction);
+  auto color = ColorAt(world, refracted_ray, remaining - 1) * computations.GetObject()->GetMaterial().GetTransparency();
+  return  color;
 }
 
 inline auto Render(Camera& camera, const World& world) -> Canvas {

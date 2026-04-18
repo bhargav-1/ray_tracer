@@ -184,6 +184,19 @@ target_link_libraries(patterns_chapter10_perturbed
         app_lib
         imgui_lib
 )
+add_executable(reflections_chapter11)
+target_sources(reflections_chapter11
+        PRIVATE
+        src/chapter_11_reflections.cpp
+)
+set_source_files_properties(src/chapter_11_reflections.cpp PROPERTIES
+        SKIP_LINTING ON
+)
+target_link_libraries(reflections_chapter11
+        PRIVATE
+        app_lib
+        imgui_lib
+)
 add_subdirectory(test)
 
 install(TARGETS app_lib

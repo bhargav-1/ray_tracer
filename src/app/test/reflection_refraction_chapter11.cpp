@@ -68,4 +68,68 @@ SCENARIO("11: The reflected color for a reflective material") {
     }
   }
 }
+
+SCENARIO("11: shade_hit() with a reflective material") {
+  GIVEN("w = default world r=ray(point(0,0,0) , vector(0,1,0))") {
+    auto world = ray_tracer::World::DefaultWorld();
+    auto ray = Ray(Point(0, 0, -3), Vec3(0, -std::numbers::sqrt2/2, std::numbers::sqrt2/2));
+    auto shape = std::make_shared<Plane>(1);
+    shape->SetTransform(Matrix<4, 4>::Translation(0, -1, 0));
+    Material material;
+    material.SetReflective(0.5);
+    shape->SetMaterial(material);
+    world.AddObject(shape);
+    auto intersection = ray_tracer::Intersection(std::numbers::sqrt2, *shape);
+    auto comps = ray_tracer::PrepareComputations(intersection, ray);
+    auto color = ShadeHit(world, comps);
+    THEN("color = Color(0.87677, 0.92436, 0.82918)") {
+      CHECK(color == Color(0.87677, 0.92436, 0.82918));
+    }
+  }
+}
+
+SCENARIO("11: color_at() with mutually reflective surfaces") {
+  GIVEN("w = default world r=ray(point(0,0,0) , vector(0,1,0))") {
+    auto world = ray_tracer::World();
+    world.AddLight(PointLight(Point(0, 0, 0), Color(1, 1, 1)));
+    auto ray = Ray(Point(0, 0, 0), Vec3(0, 1, 0));
+    auto lower = std::make_shared<Plane>(1);
+    lower->SetTransform(Matrix<4, 4>::Translation(0, -1, 0));
+    Material lower_material;
+    lower_material.SetReflective(1);
+    lower->SetMaterial(lower_material);
+    world.AddObject(lower);
+    auto upper = std::make_shared<Plane>(2);
+    upper->SetTransform(Matrix<4, 4>::Translation(0, 1, 0));
+    Material upper_material;
+    upper_material.SetReflective(1);
+    upper->SetMaterial(upper_material);
+    world.AddObject(upper);
+    auto color = ColorAt(world, ray);
+    std::cout << "Color for mirrored" << color << "\n";
+    THEN("color is not infinite") {
+      CHECK(color.GetRed() < std::numeric_limits<double>::infinity());
+      CHECK(color.GetGreen() < std::numeric_limits<double>::infinity());
+      CHECK(color.GetBlue() < std::numeric_limits<double>::infinity());
+    }
+  }
+}
+
+SCENARIO("The reflected color at the maximum recursvive depth") {
+  GIVEN("w = default world r=ray(point(0,0,0) , vector(0,1,0))") {
+    auto world = ray_tracer::World::DefaultWorld();
+    auto const shape = std::make_shared<Plane>(1);
+    shape->SetTransform(Matrix<4, 4>::Translation(0, -1, 0));
+    Material material;
+    material.SetReflective(1);
+    shape->SetMaterial(material);
+    world.AddObject(shape);
+    auto ray = Ray(Point(0, 0, -3), Vec3(0, -std::numbers::sqrt2 / 2, std::numbers::sqrt2 / 2));
+    auto comps = ray_tracer::PrepareComputations(ray_tracer::Intersection(std::numbers::sqrt2, *shape), ray);
+    auto color = ray_tracer::GetReflectedColor(world, comps,0);
+    THEN("color = Color(0,0,0)") {
+      CHECK(color == Color(0, 0, 0));
+    }
+  }
+}
 } // namespace ray_tracer

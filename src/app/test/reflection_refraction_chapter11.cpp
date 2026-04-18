@@ -8,8 +8,15 @@
 #include "app/ray_tracing_engine.h"
 #include "app/vec3.h"
 #include "app/world.h"
-
+#include "app/pattern.h"
 namespace ray_tracer {
+class TestPattern : public Pattern {
+public:
+  [[nodiscard]] auto LocalColorAt(const Point& point) const -> Color override {
+    return {point.GetX(), point.GetY(), point.GetZ()};
+  }
+};
+
 SCENARIO("11: Reflectivity for default material") {
   GIVEN("the default material") {
     auto material = Material();
@@ -26,7 +33,7 @@ SCENARIO("11: Precomputing the reflection vector") {
     auto xs_intersect = shape.Intersect(ray);
     auto comps = PrepareComputations(xs_intersect[0], ray);
     THEN("comps.reflectv = vector(0, sqrt(2)/2, sqrt(2)/2)") {
-    REQUIRE(comps.GetReflectV() == Vec3(0, std::sqrt(2) / 2, std::sqrt(2) / 2));
+      REQUIRE(comps.GetReflectV() == Vec3(0, std::sqrt(2) / 2, std::sqrt(2) / 2));
     }
   }
 }
@@ -132,4 +139,163 @@ SCENARIO("The reflected color at the maximum recursvive depth") {
     }
   }
 }
+
+SCENARIO("11: Transparency and Refractive index for the default material") {
+  GIVEN("the default material") {
+    auto material = Material();
+    THEN("transparency = 0 and refractive_index = 1") {
+      REQUIRE(material.GetTransparency() == 0.0);
+      REQUIRE(material.GetRefractiveIndex() == 1.0);
+    }
+  }
+}
+
+
+SCENARIO("11: A helper for producing a sphere with a glassy material") {
+  GIVEN("glass_sphere") {
+    const auto glass_sphere = Sphere::GlassSphere(1);
+    THEN("glass_sphere.material.transparency = 1 and glass_sphere.material.refractive_index = 1.5") {
+      CHECK(glass_sphere.GetMaterial().GetTransparency() == 1.0);
+      CHECK(glass_sphere.GetMaterial().GetRefractiveIndex() == 1.5);
+    }
+  }
+}
+
+SCENARIO("11: Finding n1 and n2 at various intersections") {
+  GIVEN("a glass sphere s1, a scaled glass sphere s2, and a translated glass sphere s3") {
+    auto sphere1 = Sphere::GlassSphere(1, 1, 1.5);
+    sphere1.SetTransform(Matrix<4, 4>::Scaling(2, 2, 2));
+    auto sphere2 = Sphere::GlassSphere(2, 1,2.0);
+    sphere2.SetTransform(Matrix<4, 4>::Translation(0, 0, -0.25));
+    auto sphere3 = Sphere::GlassSphere(3,1,2.5);
+    sphere3.SetTransform(Matrix<4, 4>::Translation(0, 0, 0.25));
+    std::vector<Intersection> intersections_xs{
+      Intersection(2, sphere1), Intersection(2.75, sphere2), Intersection(3.25, sphere3), Intersection(4.75, sphere2), Intersection(5.25, sphere3), Intersection(6, sphere1)};
+    THEN("the n1 and n2 values are as follows") {
+      std::vector<std::pair<double, double>> expected_n_values{
+                {1.0, 1.5}, {1.5, 2.0}, {2.0, 2.5}, {2.5, 2.5}, {2.5, 1.5}, {1.5, 1.0}};
+      for (size_t i = 0; i < intersections_xs.size(); ++i) {
+        auto comps = PrepareComputations(intersections_xs[i], Ray(Point(0, 0, -4), Vec3(0, 0, 1)), intersections_xs);
+        CHECK(comps.GetRefractiveIndexN1() == expected_n_values[i].first);
+        CHECK(comps.GetRefractiveIndexN2() == expected_n_values[i].second);
+      }
+    }
+  }
+}
+
+SCENARIO("11: The under point is offset below the surface") {
+  GIVEN("a ray intersecting a transparent sphere") {
+    auto ray = Ray(Point(0, 0, -5), Vec3(0, 0, 1));
+    auto shape = Sphere::GlassSphere(1);
+    shape.SetTransform(Matrix<4, 4>::Translation(0, 0, 1));
+    auto intersection = Intersection(5, shape);
+    auto comps = PrepareComputations(intersection, ray);
+    THEN("comps.under_point.z > kEpsilon/2 and comps.point.z < comps.under_point.z") {
+      CHECK(comps.GetUnderPoint().GetZ() > utilities::kEpsilon / 2);
+      CHECK(comps.GetPoint().GetZ() < comps.GetUnderPoint().GetZ());
+    }
+  }
+}
+
+SCENARIO("11: refracted color with an opaque surface") {
+  GIVEN("w = default world r=ray(point(0,0,0) , vector(0,1,0))") {
+    auto world = ray_tracer::World::DefaultWorld();
+    auto ray = Ray(Point(0, 0, -5), Vec3(0, 1, 1));
+    auto shape = world.Objects()[0];
+    auto intersections_xs = std::vector<Intersection>{Intersection(4, *shape), Intersection(6, *shape)};
+    auto comps = ray_tracer::PrepareComputations(intersections_xs[0], ray, intersections_xs);
+    auto color = ray_tracer::GetRefractedColor(world, comps);
+    THEN("color = Color(0,0,0)") {
+      CHECK(color == Color(0, 0, 0));
+    }
+  }
+}
+
+SCENARIO("11: refracted color at the maximum recursive depth") {
+  GIVEN("w = default world r=ray(point(0,0,0) , vector(0,1,0))") {
+    auto world = ray_tracer::World::DefaultWorld();
+    auto ray = Ray(Point(0, 0, -5), Vec3(0, 1, 1));
+    auto shape = Sphere::GlassSphere(1);
+    shape.SetTransform(Matrix<4, 4>::Scaling(2, 2, 2));
+    world.AddObject(std::make_shared<Sphere>(shape));
+    auto intersections_xs = std::vector<Intersection>{Intersection(4, shape), Intersection(6, shape)};
+    auto comps = ray_tracer::PrepareComputations(intersections_xs[0], ray, intersections_xs);
+    auto color = ray_tracer::GetRefractedColor(world, comps, 0);
+    THEN("color = Color(0,0,0)") {
+      CHECK(color == Color(0, 0, 0));
+    }
+  }
+}
+
+SCENARIO("11: The refracted color under total internal reflection") {
+  GIVEN("w = default world r=ray(point(0,0,0) , vector(0,1,0))") {
+    auto world = ray_tracer::World::DefaultWorld();
+    auto ray = Ray(Point(0, 0, std::numbers::sqrt2/2), Vec3(0, 1, 0));
+    auto shape = world.Objects()[0];
+    auto material = shape->GetMaterial();
+    material.SetTransparency(1);
+    material.SetRefractiveIndex(1.5);
+    shape->SetMaterial(material);
+    auto intersections_xs = std::vector<Intersection>{Intersection(-std::numbers::sqrt2/2, *shape), Intersection(std::numbers::sqrt2/2, *shape)};
+    auto comps = ray_tracer::PrepareComputations(intersections_xs[1], ray, intersections_xs);
+    auto color = ray_tracer::GetRefractedColor(world, comps);
+    THEN("color = Color(0,0,0)") {
+      CHECK(color == Color(0, 0, 0));
+    }
+  }
+}
+
+SCENARIO("11: The refracted color with a refracted ray") {
+  GIVEN("w = default world r=ray(point(0,0,0) , vector(0,1,0))") {
+    auto world = ray_tracer::World::DefaultWorld();
+    auto shape  = world.Objects()[0];
+    auto material = shape->GetMaterial();
+    material.SetAmbient(1);
+    material.SetPattern(std::make_shared<ray_tracer::TestPattern>());
+    shape->SetMaterial(material);
+    auto shape_2 = world.Objects()[1];
+    auto material_2 = shape_2->GetMaterial();
+    material_2.SetTransparency(1);
+    material_2.SetRefractiveIndex(1.5);
+    shape_2->SetMaterial(material_2);
+    auto ray = Ray(Point(0, 0, 0.1), Vec3(0, 1, 0));
+    auto intersections_xs = std::vector<Intersection>{Intersection(-0.98999, *shape), Intersection(-0.48999, *shape_2), Intersection(0.48999, *shape_2), Intersection(0.98999, *shape)};
+    auto comps = ray_tracer::PrepareComputations(intersections_xs[2], ray, intersections_xs);
+    auto color = ray_tracer::GetRefractedColor(world, comps, 5);
+    THEN("color = Color(0,0.99888,0.04725)") {
+      CHECK(color == Color(0, 0.99888, 0.04725));
+    }
+  }
+}
+
+
+SCENARIO("11: shade_hit() with a transparent material") {
+  GIVEN("w = default world r=ray(point(0,0,0) , vector(0,1,0))") {
+    auto world = ray_tracer::World::DefaultWorld();
+    auto floor  = Plane(1);
+    floor.SetTransform(Matrix<4, 4>::Translation(0, -1, 0));
+    auto material = floor.GetMaterial();
+    material.SetTransparency(0.5);
+    material.SetRefractiveIndex(1.5);
+    floor.SetMaterial(material);
+    world.AddObject(std::make_shared<Plane>(floor));
+
+    auto ball = Sphere(2);
+    ball.SetTransform(Matrix<4, 4>::Translation(0, -3.5, -0.5));
+    auto material_2 = ball.GetMaterial();
+    material_2.SetColor({1, 0, 0});
+    material_2.SetAmbient(0.5);
+    ball.SetMaterial(material_2);
+    world.AddObject(std::make_shared<Sphere>(ball));
+    auto ray = Ray(Point(0, 0, -3), Vec3(0, -std::numbers::sqrt2/2, std::numbers::sqrt2/2));
+    auto intersections_xs = std::vector<Intersection>{Intersection(std::numbers::sqrt2, floor)};
+    auto comps = ray_tracer::PrepareComputations(intersections_xs[0], ray, intersections_xs);
+    auto color = ray_tracer::ShadeHit(world, comps,5);
+    THEN("color = Color(0.93642,0.68642,0.68642)") {
+      CHECK(color == Color(0.93642, 0.68642, 0.68642));
+    }
+  }
+}
+
+
 } // namespace ray_tracer

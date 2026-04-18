@@ -62,8 +62,11 @@ inline auto PrepareComputations(const Intersection& intersection, const Ray& ray
     normal_v = -normal_v;
   }
   const auto over_point = point + normal_v * utilities::kEpsilon;
-  return Computations{time, object, point, eye_v, normal_v, inside, over_point};
+  const auto reflect_v = ray.GetDirection().Reflect(normal_v);
+  return Computations{time, object, point, eye_v, normal_v, inside, over_point, reflect_v};
 }
+
+
 
 inline auto IsShadowed(const World& world, const Point& point) -> bool {
   for (const auto& light : world.Lights()) {
@@ -100,6 +103,15 @@ inline auto ColorAt(const World& world, const Ray& ray) -> Color {
     return Color{0, 0, 0};
   }
   return ShadeHit(world, PrepareComputations(hit.value(), ray));
+}
+
+inline auto GetReflectedColor(const World& world, const Computations& computations ) -> Color {
+  if (computations.GetObject()->GetMaterial().GetReflective() == 0) {
+    return Color{0, 0, 0};
+  }
+  const auto reflect_ray = Ray(computations.GetOverPoint(), computations.GetReflectV());
+  const auto color = ColorAt(world, reflect_ray);
+  return color * computations.GetObject()->GetMaterial().GetReflective();
 }
 
 

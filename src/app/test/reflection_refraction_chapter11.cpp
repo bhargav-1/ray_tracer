@@ -297,5 +297,18 @@ SCENARIO("11: shade_hit() with a transparent material") {
   }
 }
 
+SCENARIO("The Schlick Approximation under total internal reflection") {
+  GIVEN("w = default world r=ray(point(0,0,0) , vector(0,1,0))") {
+    auto shape = Sphere::GlassSphere(1);
+    auto ray = Ray(Point(0, 0, std::numbers::sqrt2/2), Vec3(0, 1, 0));
+    auto intersections_xs = std::vector<Intersection>{Intersection(-std::numbers::sqrt2/2, shape), Intersection(std::numbers::sqrt2/2, shape)};
+    auto comps = ray_tracer::PrepareComputations(intersections_xs[1], ray, intersections_xs);
+    auto reflectance = ray_tracer::Schlick(comps);
+    THEN("reflectance = 1") {
+      CHECK(reflectance == 1.0);
+    }
+  }
+}
+
 
 } // namespace ray_tracer

@@ -53,10 +53,10 @@ class Computations {
   Vec3 normal_v_;
   bool inside_;
   Point over_point_;
-  Point under_point_;
   Vec3 reflect_v_;
   double refractive_index_n1_;
   double refractive_index_n2_;
+  Point under_point_;
 };
 
 }  // namespace ray_tracer

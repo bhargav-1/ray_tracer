@@ -2,12 +2,14 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cmath>
 #include <iostream>
 #include <optional>
 #include <vector>
 
 #include "camera.h"
 #include "canvas.h"
+#include "color.h"
 #include "computations.h"
 #include "intersection.h"
 #include "lighting.h"
@@ -52,7 +54,7 @@ inline auto Hit(const std::vector<Intersection>& intersections) -> std::optional
 inline auto PrepareComputations(const Intersection& intersection,
                                 const Ray& ray,
                                 std::vector<Intersection> intersections_xs = {}) -> Computations {
-  std::vector<const Shape*> kContainers{};
+  std::vector<const Shape*> containers{};
   double refractive_index_n1 = 1.0;
   double refractive_index_n2 = 1.0;
   if (intersections_xs.empty()) {
@@ -60,24 +62,24 @@ inline auto PrepareComputations(const Intersection& intersection,
   }
   for (auto const& each_intersection : intersections_xs) {
     if (each_intersection == intersection) {
-      if (kContainers.empty()) {
+      if (containers.empty()) {
         refractive_index_n1 = 1.0;
       } else {
-        refractive_index_n1 = kContainers.back()->GetMaterial().GetRefractiveIndex();
+        refractive_index_n1 = containers.back()->GetMaterial().GetRefractiveIndex();
       }
     }
-    if (std::ranges::find(kContainers, each_intersection.GetObject()) != kContainers.end()) {
-      std::erase(kContainers, each_intersection.GetObject());
+    if (std::ranges::find(containers, each_intersection.GetObject()) != containers.end()) {
+      std::erase(containers, each_intersection.GetObject());
     } else {
       const auto* object = each_intersection.GetObject();
-      kContainers.push_back(object);
+      containers.push_back(object);
     }
 
     if (each_intersection == intersection) {
-      if (kContainers.empty()) {
+      if (containers.empty()) {
         refractive_index_n2 = 1;
       } else {
-        refractive_index_n2 = kContainers.back()->GetMaterial().GetRefractiveIndex();
+        refractive_index_n2 = containers.back()->GetMaterial().GetRefractiveIndex();
       }
       break;
     }
@@ -123,7 +125,7 @@ inline auto IsShadowed(const World& world, const Point& point) -> bool {
 }
 auto GetReflectedColor(const World& world, const Computations& computations, int remaining = 5) -> Color;
 auto GetRefractedColor(const World& world, const Computations& computations, int remaining = 5) -> Color;
-inline auto ShadeHit(const World& world, const Computations& computations, const int remaining = 5) -> Color {
+inline auto ShadeHit(const World& world, const Computations& computations, const int remaining = 5) -> Color { // NOLINT(misc-no-recursion)
   Color color{0, 0, 0};
   for (auto world_light : world.Lights()) {
     const auto shadowed = IsShadowed(world, computations.GetOverPoint());
@@ -140,7 +142,7 @@ inline auto ShadeHit(const World& world, const Computations& computations, const
   return color;
 }
 
-inline auto ColorAt(const World& world, const Ray& ray, const int remaining = 5) -> Color {
+inline auto ColorAt(const World& world, const Ray& ray, const int remaining = 5) -> Color { // NOLINT(misc-no-recursion)
   auto intersections = Intersect(ray, world);
   auto hit = Hit(intersections);
   if (!hit.has_value()) {
@@ -149,7 +151,7 @@ inline auto ColorAt(const World& world, const Ray& ray, const int remaining = 5)
   return ShadeHit(world, PrepareComputations(hit.value(), ray, intersections), remaining);
 }
 
-inline auto GetReflectedColor(const World& world, const Computations& computations, const int remaining) -> Color {
+inline auto GetReflectedColor(const World& world, const Computations& computations, const int remaining) -> Color { // NOLINT(misc-no-recursion)
   if (computations.GetObject()->GetMaterial().GetReflective() == 0) {
     return Color{0, 0, 0};
   }
@@ -161,7 +163,7 @@ inline auto GetReflectedColor(const World& world, const Computations& computatio
   return color * computations.GetObject()->GetMaterial().GetReflective();
 }
 
-inline auto GetRefractedColor(const World& world, const Computations& computations, int remaining) -> Color {
+inline auto GetRefractedColor(const World& world, const Computations& computations, int remaining) -> Color { // NOLINT(misc-no-recursion)
   if (computations.GetObject()->GetMaterial().GetTransparency() == 0) { // NOLINT
     return Color{0, 0, 0};
   }

@@ -125,8 +125,13 @@ inline auto IsShadowed(const World& world, const Point& point) -> bool {
 }
 auto GetReflectedColor(const World& world, const Computations& computations, int remaining = 5) -> Color;
 auto GetRefractedColor(const World& world, const Computations& computations, int remaining = 5) -> Color;
-inline auto ShadeHit(const World& world, const Computations& computations, const int remaining = 5) -> Color { // NOLINT(misc-no-recursion)
+inline auto Schlick(const Computations& computations) -> double;
+inline auto ShadeHit(const World& world, const Computations& computations, const int remaining = 5)
+    -> Color {  // NOLINT(misc-no-recursion)
   Color color{0, 0, 0};
+  Color reflected_color{0, 0, 0};
+  Color refracted_color{0, 0, 0};
+
   for (auto world_light : world.Lights()) {
     const auto shadowed = IsShadowed(world, computations.GetOverPoint());
     color = color + Lighting(computations.GetObject()->GetMaterial(),
@@ -136,13 +141,21 @@ inline auto ShadeHit(const World& world, const Computations& computations, const
                              computations.GetEyeV(),
                              computations.GetNormalV(),
                              shadowed);
-    auto reflected = GetReflectedColor(world, computations, remaining);
-    color = color + reflected + GetRefractedColor(world, computations, remaining);
   }
+  reflected_color = GetReflectedColor(world, computations, remaining);
+  refracted_color = GetRefractedColor(world, computations, remaining);
+  if (auto material = computations.GetObject()->GetMaterial();
+      material.GetReflective() > 0 && material.GetTransparency() > 0) {
+    auto reflectance = Schlick(computations);
+    color = color + reflected_color * reflectance + refracted_color * (1 - reflectance);
+      } else {
+        color = color + reflected_color + refracted_color;
+      }
   return color;
 }
 
-inline auto ColorAt(const World& world, const Ray& ray, const int remaining = 5) -> Color { // NOLINT(misc-no-recursion)
+inline auto ColorAt(const World& world, const Ray& ray, const int remaining = 5)
+    -> Color {  // NOLINT(misc-no-recursion)
   auto intersections = Intersect(ray, world);
   auto hit = Hit(intersections);
   if (!hit.has_value()) {
@@ -151,7 +164,8 @@ inline auto ColorAt(const World& world, const Ray& ray, const int remaining = 5)
   return ShadeHit(world, PrepareComputations(hit.value(), ray, intersections), remaining);
 }
 
-inline auto GetReflectedColor(const World& world, const Computations& computations, const int remaining) -> Color { // NOLINT(misc-no-recursion)
+inline auto GetReflectedColor(const World& world, const Computations& computations, const int remaining)
+    -> Color {  // NOLINT(misc-no-recursion)
   if (computations.GetObject()->GetMaterial().GetReflective() == 0) {
     return Color{0, 0, 0};
   }
@@ -163,8 +177,9 @@ inline auto GetReflectedColor(const World& world, const Computations& computatio
   return color * computations.GetObject()->GetMaterial().GetReflective();
 }
 
-inline auto GetRefractedColor(const World& world, const Computations& computations, int remaining) -> Color { // NOLINT(misc-no-recursion)
-  if (computations.GetObject()->GetMaterial().GetTransparency() == 0) { // NOLINT
+inline auto GetRefractedColor(const World& world, const Computations& computations, int remaining)
+    -> Color {                                                           // NOLINT(misc-no-recursion)
+  if (computations.GetObject()->GetMaterial().GetTransparency() == 0) {  // NOLINT
     return Color{0, 0, 0};
   }
   if (remaining <= 0) {
@@ -177,14 +192,14 @@ inline auto GetRefractedColor(const World& world, const Computations& computatio
   auto sin_theta_t = n_ratio * sin_theta_i;
 
   // total interal reflection
-  if (sin_theta_t * sin_theta_t >=1) {
+  if (sin_theta_t * sin_theta_t >= 1) {
     return Color{0, 0, 0};
   }
   auto cos_theta_t = std::sqrt(1 - sin_theta_t * sin_theta_t);
-  auto direction = computations.GetNormalV() * (n_ratio * cos_theta_i - cos_theta_t) - computations.GetEyeV()*n_ratio;
+  auto direction = computations.GetNormalV() * (n_ratio * cos_theta_i - cos_theta_t) - computations.GetEyeV() * n_ratio;
   auto refracted_ray = Ray(computations.GetUnderPoint(), direction);
   auto color = ColorAt(world, refracted_ray, remaining - 1) * computations.GetObject()->GetMaterial().GetTransparency();
-  return  color;
+  return color;
 }
 
 inline auto Schlick(const Computations& computations) -> double {
@@ -195,13 +210,15 @@ inline auto Schlick(const Computations& computations) -> double {
     if (sin2_t > 1) {
       return 1.0;
     }
-    // auto cos_t = std::sqrt(1 - sin2_t);
-    // cos = cos_t;
+    auto cos_t = std::sqrt(1 - sin2_t);
+    cos = cos_t;
   }
-  // auto r0 = std::pow((computations.GetRefractiveIndexN1() - computations.GetRefractiveIndexN2()) /
-                      // (computations.GetRefractiveIndexN1() + computations.GetRefractiveIndexN2()), 2);
-  // return r0 + (1 - r0) * std::pow(1 - cos, 5);
-  return 0;
+  const auto r0 = std::pow((computations.GetRefractiveIndexN1() - computations.GetRefractiveIndexN2()) /
+                               (computations.GetRefractiveIndexN1() + computations.GetRefractiveIndexN2()),
+                           2);
+  //https://graphics.stanford.edu/courses/cs148-10-summer/docs/2006--degreve--reflection_refraction.pdf
+  // https://www.flipcode.com/archives/reflection_transmission.pdf
+  return r0 + (1 - r0) * std::pow(1 - cos, 5);
 }
 
 inline auto Render(Camera& camera, const World& world) -> Canvas {

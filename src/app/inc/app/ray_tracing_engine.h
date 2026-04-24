@@ -185,6 +185,23 @@ inline auto GetRefractedColor(const World& world, const Computations& computatio
   return  color;
 }
 
+inline auto Schlick(const Computations& computations) -> double {
+  auto cos = computations.GetEyeV().Dot(computations.GetNormalV());
+  if (computations.GetRefractiveIndexN1() > computations.GetRefractiveIndexN2()) {
+    auto n_ratio = computations.GetRefractiveIndexN1() / computations.GetRefractiveIndexN2();
+    auto sin2_t = n_ratio * n_ratio * (1 - cos * cos);
+    if (sin2_t > 1) {
+      return 1.0;
+    }
+    // auto cos_t = std::sqrt(1 - sin2_t);
+    // cos = cos_t;
+  }
+  // auto r0 = std::pow((computations.GetRefractiveIndexN1() - computations.GetRefractiveIndexN2()) /
+                      // (computations.GetRefractiveIndexN1() + computations.GetRefractiveIndexN2()), 2);
+  // return r0 + (1 - r0) * std::pow(1 - cos, 5);
+  return 0;
+}
+
 inline auto Render(Camera& camera, const World& world) -> Canvas {
   auto image = Canvas(camera.GetHorizontalSize(), camera.GetVerticalSize());
   int last_bucket = -1;

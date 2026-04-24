@@ -8,7 +8,7 @@ namespace ray_tracer {
 class Material {
  public:
   constexpr Material() noexcept : color_(1, 1, 1, 0) {}
-  constexpr explicit Material(Color  color, const double ambient =0.1, const double diffuse =0.9, const double specular =0.9, const double shininess =200, const double reflective = 0.0, const double transparency = 0.0, const double refractive_index = 1.0) noexcept
+  constexpr explicit Material(Color  color, const double ambient =0.1, const double diffuse =0.9, const double specular =0.9, const double shininess =200, const double reflective = 0.0, const double transparency = 0.0, const double refractive_index = 1.0) noexcept // NOLINT(bugprone-easily-swappable-parameters)
       : color_(std::move(color)), ambient_(ambient), diffuse_(diffuse), specular_(specular), shininess_(shininess) , reflective_(reflective), transparency_(transparency), refractive_index_(refractive_index){}
   ~Material() = default;
   constexpr auto operator==(const Material& rhs) const -> bool {

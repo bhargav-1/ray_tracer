@@ -31,7 +31,7 @@ class Computations {
         reflect_v_(std::move(reflect_v)),
         refractive_index_n1_(refractive_index_n1),
         refractive_index_n2_(refractive_index_n2),
-        under_point_(under_point) {}
+        under_point_(std::move(under_point)) {}
 
   [[nodiscard]] constexpr auto GetTime() const -> double { return time_; }
   [[nodiscard]] constexpr auto GetObject() const -> const Shape* { return object_; }

@@ -50,22 +50,54 @@ static void RenderScene() {
         ray_tracer::Color{0.9, 0.9, 0.85}, ray_tracer::Color{0.4, 0.2, 0.1});
     floor_a->SetPatternTransform(ray_tracer::Matrix<4, 4>::Scaling(0.15, 0.15, 0.15));
     auto floor_mat = ray_tracer::Material{ray_tracer::Color{1, 0.9, 0.9}, 0.1, 0.9, 0.0, 200};
-    floor_mat.SetReflective(1);
+    floor_mat.SetReflective(0);
+    floor_mat.SetTransparency(0);
     floor_mat.SetPattern(floor_a);
     floor.SetMaterial(floor_mat);
     world.AddObject(std::make_shared<ray_tracer::Plane>(floor));
 
+    auto back_wall = ray_tracer::Plane(10);
+    auto back_wall_a = std::make_shared<ray_tracer::CheckersPattern>(
+        ray_tracer::Color{0.0, 0.0, 0.05}, ray_tracer::Color{0, 0, 0});
+    back_wall_a->SetPatternTransform(ray_tracer::Matrix<4, 4>::Scaling(1, 02, 1));
+    back_wall.SetTransform(ray_tracer::Matrix<4, 4>::Translation(0, 0, 5) * ray_tracer::Matrix<4, 4>::RotationX(std::numbers::pi / 2));
+    auto back_wall_mat = ray_tracer::Material{ray_tracer::Color{1, 0.9, 0.9}, 0.1, 0.9, 0.0, 200};
+    back_wall_mat.SetReflective(1);
+    back_wall_mat.SetTransparency(0.5);
+    back_wall_mat.SetPattern(back_wall_a);
+    back_wall_mat.SetDiffuse(0.8);
+    back_wall_mat.SetSpecular(0.8);
+    back_wall_mat.SetAmbient(0.2);
+    back_wall.SetMaterial(back_wall_mat);
+    world.AddObject(std::make_shared<ray_tracer::Plane>(back_wall));
+
     // Center sphere — perturbed stripes (two-tone green)
     auto center = ray_tracer::Sphere(2);
     center.SetTransform(ray_tracer::Matrix<4, 4>::Translation(0, 1, 0));
-    auto center_pat = ray_tracer::StripePattern(
-        ray_tracer::Color{0.05, 0.5, 0.1}, ray_tracer::Color{0.15, 0.7, 0.2});
-    center_pat.SetPatternTransform(ray_tracer::Matrix<4, 4>::Scaling(0.25, 0.25, 0.25));
+    // auto center_pat = ray_tracer::StripePattern(
+    //     ray_tracer::Color{0.05, 0.5, 0.1}, ray_tracer::Color{0.15, 0.7, 0.2});
+    // center_pat.SetPatternTransform(ray_tracer::Matrix<4, 4>::Scaling(0.25, 0.25, 0.25));
     auto center_mat = ray_tracer::Material{ray_tracer::Color{1, 1, 1}, 0.1, 0.3, 0.2, 100};
-    center_mat.SetReflective(0.1);
-    center_mat.SetPattern(Perturbed(center_pat, 1.0));
+    center_mat.SetReflective(1);
+    center_mat.SetTransparency(1);
+    center_mat.SetRefractiveIndex(1.5);
+    // center_mat.SetPattern(Perturbed(center_pat, 1.0));
     center.SetMaterial(center_mat);
     world.AddObject(std::make_shared<ray_tracer::Sphere>(center));
+
+    auto center_2 = ray_tracer::Sphere(11);
+    center_2.SetTransform(ray_tracer::Matrix<4, 4>::Translation(0, 1, 0) * ray_tracer::Matrix<4, 4>::Scaling(0.5,0.5,0.5));
+    auto center_2_pat = ray_tracer::StripePattern(
+        ray_tracer::Color{0.05, 0.5, 0.1}, ray_tracer::Color{0.15, 0.7, 0.2});
+    center_2_pat.SetPatternTransform(ray_tracer::Matrix<4, 4>::Scaling(0.25, 0.25, 0.25));
+    auto center_2_mat = ray_tracer::Material{ray_tracer::Color{1, 1, 1}, 0.1, 0.3, 0.2, 100};
+    center_2_mat.SetReflective(0.1);
+    center_2_mat.SetTransparency(0.5);
+    center_2_mat.SetRefractiveIndex(2);
+    center_2_mat.SetPattern(Perturbed(center_2_pat, 1.0));
+    center_2.SetMaterial(center_2_mat);
+    world.AddObject(std::make_shared<ray_tracer::Sphere>(center_2));
+
 
     // Left sphere — perturbed stripes (two-tone green)
     auto left = ray_tracer::Sphere(3);
@@ -75,7 +107,9 @@ static void RenderScene() {
         ray_tracer::Color{0.05, 0.5, 0.1}, ray_tracer::Color{0.2, 0.65, 0.25});
     left_pat.SetPatternTransform(ray_tracer::Matrix<4, 4>::Scaling(0.2, 0.2, 0.2));
     auto left_mat = ray_tracer::Material{ray_tracer::Color{1, 1, 1}, 0.0, 0.9, 0.9, 500};
-    left_mat.SetReflective(0.1);
+    left_mat.SetReflective(1);
+    left_mat.SetTransparency(0.5);
+    left_mat.SetRefractiveIndex(0.5);
     left_mat.SetPattern(Perturbed(left_pat, 0.8));
     left.SetMaterial(left_mat);
     world.AddObject(std::make_shared<ray_tracer::Sphere>(left));
@@ -85,7 +119,9 @@ static void RenderScene() {
     right.SetTransform(ray_tracer::Matrix<4, 4>::Translation(1.5, 0.5, -0.5) *
                        ray_tracer::Matrix<4, 4>::Scaling(0.5, 0.5, 0.5));
     auto right_mat = ray_tracer::Material{ray_tracer::Color{1.0, 0.55, 0.0}, 0, 0.8, 0.9, 200};
-    right_mat.SetReflective(0.1);
+    right_mat.SetReflective(1);
+    right_mat.SetTransparency(0.9);
+    right_mat.SetRefractiveIndex(1.5);
     right.SetMaterial(right_mat);
     right.SetMaterial(right_mat);
     world.AddObject(std::make_shared<ray_tracer::Sphere>(right));

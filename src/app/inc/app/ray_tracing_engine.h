@@ -117,7 +117,14 @@ inline auto IsShadowed(const World& world, const Point& point) -> bool {
     Vec3 const direction_to_light = vector_to_light.Normalize();
     Ray const shadow_ray(point, direction_to_light);
     auto intersections = Intersect(shadow_ray, world);
-    if (auto hit = Hit(intersections); hit.has_value() && hit.value().GetTime() < distance_to_light) {
+    auto shadow_intersections = std::vector<Intersection>{};
+    shadow_intersections.reserve(intersections.size());
+    for (const auto& each_intersection : intersections) {
+      if (each_intersection.GetTime() > utilities::kEpsilon && each_intersection.GetObject()->GetCastShadow()) {
+       shadow_intersections.push_back(each_intersection);
+      }
+    }
+    if (auto hit = Hit(shadow_intersections); hit.has_value() && hit.value().GetTime() < distance_to_light) {
       return true;
     }
   }

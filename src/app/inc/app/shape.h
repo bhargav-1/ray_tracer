@@ -41,6 +41,8 @@ public:
   [[nodiscard]] auto GetSavedRay() const -> std::optional<Ray> { return saved_ray_; }
   [[nodiscard]] virtual auto LocalIntersect(const Ray& ray) const -> std::vector<Intersection> = 0;
   [[nodiscard]] virtual auto LocalNormalAt(const ray_tracer::Point& point) const -> ray_tracer::Vec3 = 0;
+  [[nodiscard]] auto GetCastShadow() const -> bool { return cast_shadow_; }
+  void SetCastShadow(const bool cast_shadow) { cast_shadow_ = cast_shadow; }
 
 private:
   std::size_t id_;
@@ -49,6 +51,7 @@ private:
   Matrix<4, 4> transpose_inverse_ = Matrix<4, 4>::IdentityMatrix();
   Material material_;
   mutable std::optional<Ray> saved_ray_;
+  bool cast_shadow_ = true;
 };
 
 inline auto operator==(const Shape& lhs, const Shape& rhs) -> bool { return lhs.id_ == rhs.id_; }

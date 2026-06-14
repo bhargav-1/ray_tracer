@@ -33,5 +33,6 @@ wget
 vim
 zip
 libglfw3-dev
+libyaml-cpp-dev
 libgl1-mesa-dev
 dpkg-dev

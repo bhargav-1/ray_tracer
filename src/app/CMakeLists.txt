@@ -3,6 +3,11 @@ add_library(app_lib)
 
 target_sources(app_lib
         PRIVATE
+        src/scene_editor/gl_texture.cpp
+        src/scene_editor/scene_renderer.cpp
+        src/scene_editor/scene_editor_app.cpp
+        src/scene/scene_yaml.cpp
+        src/scene/scene_compiler.cpp
 )
 #set_target_properties(${PROJECT_NAME}_lib PROPERTIES INCLUDE_DIRECTORIES ${GENERATED_BUILD_DIR}/src)
 target_include_directories(app_lib
@@ -13,7 +18,17 @@ target_include_directories(app_lib
 target_link_libraries(app_lib
         PUBLIC
         fmt::fmt
+        yaml-cpp::yaml-cpp
 )
+target_compile_definitions(app_lib
+        PUBLIC
+        RAY_TRACER_ASSET_DIR="${CMAKE_SOURCE_DIR}/assets"
+)
+
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/inc/app/scene" PREFIX "Header Files\\scene"
+        FILES inc/app/scene/scene.h inc/app/scene/scene_yaml.h inc/app/scene/scene_compiler.h)
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/inc/app/scene_editor" PREFIX "Header Files\\scene_editor"
+        FILES inc/app/scene_editor/gl_texture.h inc/app/scene_editor/scene_renderer.h inc/app/scene_editor/scene_editor_app.h)
 
 add_executable(projectile_canvas)
 target_sources(projectile_canvas
@@ -184,15 +199,13 @@ target_link_libraries(patterns_chapter10_perturbed
         app_lib
         imgui_lib
 )
-add_executable(reflections_chapter11)
-target_sources(reflections_chapter11
+add_executable(scene_editor)
+target_sources(scene_editor
         PRIVATE
-        src/chapter_11_reflections.cpp
+        src/scene_editor/imgui_file_dialog.cpp
+        src/scene_editor_main.cpp
 )
-set_source_files_properties(src/chapter_11_reflections.cpp PROPERTIES
-        SKIP_LINTING ON
-)
-target_link_libraries(reflections_chapter11
+target_link_libraries(scene_editor
         PRIVATE
         app_lib
         imgui_lib

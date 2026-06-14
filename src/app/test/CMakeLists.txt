@@ -16,6 +16,11 @@ target_sources(app_lib_tests
         planes_chapter9.cpp
         patterns_chapter10.cpp
         reflection_refraction_chapter11.cpp
+        scene_model.cpp
+        scene_yaml_io.cpp
+        scene_compiler.cpp
+        scene_editor_app.cpp
+        scene_renderer.cpp
 )
 
 target_link_libraries(app_lib_tests

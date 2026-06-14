@@ -2,6 +2,8 @@
 
 #include <filesystem>
 #include <optional>
+#include <cstdint>
+#include <cstddef>
 #include <string>
 #include <vector>
 
@@ -11,11 +13,11 @@
 
 namespace ray_tracer::scene_editor {
 
-enum class SelectionTarget { None, Object, Light, Camera };
-enum class GizmoMode { Translate, Rotate, Scale };
+enum class SelectionTarget : std::uint8_t { kNone, kObject, kLight, kCamera };
+enum class GizmoMode : std::uint8_t { kTranslate, kRotate, kScale };
 
 struct Selection {
-  SelectionTarget target{SelectionTarget::None};
+  SelectionTarget target{SelectionTarget::kNone};
   std::size_t index{0};
 };
 
@@ -32,7 +34,7 @@ struct RenderState {
 struct EditorState {
   std::filesystem::path current_path;
   Selection selection;
-  GizmoMode gizmo_mode{GizmoMode::Translate};
+  GizmoMode gizmo_mode{GizmoMode::kTranslate};
   RenderState render_state;
   bool show_viewport_overlays{true};
   std::string status_message;

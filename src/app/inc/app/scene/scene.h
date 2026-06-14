@@ -1,6 +1,7 @@
 #pragma once
 
 #include <optional>
+#include <cstdint>
 #include <string>
 #include <vector>
 
@@ -54,22 +55,22 @@ struct Light {
   constexpr auto operator==(const Light&) const -> bool = default;
 };
 
-enum class ObjectType { Sphere, Plane };
+enum class ObjectType : std::uint8_t { kSphere, kPlane };
 
-enum class PatternType {
-  Solid,
-  Stripe,
-  Gradient,
-  Ring,
-  Checkers,
-  RadialGradient,
-  UvCheckers,
-  Blended,
-  Perturbed
+enum class PatternType : std::uint8_t {
+  kSolid,
+  kStripe,
+  kGradient,
+  kRing,
+  kCheckers,
+  kRadialGradient,
+  kUvCheckers,
+  kBlended,
+  kPerturbed
 };
 
-struct Pattern {
-  PatternType type{PatternType::Solid};
+struct Pattern {  // NOLINT(misc-no-recursion)
+  PatternType type{PatternType::kSolid};
   ColorRgb color{1.0F, 1.0F, 1.0F};
   Transform transform;
   std::vector<Pattern> children;
@@ -77,6 +78,7 @@ struct Pattern {
   int width{2};
   int height{2};
 
+  // NOLINTNEXTLINE(misc-no-recursion)
   auto operator==(const Pattern&) const -> bool = default;
 };
 
@@ -96,7 +98,7 @@ struct Material {
 
 struct Object {
   std::string name;
-  ObjectType type{ObjectType::Sphere};
+  ObjectType type{ObjectType::kSphere};
   Transform transform;
   Material material;
   bool visible{true};

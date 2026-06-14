@@ -2,12 +2,17 @@
 
 #include <algorithm>
 #include <array>
+#include <atomic>
 #include <cmath>
-#include <cstdio>
+#include <cstddef>
+#include <iomanip>
+#include <iostream>
+#include <vector>
 #include <string_view>
 #include <utility>
 
 #include "app/ray_tracing_engine.h"
+#include "app/scene/scene_compiler.h"
 
 namespace ray_tracer::scene_editor {
 namespace {
@@ -50,15 +55,11 @@ auto LogRenderSamples(const scene_runtime::CompiledScene& scene,
       SamplePoint{"bottom_right", output_width - 1, output_height - 1},
   };
 
-  std::fprintf(stderr,
-               "[scene_editor] renderer samples mode=%s output=%dx%d full=%dx%d objects=%zu lights=%zu\n",
-               preview ? "preview" : "full",
-               output_width,
-               output_height,
-               full_width,
-               full_height,
-               scene.world.Objects().size(),
-               scene.world.Lights().size());
+  std::cerr << "[scene_editor] renderer samples mode=" << (preview ? "preview" : "full")
+            << " output=" << output_width << 'x' << output_height
+            << " full=" << full_width << 'x' << full_height
+            << " objects=" << scene.world.Objects().size()
+            << " lights=" << scene.world.Lights().size() << '\n';
   for (const auto& sample : samples) {
     const int output_x = std::clamp(sample.x, 0, output_width - 1);
     const int output_y = std::clamp(sample.y, 0, output_height - 1);
@@ -67,21 +68,13 @@ auto LogRenderSamples(const scene_runtime::CompiledScene& scene,
     const auto ray = camera.GetRayForPixel(source_x, source_y);
     const auto& origin = ray.GetOrigin();
     const auto& direction = ray.GetDirection();
-    std::fprintf(stderr,
-                 "[scene_editor] renderer sample mode=%s label=%s output_pixel=[%d %d] source_pixel=[%d %d] "
-                 "origin=[%.6f %.6f %.6f] direction=[%.6f %.6f %.6f]\n",
-                 preview ? "preview" : "full",
-                 sample.label.data(),
-                 output_x,
-                 output_y,
-                 source_x,
-                 source_y,
-                 origin.GetX(),
-                 origin.GetY(),
-                 origin.GetZ(),
-                 direction.GetX(),
-                 direction.GetY(),
-                 direction.GetZ());
+    std::cerr << std::fixed << std::setprecision(6)
+              << "[scene_editor] renderer sample mode=" << (preview ? "preview" : "full")
+              << " label=" << sample.label
+              << " output_pixel=[" << output_x << ' ' << output_y << ']'
+              << " source_pixel=[" << source_x << ' ' << source_y << ']'
+              << " origin=[" << origin.GetX() << ' ' << origin.GetY() << ' ' << origin.GetZ() << ']'
+              << " direction=[" << direction.GetX() << ' ' << direction.GetY() << ' ' << direction.GetZ() << "]\n";
   }
 }
 
@@ -90,7 +83,7 @@ auto LogRenderSamples(const scene_runtime::CompiledScene& scene,
 auto SceneRenderer::Render(const scene_runtime::CompiledScene& scene,
                              const bool preview,
                              std::atomic<bool>* cancel,
-                             std::atomic<int>* progress) const -> RenderPixels {
+                             std::atomic<int>* progress) -> RenderPixels {
   auto camera = scene.camera;
   const int full_width = camera.GetHorizontalSize();
   const int full_height = camera.GetVerticalSize();
@@ -112,29 +105,29 @@ auto SceneRenderer::Render(const scene_runtime::CompiledScene& scene,
   if (progress != nullptr) {
     progress->store(0);
   }
-  for (int y = 0; y < height; ++y) {
+  for (int row = 0; row < height; ++row) {
     if (cancel != nullptr && cancel->load()) {
       return {};
     }
-    for (int x = 0; x < width; ++x) {
+    for (int column = 0; column < width; ++column) {
       if (cancel != nullptr && cancel->load()) {
         return {};
       }
-      auto& output = image.pixels[static_cast<std::size_t>(y) * static_cast<std::size_t>(width) +
-                                  static_cast<std::size_t>(x)];
+      auto& output = image.pixels[static_cast<std::size_t>(row) * static_cast<std::size_t>(width) +
+                                  static_cast<std::size_t>(column)];
       if (!preview) {
-        auto ray = camera.GetRayForPixel(x, y);
+        auto ray = camera.GetRayForPixel(column, row);
         output = ray_tracer::ColorAt(scene.world, ray);
         continue;
       }
 
-      const int source_x = PreviewSamplePixel(x, width, full_width);
-      const int source_y = PreviewSamplePixel(y, height, full_height);
+      const int source_x = PreviewSamplePixel(column, width, full_width);
+      const int source_y = PreviewSamplePixel(row, height, full_height);
       auto ray = camera.GetRayForPixel(source_x, source_y);
       output = ray_tracer::ColorAt(scene.world, ray);
     }
     if (progress != nullptr) {
-      progress->store(((y + 1) * 100) / height);
+      progress->store(((row + 1) * 100) / height);
     }
   }
   return image;

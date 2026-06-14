@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <array>
 #include <cstring>
+#include <exception>
+#include <filesystem>
 #include <string>
 #include <vector>
 
@@ -60,9 +62,18 @@ auto ImGuiFileDialog::OpenDialog(const std::string& key,
                                  const std::string& title,
                                  const std::string& filters,
                                  const std::filesystem::path& start_path) -> void {
+  OpenDialog(key, title, filters, start_path, "Load");
+}
+
+auto ImGuiFileDialog::OpenDialog(const std::string& key,
+                                 const std::string& title,
+                                 const std::string& filters,
+                                 const std::filesystem::path& start_path,
+                                 const std::string& accept_label) -> void {
   key_ = key;
   title_ = title;
   filters_ = filters;
+  accept_label_ = accept_label;
   accepted_ = false;
   error_.clear();
 
@@ -131,7 +142,7 @@ auto ImGuiFileDialog::Display(const std::string& key) -> bool {
       selected_path_ = current_directory_ / typed_filename_;
     }
 
-    if (ImGui::Button("Load", ImVec2(120.0F, 0.0F))) {
+    if (ImGui::Button(accept_label_.c_str(), ImVec2(120.0F, 0.0F))) {
       AcceptSelection();
       should_close = accepted_;
     }

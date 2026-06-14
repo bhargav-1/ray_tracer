@@ -11,6 +11,7 @@ lights:
 objects:
   - name: Floor (Plane)
     type: plane
+    visible: true
     cast_shadow: true
     transform:
       translate: [0, 0, 0]
@@ -46,6 +47,7 @@ objects:
           scale: [1, 1, 1]
   - name: Sphere 1
     type: sphere
+    visible: true
     cast_shadow: true
     transform:
       translate: [0, 1.7397385, 0]

@@ -1,12 +1,16 @@
 #include "app/scene/scene_compiler.h"
 
+#include <cstddef>
 #include <cmath>
+#include <exception>
 #include <memory>
 #include <numbers>
+#include <optional>
 #include <stdexcept>
 #include <string>
 #include <utility>
 
+#include "app/camera.h"
 #include "app/color.h"
 #include "app/material.h"
 #include "app/matrix.h"
@@ -14,9 +18,11 @@
 #include "app/plane.h"
 #include "app/point.h"
 #include "app/point_light.h"
+#include "app/scene/scene.h"
 #include "app/sphere.h"
 #include "app/transformations.h"
 #include "app/vec3.h"
+#include "app/world.h"
 
 namespace ray_tracer::scene_runtime {
 namespace {
@@ -50,68 +56,68 @@ auto BuildTransformMatrix(const scene::Transform& transform) -> ray_tracer::Matr
 }
 
 auto SolidChildColor(const scene::Pattern& pattern, const std::string& label) -> ray_tracer::Color {
-  if (pattern.type != scene::PatternType::Solid) {
+  if (pattern.type != scene::PatternType::kSolid) {
     throw std::runtime_error(label + " requires solid child patterns in the current runtime");
   }
   return ToColor(pattern.color);
 }
 
-auto CompilePattern(const scene::Pattern& pattern) -> std::shared_ptr<ray_tracer::Pattern> {
+auto CompilePattern(const scene::Pattern& pattern) -> std::shared_ptr<ray_tracer::Pattern> {  // NOLINT(misc-no-recursion)
   std::shared_ptr<ray_tracer::Pattern> compiled;
   switch (pattern.type) {
-    case scene::PatternType::Solid:
+    case scene::PatternType::kSolid:
       compiled = std::make_shared<ray_tracer::SolidPattern>(ToColor(pattern.color));
       break;
-    case scene::PatternType::Stripe:
+    case scene::PatternType::kStripe:
       if (pattern.children.size() != 2) {
         throw std::runtime_error("stripe pattern requires exactly 2 child patterns");
       }
       compiled = std::make_shared<ray_tracer::StripePattern>(
           CompilePattern(pattern.children[0]), CompilePattern(pattern.children[1]));
       break;
-    case scene::PatternType::Ring:
+    case scene::PatternType::kRing:
       if (pattern.children.size() != 2) {
         throw std::runtime_error("ring pattern requires exactly 2 child patterns");
       }
       compiled = std::make_shared<ray_tracer::RingPattern>(
           CompilePattern(pattern.children[0]), CompilePattern(pattern.children[1]));
       break;
-    case scene::PatternType::Checkers:
+    case scene::PatternType::kCheckers:
       if (pattern.children.size() != 2) {
         throw std::runtime_error("checkers pattern requires exactly 2 child patterns");
       }
       compiled = std::make_shared<ray_tracer::CheckersPattern>(
           CompilePattern(pattern.children[0]), CompilePattern(pattern.children[1]));
       break;
-    case scene::PatternType::Blended:
+    case scene::PatternType::kBlended:
       if (pattern.children.size() != 2) {
         throw std::runtime_error("blended pattern requires exactly 2 child patterns");
       }
       compiled = std::make_shared<ray_tracer::BlendedPattern>(
           CompilePattern(pattern.children[0]), CompilePattern(pattern.children[1]));
       break;
-    case scene::PatternType::UvCheckers:
+    case scene::PatternType::kUvCheckers:
       if (pattern.children.size() != 2) {
         throw std::runtime_error("uv_checkers pattern requires exactly 2 child patterns");
       }
       compiled = std::make_shared<ray_tracer::UVCheckersPattern>(
           pattern.width, pattern.height, CompilePattern(pattern.children[0]), CompilePattern(pattern.children[1]));
       break;
-    case scene::PatternType::Perturbed:
+    case scene::PatternType::kPerturbed:
       if (pattern.children.size() != 1) {
         throw std::runtime_error("perturbed pattern requires exactly 1 source pattern");
       }
       compiled = std::make_shared<ray_tracer::PerturbedPattern>(
           CompilePattern(pattern.children[0]), pattern.perturb_scale);
       break;
-    case scene::PatternType::Gradient:
+    case scene::PatternType::kGradient:
       if (pattern.children.size() != 2) {
         throw std::runtime_error("gradient pattern requires exactly 2 child patterns");
       }
       compiled = std::make_shared<ray_tracer::GradientPattern>(
           SolidChildColor(pattern.children[0], "gradient"), SolidChildColor(pattern.children[1], "gradient"));
       break;
-    case scene::PatternType::RadialGradient:
+    case scene::PatternType::kRadialGradient:
       if (pattern.children.size() != 2) {
         throw std::runtime_error("radial_gradient pattern requires exactly 2 child patterns");
       }
@@ -158,10 +164,10 @@ auto CompileScene(const scene::Scene& scene) -> CompileSceneResult {
       }
       std::shared_ptr<ray_tracer::Shape> shape;
       switch (object.type) {
-        case scene::ObjectType::Sphere:
+        case scene::ObjectType::kSphere:
           shape = std::make_shared<ray_tracer::Sphere>(index + 1);
           break;
-        case scene::ObjectType::Plane:
+        case scene::ObjectType::kPlane:
           shape = std::make_shared<ray_tracer::Plane>(index + 1);
           break;
       }

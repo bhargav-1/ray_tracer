@@ -18,10 +18,10 @@ class SceneRenderer {
  public:
   static constexpr int kPreviewDivisor = 8;
 
-  [[nodiscard]] auto Render(const scene_runtime::CompiledScene& scene,
-                            bool preview,
-                            std::atomic<bool>* cancel,
-                            std::atomic<int>* progress) const -> RenderPixels;
+  [[nodiscard]] static auto Render(const scene_runtime::CompiledScene& scene,
+                                   bool preview,
+                                   std::atomic<bool>* cancel,
+                                   std::atomic<int>* progress) -> RenderPixels;
 
   [[nodiscard]] static auto ToRgb8(const RenderPixels& image) -> std::vector<unsigned char>;
 };

@@ -2,6 +2,7 @@
 
 #include <utility>
 
+#include "app/scene/scene_compiler.h"
 #include "app/scene/scene_yaml.h"
 
 namespace ray_tracer::scene_editor {

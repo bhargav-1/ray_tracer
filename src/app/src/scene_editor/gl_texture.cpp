@@ -1,5 +1,9 @@
 #include "app/scene_editor/gl_texture.h"
 
+#include <vector>
+
+#include <GL/gl.h>
+
 namespace ray_tracer::scene_editor {
 
 GlTexture::~GlTexture() {

@@ -1,13 +1,20 @@
 #include "app/scene/scene_yaml.h"
 
-#include <fstream>
 #include <algorithm>
+#include <cstddef>
+#include <exception>
+#include <filesystem>
+#include <fstream>
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
+#include "app/scene/scene.h"
+
+#include <yaml-cpp/emittermanip.h>
 #include <yaml-cpp/yaml.h>
 
 namespace ray_tracer::scene_io {
@@ -38,7 +45,10 @@ auto RequireOnlyKeys(const YAML::Node& node, const std::vector<std::string>& key
   for (const auto& item : node) {
     const auto key = item.first.as<std::string>();
     if (std::find(keys.begin(), keys.end(), key) == keys.end()) {
-      throw std::runtime_error(label + " has unknown field '" + key + "'");
+      auto error = label + " has unknown field '";
+      error += key;
+      error += "'";
+      throw std::runtime_error(error);
     }
   }
 }
@@ -75,50 +85,50 @@ auto ParseTransform(const YAML::Node& node, const std::string& label) -> scene::
 
 auto ObjectTypeFromString(const std::string& type) -> scene::ObjectType {
   if (type == "sphere") {
-    return scene::ObjectType::Sphere;
+    return scene::ObjectType::kSphere;
   }
   if (type == "plane") {
-    return scene::ObjectType::Plane;
+    return scene::ObjectType::kPlane;
   }
   throw std::runtime_error("unknown object type '" + type + "'");
 }
 
 auto PatternTypeFromString(const std::string& type) -> scene::PatternType {
   if (type == "solid") {
-    return scene::PatternType::Solid;
+    return scene::PatternType::kSolid;
   }
   if (type == "stripe") {
-    return scene::PatternType::Stripe;
+    return scene::PatternType::kStripe;
   }
   if (type == "gradient") {
-    return scene::PatternType::Gradient;
+    return scene::PatternType::kGradient;
   }
   if (type == "ring") {
-    return scene::PatternType::Ring;
+    return scene::PatternType::kRing;
   }
   if (type == "checkers") {
-    return scene::PatternType::Checkers;
+    return scene::PatternType::kCheckers;
   }
   if (type == "radial_gradient") {
-    return scene::PatternType::RadialGradient;
+    return scene::PatternType::kRadialGradient;
   }
   if (type == "uv_checkers") {
-    return scene::PatternType::UvCheckers;
+    return scene::PatternType::kUvCheckers;
   }
   if (type == "blended") {
-    return scene::PatternType::Blended;
+    return scene::PatternType::kBlended;
   }
   if (type == "perturbed") {
-    return scene::PatternType::Perturbed;
+    return scene::PatternType::kPerturbed;
   }
   throw std::runtime_error("unknown pattern type '" + type + "'");
 }
 
 auto ObjectTypeToString(scene::ObjectType type) -> const char* {
   switch (type) {
-    case scene::ObjectType::Sphere:
+    case scene::ObjectType::kSphere:
       return "sphere";
-    case scene::ObjectType::Plane:
+    case scene::ObjectType::kPlane:
       return "plane";
   }
   return "sphere";
@@ -126,29 +136,29 @@ auto ObjectTypeToString(scene::ObjectType type) -> const char* {
 
 auto PatternTypeToString(scene::PatternType type) -> const char* {
   switch (type) {
-    case scene::PatternType::Solid:
+    case scene::PatternType::kSolid:
       return "solid";
-    case scene::PatternType::Stripe:
+    case scene::PatternType::kStripe:
       return "stripe";
-    case scene::PatternType::Gradient:
+    case scene::PatternType::kGradient:
       return "gradient";
-    case scene::PatternType::Ring:
+    case scene::PatternType::kRing:
       return "ring";
-    case scene::PatternType::Checkers:
+    case scene::PatternType::kCheckers:
       return "checkers";
-    case scene::PatternType::RadialGradient:
+    case scene::PatternType::kRadialGradient:
       return "radial_gradient";
-    case scene::PatternType::UvCheckers:
+    case scene::PatternType::kUvCheckers:
       return "uv_checkers";
-    case scene::PatternType::Blended:
+    case scene::PatternType::kBlended:
       return "blended";
-    case scene::PatternType::Perturbed:
+    case scene::PatternType::kPerturbed:
       return "perturbed";
   }
   return "solid";
 }
 
-auto ParsePattern(const YAML::Node& node, const std::string& label) -> scene::Pattern {
+auto ParsePattern(const YAML::Node& node, const std::string& label) -> scene::Pattern {  // NOLINT(misc-no-recursion)
   RequireMap(node, label);
   scene::Pattern pattern;
   pattern.type = PatternTypeFromString(Required(node, "type", label).as<std::string>());
@@ -156,14 +166,14 @@ auto ParsePattern(const YAML::Node& node, const std::string& label) -> scene::Pa
     pattern.transform = ParseTransform(transform, label + ".transform");
   }
   switch (pattern.type) {
-    case scene::PatternType::Solid:
+    case scene::PatternType::kSolid:
       pattern.color = ParseColor(Required(node, "color", label), label + ".color");
       break;
-    case scene::PatternType::Stripe:
-    case scene::PatternType::Gradient:
-    case scene::PatternType::Ring:
-    case scene::PatternType::Checkers:
-    case scene::PatternType::Blended: {
+    case scene::PatternType::kStripe:
+    case scene::PatternType::kGradient:
+    case scene::PatternType::kRing:
+    case scene::PatternType::kCheckers:
+    case scene::PatternType::kBlended: {
       const auto children = Required(node, "children", label);
       RequireSequence(children, label + ".children");
       if (children.size() != 2) {
@@ -173,7 +183,7 @@ auto ParsePattern(const YAML::Node& node, const std::string& label) -> scene::Pa
       pattern.children.push_back(ParsePattern(children[1], label + ".children[1]"));
       break;
     }
-    case scene::PatternType::UvCheckers: {
+    case scene::PatternType::kUvCheckers: {
       pattern.width = Required(node, "width", label).as<int>();
       pattern.height = Required(node, "height", label).as<int>();
       const auto children = Required(node, "children", label);
@@ -185,11 +195,11 @@ auto ParsePattern(const YAML::Node& node, const std::string& label) -> scene::Pa
       pattern.children.push_back(ParsePattern(children[1], label + ".children[1]"));
       break;
     }
-    case scene::PatternType::Perturbed:
+    case scene::PatternType::kPerturbed:
       pattern.perturb_scale = Required(node, "scale", label).as<float>();
       pattern.children.push_back(ParsePattern(Required(node, "source", label), label + ".source"));
       break;
-    case scene::PatternType::RadialGradient: {
+    case scene::PatternType::kRadialGradient: {
       const auto children = Required(node, "children", label);
       RequireSequence(children, label + ".children");
       if (children.size() != 2) {
@@ -272,18 +282,18 @@ auto EmitTransform(YAML::Emitter& out, const scene::Transform& transform) -> voi
   out << YAML::EndMap;
 }
 
-auto EmitPattern(YAML::Emitter& out, const scene::Pattern& pattern) -> void {
+auto EmitPattern(YAML::Emitter& out, const scene::Pattern& pattern) -> void {  // NOLINT(misc-no-recursion)
   out << YAML::BeginMap;
   out << YAML::Key << "type" << YAML::Value << PatternTypeToString(pattern.type);
-  if (pattern.type == scene::PatternType::Solid) {
+  if (pattern.type == scene::PatternType::kSolid) {
     out << YAML::Key << "color" << YAML::Value;
     EmitColor(out, pattern.color);
-  } else if (pattern.type == scene::PatternType::Perturbed) {
+  } else if (pattern.type == scene::PatternType::kPerturbed) {
     out << YAML::Key << "scale" << YAML::Value << pattern.perturb_scale;
     out << YAML::Key << "source" << YAML::Value;
     EmitPattern(out, pattern.children.at(0));
   } else {
-    if (pattern.type == scene::PatternType::UvCheckers) {
+    if (pattern.type == scene::PatternType::kUvCheckers) {
       out << YAML::Key << "width" << YAML::Value << pattern.width;
       out << YAML::Key << "height" << YAML::Value << pattern.height;
     }
@@ -342,7 +352,7 @@ auto ParseSceneYaml(std::string_view yaml_text) -> LoadSceneResult {
 }
 
 auto LoadSceneYaml(const std::filesystem::path& path) -> LoadSceneResult {
-  std::ifstream input{path};
+  const std::ifstream input{path};
   if (!input) {
     return {.ok = false, .scene = {}, .error = "failed to open scene file '" + path.string() + "'"};
   }

@@ -1,0 +1,187 @@
+#include "app/scene/scene_compiler.h"
+
+#include <cmath>
+#include <memory>
+#include <numbers>
+#include <stdexcept>
+#include <string>
+#include <utility>
+
+#include "app/color.h"
+#include "app/material.h"
+#include "app/matrix.h"
+#include "app/pattern.h"
+#include "app/plane.h"
+#include "app/point.h"
+#include "app/point_light.h"
+#include "app/sphere.h"
+#include "app/transformations.h"
+#include "app/vec3.h"
+
+namespace ray_tracer::scene_runtime {
+namespace {
+
+auto ToColor(const scene::ColorRgb& color) -> ray_tracer::Color {
+  return {color.r, color.g, color.b};
+}
+
+auto ToPoint(const scene::Vec3& value) -> ray_tracer::Point {
+  return {value.x, value.y, value.z};
+}
+
+auto ToVec3(const scene::Vec3& value) -> ray_tracer::Vec3 {
+  return {value.x, value.y, value.z};
+}
+
+auto BuildTransformMatrix(const scene::Transform& transform) -> ray_tracer::Matrix<4, 4> {
+  auto matrix = ray_tracer::Matrix<4, 4>::Translation(
+      transform.translate.x, transform.translate.y, transform.translate.z);
+  constexpr auto kDegToRad = std::numbers::pi / 180.0;
+  if (transform.rotate_deg.x != 0.0F) {
+    matrix = matrix * ray_tracer::Matrix<4, 4>::RotationX(transform.rotate_deg.x * kDegToRad);
+  }
+  if (transform.rotate_deg.y != 0.0F) {
+    matrix = matrix * ray_tracer::Matrix<4, 4>::RotationY(transform.rotate_deg.y * kDegToRad);
+  }
+  if (transform.rotate_deg.z != 0.0F) {
+    matrix = matrix * ray_tracer::Matrix<4, 4>::RotationZ(transform.rotate_deg.z * kDegToRad);
+  }
+  return matrix * ray_tracer::Matrix<4, 4>::Scaling(transform.scale.x, transform.scale.y, transform.scale.z);
+}
+
+auto SolidChildColor(const scene::Pattern& pattern, const std::string& label) -> ray_tracer::Color {
+  if (pattern.type != scene::PatternType::Solid) {
+    throw std::runtime_error(label + " requires solid child patterns in the current runtime");
+  }
+  return ToColor(pattern.color);
+}
+
+auto CompilePattern(const scene::Pattern& pattern) -> std::shared_ptr<ray_tracer::Pattern> {
+  std::shared_ptr<ray_tracer::Pattern> compiled;
+  switch (pattern.type) {
+    case scene::PatternType::Solid:
+      compiled = std::make_shared<ray_tracer::SolidPattern>(ToColor(pattern.color));
+      break;
+    case scene::PatternType::Stripe:
+      if (pattern.children.size() != 2) {
+        throw std::runtime_error("stripe pattern requires exactly 2 child patterns");
+      }
+      compiled = std::make_shared<ray_tracer::StripePattern>(
+          CompilePattern(pattern.children[0]), CompilePattern(pattern.children[1]));
+      break;
+    case scene::PatternType::Ring:
+      if (pattern.children.size() != 2) {
+        throw std::runtime_error("ring pattern requires exactly 2 child patterns");
+      }
+      compiled = std::make_shared<ray_tracer::RingPattern>(
+          CompilePattern(pattern.children[0]), CompilePattern(pattern.children[1]));
+      break;
+    case scene::PatternType::Checkers:
+      if (pattern.children.size() != 2) {
+        throw std::runtime_error("checkers pattern requires exactly 2 child patterns");
+      }
+      compiled = std::make_shared<ray_tracer::CheckersPattern>(
+          CompilePattern(pattern.children[0]), CompilePattern(pattern.children[1]));
+      break;
+    case scene::PatternType::Blended:
+      if (pattern.children.size() != 2) {
+        throw std::runtime_error("blended pattern requires exactly 2 child patterns");
+      }
+      compiled = std::make_shared<ray_tracer::BlendedPattern>(
+          CompilePattern(pattern.children[0]), CompilePattern(pattern.children[1]));
+      break;
+    case scene::PatternType::UvCheckers:
+      if (pattern.children.size() != 2) {
+        throw std::runtime_error("uv_checkers pattern requires exactly 2 child patterns");
+      }
+      compiled = std::make_shared<ray_tracer::UVCheckersPattern>(
+          pattern.width, pattern.height, CompilePattern(pattern.children[0]), CompilePattern(pattern.children[1]));
+      break;
+    case scene::PatternType::Perturbed:
+      if (pattern.children.size() != 1) {
+        throw std::runtime_error("perturbed pattern requires exactly 1 source pattern");
+      }
+      compiled = std::make_shared<ray_tracer::PerturbedPattern>(
+          CompilePattern(pattern.children[0]), pattern.perturb_scale);
+      break;
+    case scene::PatternType::Gradient:
+      if (pattern.children.size() != 2) {
+        throw std::runtime_error("gradient pattern requires exactly 2 child patterns");
+      }
+      compiled = std::make_shared<ray_tracer::GradientPattern>(
+          SolidChildColor(pattern.children[0], "gradient"), SolidChildColor(pattern.children[1], "gradient"));
+      break;
+    case scene::PatternType::RadialGradient:
+      if (pattern.children.size() != 2) {
+        throw std::runtime_error("radial_gradient pattern requires exactly 2 child patterns");
+      }
+      compiled = std::make_shared<ray_tracer::RadialGradientPattern>(
+          SolidChildColor(pattern.children[0], "radial_gradient"),
+          SolidChildColor(pattern.children[1], "radial_gradient"));
+      break;
+  }
+  compiled->SetPatternTransform(BuildTransformMatrix(pattern.transform));
+  return compiled;
+}
+
+auto CompileMaterial(const scene::Material& material) -> ray_tracer::Material {
+  ray_tracer::Material compiled{
+      ToColor(material.color),
+      material.ambient,
+      material.diffuse,
+      material.specular,
+      material.shininess,
+      material.reflective,
+      material.transparency,
+      material.refractive_index};
+  if (material.pattern.has_value()) {
+    compiled.SetPattern(CompilePattern(*material.pattern));
+  }
+  return compiled;
+}
+
+}  // namespace
+
+auto CompileScene(const scene::Scene& scene) -> CompileSceneResult {
+  try {
+    if (!scene.camera.has_value()) {
+      throw std::runtime_error("scene requires a camera");
+    }
+    ray_tracer::World world;
+    for (const auto& light : scene.lights) {
+      world.AddLight(ray_tracer::PointLight(ToPoint(light.position), ToColor(light.color)));
+    }
+    for (std::size_t index = 0; index < scene.objects.size(); ++index) {
+      const auto& object = scene.objects[index];
+      if (!object.visible) {
+        continue;
+      }
+      std::shared_ptr<ray_tracer::Shape> shape;
+      switch (object.type) {
+        case scene::ObjectType::Sphere:
+          shape = std::make_shared<ray_tracer::Sphere>(index + 1);
+          break;
+        case scene::ObjectType::Plane:
+          shape = std::make_shared<ray_tracer::Plane>(index + 1);
+          break;
+      }
+      shape->SetTransform(BuildTransformMatrix(object.transform));
+      shape->SetCastShadow(object.cast_shadow);
+      shape->SetMaterial(CompileMaterial(object.material));
+      world.AddObject(std::move(shape));
+    }
+
+    const auto& camera_spec = *scene.camera;
+    ray_tracer::Camera camera{
+        camera_spec.resolution.width,
+        camera_spec.resolution.height,
+        camera_spec.fov_deg * std::numbers::pi / 180.0};
+    camera.SetTransform(ray_tracer::ViewTransform(
+        ToPoint(camera_spec.from), ToPoint(camera_spec.to), ToVec3(camera_spec.up)));
+    return {.ok = true, .compiled = CompiledScene{.world = std::move(world), .camera = camera}, .error = {}};
+  } catch (const std::exception& exception) {
+    return {.ok = false, .compiled = std::nullopt, .error = exception.what()};
+  }
+}
+
+}  // namespace ray_tracer::scene_runtime

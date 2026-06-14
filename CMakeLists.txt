@@ -51,6 +51,7 @@ message("------------------------------CMAKE_PROJECT_VERSION_MINOR: ${CMAKE_PROJ
 message("------------------------------CMAKE_PROJECT_VERSION_PATCH: ${CMAKE_PROJECT_VERSION_PATCH}")
 
 
+find_package(yaml-cpp CONFIG REQUIRED)
 find_package(Catch2 REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(OpenGL REQUIRED)

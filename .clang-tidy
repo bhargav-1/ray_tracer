@@ -17,6 +17,7 @@ Checks: >
   -google-readability-namespace-comments,
   -google-runtime-int,
   -google-runtime-references,
+  -misc-non-private-member-variables-in-classes,
   -modernize-use-equals-delete,
   -modernize-use-transparent-functors,
   -google-readability-todo,

@@ -1,12 +1,21 @@
 #include <catch2/catch_test_macros.hpp>
+#include <cmath>
+#include <cstddef>
+#include <iostream>
+#include <limits>
 #include <memory>
 #include <numbers>
+#include <utility>
+#include <vector>
 #include "app/color.h"
 #include "app/material.h"
+#include "app/matrix.h"
 #include "app/pattern.h"
 #include "app/plane.h"
 #include "app/point.h"
 #include "app/ray_tracing_engine.h"
+#include "app/sphere.h"
+#include "app/utilities.h"
 #include "app/vec3.h"
 #include "app/world.h"
 namespace ray_tracer {

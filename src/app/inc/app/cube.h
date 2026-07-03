@@ -44,16 +44,32 @@ inline auto Cube::CheckAxis(double origin, double direction) -> std::pair<double
   return {tmin, tmax};
 }
 inline auto Cube::LocalIntersect(const Ray& transformed_ray) const -> std::vector<Intersection> {
+  const auto is_parallel_outside = [](const double origin, const double direction) {
+    return std::abs(direction) < utilities::kEpsilon && (origin < -1 || origin > 1);
+  };
+  if (is_parallel_outside(transformed_ray.GetOrigin().GetX(), transformed_ray.GetDirection().GetX()) ||
+      is_parallel_outside(transformed_ray.GetOrigin().GetY(), transformed_ray.GetDirection().GetY()) ||
+      is_parallel_outside(transformed_ray.GetOrigin().GetZ(), transformed_ray.GetDirection().GetZ())) {
+    return {};
+  }
+
   auto x_axis = CheckAxis(transformed_ray.GetOrigin().GetX(), transformed_ray.GetDirection().GetX());
   auto y_axis = CheckAxis(transformed_ray.GetOrigin().GetY(), transformed_ray.GetDirection().GetY());
+  auto tmin = std::max(x_axis.first, y_axis.first);
+  auto tmax = std::min(x_axis.second, y_axis.second);
+  if (tmin > tmax) {
+    return {};
+  }
+
   auto z_axis = CheckAxis(transformed_ray.GetOrigin().GetZ(), transformed_ray.GetDirection().GetZ());
-  auto tmin = std::max(std::max(x_axis.first, y_axis.first), z_axis.first);
-  auto tmax = std::min(std::min(x_axis.second, y_axis.second), z_axis.second);
+  tmin = std::max(tmin, z_axis.first);
+  tmax = std::min(tmax, z_axis.second);
   if (tmin > tmax) {
     return {};
   }
   return {Intersection(tmin, *this), Intersection(tmax, *this)};
 }
+
 inline auto Cube::LocalNormalAt(const ray_tracer::Point& point) const -> ray_tracer::Vec3 {
   auto maxc = std::max(std::max(std::abs(point.GetX()), std::abs(point.GetY())), std::abs(point.GetZ()));
   auto result = Vec3(0, 0, 0);

@@ -6,6 +6,7 @@
 #include <filesystem>
 #include <numbers>
 
+#include "app/cube.h"
 #include "app/matrix.h"
 #include "app/scene/scene.h"
 
@@ -59,6 +60,13 @@ auto MakeCompiledSceneModel() -> scene::Scene {
   sphere.material.reflective = 0.1F;
   scene.objects.push_back(sphere);
 
+  scene::Object cube;
+  cube.name = "cube";
+  cube.type = scene::ObjectType::kCube;
+  cube.transform.translate = {-1.0F, 0.0F, 0.0F};
+  cube.transform.scale = {0.25F, 0.25F, 0.25F};
+  scene.objects.push_back(cube);
+
   scene::Object hidden;
   hidden.name = "hidden";
   hidden.type = scene::ObjectType::kSphere;
@@ -83,7 +91,7 @@ SCENARIO("scene compiler: compiles camera, lights, objects, transforms, material
   CHECK(compiled.camera.GetVerticalSize() == 200);
   CHECK(utilities::Equal(compiled.camera.GetFieldOfView(), std::numbers::pi / 3.0));
   REQUIRE(compiled.world.Lights().size() == 1);
-  REQUIRE(compiled.world.Objects().size() == 2);
+  REQUIRE(compiled.world.Objects().size() == 3);
   CHECK_FALSE(compiled.world.Objects()[0]->GetCastShadow());
   CHECK(compiled.world.Objects()[0]->GetMaterial().HasPattern());
   CHECK(compiled.world.Objects()[1]->GetTransform() ==
@@ -92,6 +100,10 @@ SCENARIO("scene compiler: compiles camera, lights, objects, transforms, material
             ray_tracer::Matrix<4, 4>::Scaling(0.5, 0.5, 0.5));
   CHECK(compiled.world.Objects()[1]->GetMaterial().GetColor() == ray_tracer::Color(0.8, 1.0, 0.6));
   CHECK(utilities::Equal(compiled.world.Objects()[1]->GetMaterial().GetReflective(), 0.1));
+  CHECK(dynamic_cast<const ray_tracer::Cube*>(compiled.world.Objects()[2].get()) != nullptr);
+  CHECK(compiled.world.Objects()[2]->GetTransform() ==
+        ray_tracer::Matrix<4, 4>::Translation(-1, 0, 0) *
+            ray_tracer::Matrix<4, 4>::Scaling(0.25, 0.25, 0.25));
 }
 
 SCENARIO("scene compiler: returns useful errors") {

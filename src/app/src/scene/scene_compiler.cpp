@@ -15,11 +15,10 @@
 #include "app/material.h"
 #include "app/matrix.h"
 #include "app/pattern.h"
-#include "app/plane.h"
 #include "app/point.h"
 #include "app/point_light.h"
 #include "app/scene/scene.h"
-#include "app/sphere.h"
+#include "app/shape_catalog.h"
 #include "app/transformations.h"
 #include "app/vec3.h"
 #include "app/world.h"
@@ -162,15 +161,7 @@ auto CompileScene(const scene::Scene& scene) -> CompileSceneResult {
       if (!object.visible) {
         continue;
       }
-      std::shared_ptr<ray_tracer::Shape> shape;
-      switch (object.type) {
-        case scene::ObjectType::kSphere:
-          shape = std::make_shared<ray_tracer::Sphere>(index + 1);
-          break;
-        case scene::ObjectType::kPlane:
-          shape = std::make_shared<ray_tracer::Plane>(index + 1);
-          break;
-      }
+      auto shape = shape_catalog::Find(object.type).create(index + 1);
       shape->SetTransform(BuildTransformMatrix(object.transform));
       shape->SetCastShadow(object.cast_shadow);
       shape->SetMaterial(CompileMaterial(object.material));

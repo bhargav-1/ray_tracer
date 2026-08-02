@@ -55,7 +55,7 @@ struct Light {
   constexpr auto operator==(const Light&) const -> bool = default;
 };
 
-enum class ObjectType : std::uint8_t { kSphere, kPlane };
+enum class ObjectType : std::uint8_t { kSphere, kPlane, kCube };
 
 enum class PatternType : std::uint8_t {
   kSolid,

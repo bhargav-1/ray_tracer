@@ -21,7 +21,7 @@ SCENARIO("scene model: empty scenes can be constructed") {
   CHECK(scene.objects.empty());
 }
 
-SCENARIO("scene model: scenes can contain camera, lights, spheres, and planes") {
+SCENARIO("scene model: scenes can contain camera, lights, spheres, planes, and cubes") {
   scene::Scene scene;
   scene.camera = scene::Camera{};
   scene.lights.push_back(scene::Light{});
@@ -33,12 +33,17 @@ SCENARIO("scene model: scenes can contain camera, lights, spheres, and planes") 
   plane.name = "plane";
   plane.type = scene::ObjectType::kPlane;
   scene.objects.push_back(plane);
+  scene::Object cube;
+  cube.name = "cube";
+  cube.type = scene::ObjectType::kCube;
+  scene.objects.push_back(cube);
 
   CHECK(scene.camera.has_value());
   CHECK(scene.lights.size() == 1);
-  CHECK(scene.objects.size() == 2);
+  CHECK(scene.objects.size() == 3);
   CHECK(scene.objects[0].type == scene::ObjectType::kSphere);
   CHECK(scene.objects[1].type == scene::ObjectType::kPlane);
+  CHECK(scene.objects[2].type == scene::ObjectType::kCube);
 }
 
 SCENARIO("scene model: recursive patterns can be constructed") {

@@ -1,14 +1,10 @@
 #include "app/scene_editor/scene_renderer.h"
 
 #include <algorithm>
-#include <array>
 #include <atomic>
 #include <cmath>
 #include <cstddef>
-#include <iomanip>
-#include <iostream>
 #include <vector>
-#include <string_view>
 #include <utility>
 
 #include "app/ray_tracing_engine.h"
@@ -36,48 +32,6 @@ auto PreviewSamplePixel(const int preview_pixel, const int preview_size, const i
   return std::clamp(middle, 0, full_size - 1);
 }
 
-auto LogRenderSamples(const scene_runtime::CompiledScene& scene,
-                      const bool preview,
-                      const int output_width,
-                      const int output_height,
-                      const int full_width,
-                      const int full_height) -> void {
-  auto camera = scene.camera;
-  struct SamplePoint {
-    std::string_view label;
-    int x;
-    int y;
-  };
-
-  const std::array samples{
-      SamplePoint{"top_left", 0, 0},
-      SamplePoint{"center", output_width / 2, output_height / 2},
-      SamplePoint{"bottom_right", output_width - 1, output_height - 1},
-  };
-
-  std::cerr << "[scene_editor] renderer samples mode=" << (preview ? "preview" : "full")
-            << " output=" << output_width << 'x' << output_height
-            << " full=" << full_width << 'x' << full_height
-            << " objects=" << scene.world.Objects().size()
-            << " lights=" << scene.world.Lights().size() << '\n';
-  for (const auto& sample : samples) {
-    const int output_x = std::clamp(sample.x, 0, output_width - 1);
-    const int output_y = std::clamp(sample.y, 0, output_height - 1);
-    const int source_x = preview ? PreviewSamplePixel(output_x, output_width, full_width) : output_x;
-    const int source_y = preview ? PreviewSamplePixel(output_y, output_height, full_height) : output_y;
-    const auto ray = camera.GetRayForPixel(source_x, source_y);
-    const auto& origin = ray.GetOrigin();
-    const auto& direction = ray.GetDirection();
-    std::cerr << std::fixed << std::setprecision(6)
-              << "[scene_editor] renderer sample mode=" << (preview ? "preview" : "full")
-              << " label=" << sample.label
-              << " output_pixel=[" << output_x << ' ' << output_y << ']'
-              << " source_pixel=[" << source_x << ' ' << source_y << ']'
-              << " origin=[" << origin.GetX() << ' ' << origin.GetY() << ' ' << origin.GetZ() << ']'
-              << " direction=[" << direction.GetX() << ' ' << direction.GetY() << ' ' << direction.GetZ() << "]\n";
-  }
-}
-
 }  // namespace
 
 auto SceneRenderer::Render(const scene_runtime::CompiledScene& scene,
@@ -99,8 +53,6 @@ auto SceneRenderer::Render(const scene_runtime::CompiledScene& scene,
   image.width = width;
   image.height = height;
   image.pixels.resize(static_cast<std::size_t>(width) * static_cast<std::size_t>(height));
-
-  LogRenderSamples(scene, preview, width, height, full_width, full_height);
 
   if (progress != nullptr) {
     progress->store(0);

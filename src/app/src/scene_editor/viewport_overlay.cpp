@@ -14,6 +14,7 @@
 #include "app/scene/scene.h"
 #include "app/scene_editor/render_state.h"
 #include "app/scene_editor/scene_editor_app.h"
+#include "app/shape_catalog.h"
 #include "app/transformations.h"
 #include "app/vec3.h"
 
@@ -212,8 +213,8 @@ auto ApplyAxisDrag(scene::Scene& scene,
 
 }  // namespace
 
-auto ObjectTypeLabel(scene::ObjectType type) -> const char* {
-  return type == scene::ObjectType::kPlane ? "Plane" : "Sphere";
+auto ObjectTypeLabel(scene::ObjectType type) -> std::string {
+  return shape_catalog::DisplayName(type);
 }
 
 auto SelectedName(const scene::Scene& scene, const Selection& selection) -> std::string {

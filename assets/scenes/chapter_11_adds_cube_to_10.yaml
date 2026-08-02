@@ -1,0 +1,227 @@
+version: 1
+camera:
+  from: [-15.165066, 3.6139536, -1.3806695]
+  to: [0, 1, 0]
+  up: [0, 1, 0]
+  fov_deg: 60
+  resolution: [1200, 600]
+lights:
+  - position: [-1.3747836, 10, -10]
+    color: [1, 1, 1]
+objects:
+  - name: Reflective Perturbed Checker Floor
+    type: plane
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [0, 0, 0]
+      rotate_deg: [0, 0, 0]
+      scale: [1, 1, 1]
+    material:
+      color: [0.9, 0.86, 0.86]
+      ambient: 0.04
+      diffuse: 0.45
+      specular: 0.75
+      shininess: 450
+      reflective: 0.45
+      transparency: 0
+      refractive_index: 1
+      pattern:
+        type: perturbed
+        scale: 0.6
+        source:
+          type: checkers
+          children:
+            - type: solid
+              color: [0.85, 0.15, 0.15]
+              transform:
+                translate: [0, 0, 0]
+                rotate_deg: [0, 0, 0]
+                scale: [1, 1, 1]
+            - type: solid
+              color: [0.95, 0.95, 0.95]
+              transform:
+                translate: [0, 0, 0]
+                rotate_deg: [0, 0, 0]
+                scale: [1, 1, 1]
+          transform:
+            translate: [0, 0, 0]
+            rotate_deg: [0, 0, 0]
+            scale: [2, 2, 2]
+        transform:
+          translate: [0, 0, 0]
+          rotate_deg: [0, 0, 0]
+          scale: [1, 1, 1]
+  - name: Left Reflective Wall
+    type: plane
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [-45.296978, -1.3131154, 6.7581377]
+      rotate_deg: [0, 0, 90]
+      scale: [1, 1, 1]
+    material:
+      color: [0.68, 0.72, 0.78]
+      ambient: 0.03
+      diffuse: 0.18
+      specular: 0.9
+      shininess: 500
+      reflective: 0.65
+      transparency: 0
+      refractive_index: 1
+  - name: Right Reflective Wall
+    type: plane
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [13.305203, 0, -0.07968883]
+      rotate_deg: [0, 0, -90]
+      scale: [1, 1, 1]
+    material:
+      color: [0.018262194, 0.30899692, 0.745098]
+      ambient: 0.03
+      diffuse: 0.18
+      specular: 0.9
+      shininess: 500
+      reflective: 1
+      transparency: 0
+      refractive_index: 1
+  - name: Center Perturbed Green Sphere
+    type: sphere
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [0, 1, 0]
+      rotate_deg: [0, 0, 0]
+      scale: [1, 1, 1]
+    material:
+      color: [1, 1, 1]
+      ambient: 0.1
+      diffuse: 0.7
+      specular: 0.3
+      shininess: 200
+      reflective: 0.08
+      transparency: 0
+      refractive_index: 1
+      pattern:
+        type: perturbed
+        scale: 1
+        source:
+          type: stripe
+          children:
+            - type: solid
+              color: [1, 1, 1]
+              transform:
+                translate: [0, 0, 0]
+                rotate_deg: [0, 0, 0]
+                scale: [1, 1, 1]
+            - type: solid
+              color: [0.15000005, 0.42500013, 0.7]
+              transform:
+                translate: [0, 0, 0]
+                rotate_deg: [0, 0, 0]
+                scale: [1, 1, 1]
+          transform:
+            translate: [0, 0, 0]
+            rotate_deg: [0, 0, 0]
+            scale: [0.25, 0.25, 0.25]
+        transform:
+          translate: [0, 0, 0]
+          rotate_deg: [0, 0, 0]
+          scale: [1, 1, 1]
+  - name: Left Perturbed Green Sphere
+    type: sphere
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [-16.715746, -1.4037323, -0.75]
+      rotate_deg: [0, 0, 0]
+      scale: [0.33, 0.33, 0.33]
+    material:
+      color: [1, 1, 1]
+      ambient: 0.1
+      diffuse: 0.7
+      specular: 0.3
+      shininess: 200
+      reflective: 0.06
+      transparency: 0
+      refractive_index: 1
+      pattern:
+        type: perturbed
+        scale: 0.8
+        source:
+          type: stripe
+          children:
+            - type: solid
+              color: [0.05, 0.5, 0.1]
+              transform:
+                translate: [0, 0, 0]
+                rotate_deg: [0, 0, 0]
+                scale: [1, 1, 1]
+            - type: solid
+              color: [0.2, 0.65, 0.25]
+              transform:
+                translate: [0, 0, 0]
+                rotate_deg: [0, 0, 0]
+                scale: [1, 1, 1]
+          transform:
+            translate: [0, 0, 0]
+            rotate_deg: [0, 0, 0]
+            scale: [0.2, 0.2, 0.2]
+        transform:
+          translate: [0, 0, 0]
+          rotate_deg: [0, 0, 0]
+          scale: [1, 1, 1]
+  - name: Right Orange Sphere
+    type: sphere
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [1.5, 0.5, -0.5]
+      rotate_deg: [0, 0, 0]
+      scale: [0.5, 0.5, 0.5]
+    material:
+      color: [1, 0.55, 0]
+      ambient: 0.1
+      diffuse: 0.7
+      specular: 0.3
+      shininess: 200
+      reflective: 0.08
+      transparency: 0
+      refractive_index: 1
+  - name: Cube 7
+    type: cube
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [0, 1.75497, 3.5916579]
+      rotate_deg: [0, 0, -47.816093]
+      scale: [1, 1, 1]
+    material:
+      color: [0.872549, 0.31651288, 0.31651288]
+      ambient: 0.1
+      diffuse: 0.9
+      specular: 0.9
+      shininess: 200
+      reflective: 0
+      transparency: 0
+      refractive_index: 1
+      pattern:
+        type: checkers
+        children:
+          - type: solid
+            color: [0.55305654, 0.8235294, 0.6087421]
+            transform:
+              translate: [0, 0, 0]
+              rotate_deg: [0, 0, 0]
+              scale: [1, 1, 1]
+          - type: solid
+            color: [0.4022207, 0.36524412, 0.78431374]
+            transform:
+              translate: [0, 0, 0]
+              rotate_deg: [0, 0, 0]
+              scale: [1, 1, 1]
+        transform:
+          translate: [0, 0, 0]
+          rotate_deg: [0, 0.2, 0]
+          scale: [1, 1, 0.3]

@@ -15,7 +15,7 @@ struct OverlayResult {
   bool block_camera{false};
 };
 
-auto ObjectTypeLabel(scene::ObjectType type) -> const char*;
+auto ObjectTypeLabel(scene::ObjectType type) -> std::string;
 auto SelectedName(const scene::Scene& scene, const Selection& selection) -> std::string;
 auto DrawViewportOverlay(scene::Scene& scene,
                          EditorState& editor_state,

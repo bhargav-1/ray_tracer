@@ -109,12 +109,30 @@ SCENARIO("scene yaml: parses camera, resolution, light, object, material, transf
   CHECK(pattern.children[0].type == scene::PatternType::kStripe);
 }
 
+SCENARIO("scene yaml: parses and serializes cube objects") {
+  auto cube_yaml = std::string{kFullSceneYaml};
+  cube_yaml.replace(cube_yaml.find("type: plane"), std::string{"type: plane"}.size(), "type: cube");
+
+  const auto parsed = scene_io::ParseSceneYaml(cube_yaml);
+
+  REQUIRE(parsed.ok);
+  REQUIRE(parsed.scene.objects.size() == 1);
+  CHECK(parsed.scene.objects[0].type == scene::ObjectType::kCube);
+
+  const auto serialized = scene_io::SerializeSceneYaml(parsed.scene);
+  CHECK(serialized.find("type: cube") != std::string::npos);
+
+  const auto reparsed = scene_io::ParseSceneYaml(serialized);
+  REQUIRE(reparsed.ok);
+  CHECK(reparsed.scene == parsed.scene);
+}
+
 SCENARIO("scene yaml: rejects invalid scenes with useful errors") {
   CHECK_FALSE(scene_io::ParseSceneYaml("camera: {}\nlights: []\nobjects: []\n").ok);
   CHECK_FALSE(scene_io::ParseSceneYaml(std::string{kMinimalSceneYaml} + "\nextra: 1\n").ok);
 
   auto unknown_object = std::string{kFullSceneYaml};
-  unknown_object.replace(unknown_object.find("type: plane"), std::string{"type: plane"}.size(), "type: cube");
+  unknown_object.replace(unknown_object.find("type: plane"), std::string{"type: plane"}.size(), "type: cone");
   const auto object_result = scene_io::ParseSceneYaml(unknown_object);
   CHECK_FALSE(object_result.ok);
   CHECK_FALSE(object_result.error.empty());

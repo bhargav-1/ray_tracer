@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "app/scene/scene.h"
+#include "app/shape_catalog.h"
 
 #include <yaml-cpp/emittermanip.h>
 #include <yaml-cpp/yaml.h>
@@ -83,16 +84,6 @@ auto ParseTransform(const YAML::Node& node, const std::string& label) -> scene::
   return transform;
 }
 
-auto ObjectTypeFromString(const std::string& type) -> scene::ObjectType {
-  if (type == "sphere") {
-    return scene::ObjectType::kSphere;
-  }
-  if (type == "plane") {
-    return scene::ObjectType::kPlane;
-  }
-  throw std::runtime_error("unknown object type '" + type + "'");
-}
-
 auto PatternTypeFromString(const std::string& type) -> scene::PatternType {
   if (type == "solid") {
     return scene::PatternType::kSolid;
@@ -122,16 +113,6 @@ auto PatternTypeFromString(const std::string& type) -> scene::PatternType {
     return scene::PatternType::kPerturbed;
   }
   throw std::runtime_error("unknown pattern type '" + type + "'");
-}
-
-auto ObjectTypeToString(scene::ObjectType type) -> const char* {
-  switch (type) {
-    case scene::ObjectType::kSphere:
-      return "sphere";
-    case scene::ObjectType::kPlane:
-      return "plane";
-  }
-  return "sphere";
 }
 
 auto PatternTypeToString(scene::PatternType type) -> const char* {
@@ -253,7 +234,7 @@ auto ParseObject(const YAML::Node& node, const std::string& label) -> scene::Obj
   RequireMap(node, label);
   scene::Object object;
   object.name = Required(node, "name", label).as<std::string>();
-  object.type = ObjectTypeFromString(Required(node, "type", label).as<std::string>());
+  object.type = shape_catalog::Find(Required(node, "type", label).as<std::string>()).type;
   if (const auto visible = node["visible"]) {
     object.visible = visible.as<bool>();
   }
@@ -395,7 +376,7 @@ auto SerializeSceneYaml(const scene::Scene& scene) -> std::string {
   for (const auto& object : scene.objects) {
     out << YAML::BeginMap;
     out << YAML::Key << "name" << YAML::Value << object.name;
-    out << YAML::Key << "type" << YAML::Value << ObjectTypeToString(object.type);
+    out << YAML::Key << "type" << YAML::Value << shape_catalog::Find(object.type).serialized_name;
     out << YAML::Key << "visible" << YAML::Value << object.visible;
     out << YAML::Key << "cast_shadow" << YAML::Value << object.cast_shadow;
     out << YAML::Key << "transform" << YAML::Value;

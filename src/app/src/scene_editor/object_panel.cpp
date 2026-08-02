@@ -10,6 +10,7 @@
 
 #include "app/scene/scene.h"
 #include "app/scene_editor/widget_helpers.h"
+#include "app/shape_catalog.h"
 
 namespace ray_tracer::scene_editor {
 namespace {
@@ -132,11 +133,20 @@ auto DrawMaterialEditor(scene::Material& material) -> bool {
 
 auto DrawObjectEditor(scene::Object& object) -> bool {
   bool changed = false;
-  int type_index = object.type == scene::ObjectType::kPlane ? 1 : 0;
-  static constexpr std::array kObjectTypeNames = {"Sphere", "Plane"};
-  if (ImGui::Combo("Shape", &type_index, kObjectTypeNames.data(), static_cast<int>(kObjectTypeNames.size()))) {
-    object.type = type_index == 1 ? scene::ObjectType::kPlane : scene::ObjectType::kSphere;
-    changed = true;
+  const auto current_name = shape_catalog::DisplayName(object.type);
+  if (ImGui::BeginCombo("Shape", current_name.c_str())) {
+    for (const auto& registration : shape_catalog::All()) {
+      const bool selected = registration.type == object.type;
+      const auto display_name = shape_catalog::DisplayName(registration.serialized_name);
+      if (ImGui::Selectable(display_name.c_str(), selected)) {
+        object.type = registration.type;
+        changed = true;
+      }
+      if (selected) {
+        ImGui::SetItemDefaultFocus();
+      }
+    }
+    ImGui::EndCombo();
   }
   if (ImGui::TreeNodeEx("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
     changed |= DragF3("Translate", object.transform.translate, 0.1F, -50.0F, 50.0F);

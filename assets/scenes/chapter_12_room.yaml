@@ -1,0 +1,476 @@
+version: 1
+camera:
+  from: [3.4409678, 6.303216, -16.220703]
+  to: [0, 2.7, 1.8]
+  up: [0, 1, 0]
+  fov_deg: 48
+  resolution: [960, 540]
+lights:
+  - position: [-4.5, 7.5, -4]
+    color: [1, 0.92, 0.82]
+  - position: [4.5, 6.5, 1]
+    color: [0.35, 0.42, 0.55]
+objects:
+  - name: Checker Floor
+    type: cube
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [0, -0.12, 0]
+      rotate_deg: [0, 0, 0]
+      scale: [6, 0.12, 7]
+    material:
+      color: [0.78, 0.78, 0.74]
+      ambient: 0.14
+      diffuse: 0.82
+      specular: 0.08
+      shininess: 40
+      reflective: 0.08
+      transparency: 0
+      refractive_index: 1
+      pattern:
+        type: checkers
+        children:
+          - type: solid
+            color: [0.78, 0.78, 0.72]
+            transform:
+              translate: [0, 0, 0]
+              rotate_deg: [0, 0, 0]
+              scale: [1, 1, 1]
+          - type: solid
+            color: [0.28, 0.31, 0.33]
+            transform:
+              translate: [0, 0, 0]
+              rotate_deg: [0, 0, 0]
+              scale: [1, 1, 1]
+        transform:
+          translate: [0, 0, 0]
+          rotate_deg: [0, 0, 0]
+          scale: [0.55, 0.55, 0.55]
+  - name: Back Wall
+    type: cube
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [0, 4, 6]
+      rotate_deg: [0, 0, 0]
+      scale: [6, 4, 0.1]
+    material:
+      color: [0.7297644, 0.5628604, 0.9411765]
+      ambient: 0.16
+      diffuse: 0.78
+      specular: 0.05
+      shininess: 30
+      reflective: 0
+      transparency: 0
+      refractive_index: 1
+      pattern:
+        type: stripe
+        children:
+          - type: solid
+            color: [0.30852383, 0.372549, 0.100442134]
+            transform:
+              translate: [0, 0, 0]
+              rotate_deg: [0, 0, 0]
+              scale: [1, 1, 1]
+          - type: solid
+            color: [0.67901766, 0.6877375, 0.9754902]
+            transform:
+              translate: [0, 0, 0]
+              rotate_deg: [0, 0, 0]
+              scale: [1, 1, 1]
+        transform:
+          translate: [0.03, 2, 0.4]
+          rotate_deg: [0, 0, 0.03]
+          scale: [0.4, 0.04, 1]
+  - name: Left Wall
+    type: cube
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [-6, 4, 0]
+      rotate_deg: [0, 0, 0]
+      scale: [0.1, 4, 6]
+    material:
+      color: [0.72, 0.76, 0.78]
+      ambient: 0.16
+      diffuse: 0.78
+      specular: 0.05
+      shininess: 30
+      reflective: 0
+      transparency: 0
+      refractive_index: 1
+  - name: Right Wall
+    type: cube
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [6, 4, 0]
+      rotate_deg: [0, 0, 0]
+      scale: [0.1, 4, 6]
+    material:
+      color: [0.7947559, 0.89705884, 0.40015858]
+      ambient: 0.16
+      diffuse: 0.78
+      specular: 0.05
+      shininess: 30
+      reflective: 0
+      transparency: 0
+      refractive_index: 1
+  - name: Ceiling
+    type: cube
+    visible: true
+    cast_shadow: false
+    transform:
+      translate: [0, 8, 0]
+      rotate_deg: [0, 0, 0]
+      scale: [6, 0.1, 6]
+    material:
+      color: [0.9, 0.9, 0.86]
+      ambient: 0.2
+      diffuse: 0.7
+      specular: 0
+      shininess: 20
+      reflective: 0
+      transparency: 0
+      refractive_index: 1
+  - name: Walnut Table Top
+    type: cube
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [0, 2.15, 1]
+      rotate_deg: [0, 0, 0]
+      scale: [2.65, 0.15, 1.6]
+    material:
+      color: [0.34, 0.16, 0.07]
+      ambient: 0.1
+      diffuse: 0.72
+      specular: 0.3
+      shininess: 120
+      reflective: 0.12
+      transparency: 0
+      refractive_index: 1
+  - name: Table Leg Front Left
+    type: cube
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [-2.2, 1.05, -0.05]
+      rotate_deg: [0, 0, 0]
+      scale: [0.18, 1.05, 0.18]
+    material:
+      color: [0.25, 0.11, 0.045]
+      ambient: 0.1
+      diffuse: 0.75
+      specular: 0.18
+      shininess: 80
+      reflective: 0.06
+      transparency: 0
+      refractive_index: 1
+  - name: Table Leg Front Right
+    type: cube
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [2.2, 1.05, -0.05]
+      rotate_deg: [0, 0, 0]
+      scale: [0.18, 1.05, 0.18]
+    material:
+      color: [0.25, 0.11, 0.045]
+      ambient: 0.1
+      diffuse: 0.75
+      specular: 0.18
+      shininess: 80
+      reflective: 0.06
+      transparency: 0
+      refractive_index: 1
+  - name: Table Leg Back Left
+    type: cube
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [-2.2, 1.05, 2.05]
+      rotate_deg: [0, 0, 0]
+      scale: [0.18, 1.05, 0.18]
+    material:
+      color: [0.25, 0.11, 0.045]
+      ambient: 0.1
+      diffuse: 0.75
+      specular: 0.18
+      shininess: 80
+      reflective: 0.06
+      transparency: 0
+      refractive_index: 1
+  - name: Table Leg Back Right
+    type: cube
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [2.2, 1.05, 2.05]
+      rotate_deg: [0, 0, 0]
+      scale: [0.18, 1.05, 0.18]
+    material:
+      color: [0.25, 0.11, 0.045]
+      ambient: 0.1
+      diffuse: 0.75
+      specular: 0.18
+      shininess: 80
+      reflective: 0.06
+      transparency: 0
+      refractive_index: 1
+  - name: Red Sphere
+    type: sphere
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [-1.55, 2.78, 0.35]
+      rotate_deg: [0, 0, 0]
+      scale: [0.48, 0.48, 0.48]
+    material:
+      color: [0.82, 0.08, 0.06]
+      ambient: 0.1
+      diffuse: 0.72
+      specular: 0.55
+      shininess: 180
+      reflective: 0.18
+      transparency: 0
+      refractive_index: 1
+  - name: Teal Sphere
+    type: sphere
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [-0.35, 2.66, 1.55]
+      rotate_deg: [0, 0, 0]
+      scale: [0.36, 0.36, 0.36]
+    material:
+      color: [0.04, 0.48, 0.46]
+      ambient: 0.1
+      diffuse: 0.68
+      specular: 0.65
+      shininess: 220
+      reflective: 0.24
+      transparency: 0
+      refractive_index: 1
+  - name: Tall Gold Cube
+    type: cube
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [1.5, 3.02, 0.45]
+      rotate_deg: [0, 18, 0]
+      scale: [0.48, 0.72, 0.48]
+    material:
+      color: [0.92, 0.58, 0.08]
+      ambient: 0.11
+      diffuse: 0.68
+      specular: 0.5
+      shininess: 160
+      reflective: 0.16
+      transparency: 0
+      refractive_index: 1
+  - name: Small Violet Cube
+    type: cube
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [0.55, 2.58, -0.05]
+      rotate_deg: [0, -22, 0]
+      scale: [0.28, 0.28, 0.28]
+    material:
+      color: [0.45, 0.12, 0.68]
+      ambient: 0.12
+      diffuse: 0.7
+      specular: 0.5
+      shininess: 170
+      reflective: 0.14
+      transparency: 0
+      refractive_index: 1
+  - name: Wide Blue Cube
+    type: cube
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [1.15, 2.55, 1.65]
+      rotate_deg: [0, 32, 0]
+      scale: [0.52, 0.25, 0.38]
+    material:
+      color: [0.08, 0.26, 0.72]
+      ambient: 0.1
+      diffuse: 0.68
+      specular: 0.58
+      shininess: 190
+      reflective: 0.2
+      transparency: 0
+      refractive_index: 1
+  - name: Frame One
+    type: cube
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [-3.6, 4.55, 5.78]
+      rotate_deg: [0, 0, 0]
+      scale: [0.82, 1.05, 0.08]
+    material:
+      color: [0.12, 0.09, 0.07]
+      ambient: 0.16
+      diffuse: 0.7
+      specular: 0.2
+      shininess: 80
+      reflective: 0.05
+      transparency: 0
+      refractive_index: 1
+  - name: Red Study
+    type: cube
+    visible: true
+    cast_shadow: false
+    transform:
+      translate: [-3.6, 4.55, 5.66]
+      rotate_deg: [0, 0, 0]
+      scale: [0.64, 0.86, 0.04]
+    material:
+      color: [0.85, 0.12, 0.08]
+      ambient: 0.32
+      diffuse: 0.62
+      specular: 0.12
+      shininess: 50
+      reflective: 0
+      transparency: 0
+      refractive_index: 1
+  - name: Frame Two
+    type: cube
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [-1.2, 4.55, 5.78]
+      rotate_deg: [0, 0, 0]
+      scale: [0.82, 1.05, 0.08]
+    material:
+      color: [0.12, 0.09, 0.07]
+      ambient: 0.16
+      diffuse: 0.7
+      specular: 0.2
+      shininess: 80
+      reflective: 0.05
+      transparency: 0
+      refractive_index: 1
+  - name: Yellow Study
+    type: cube
+    visible: true
+    cast_shadow: false
+    transform:
+      translate: [-1.2, 4.55, 5.66]
+      rotate_deg: [0, 0, 0]
+      scale: [0.64, 0.86, 0.04]
+    material:
+      color: [0.96, 0.68, 0.06]
+      ambient: 0.32
+      diffuse: 0.62
+      specular: 0.12
+      shininess: 50
+      reflective: 0
+      transparency: 0
+      refractive_index: 1
+  - name: Frame Three
+    type: cube
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [1.2, 4.55, 5.78]
+      rotate_deg: [0, 0, 0]
+      scale: [0.82, 1.05, 0.08]
+    material:
+      color: [0.12, 0.09, 0.07]
+      ambient: 0.16
+      diffuse: 0.7
+      specular: 0.2
+      shininess: 80
+      reflective: 0.05
+      transparency: 0
+      refractive_index: 1
+  - name: Blue Study
+    type: cube
+    visible: true
+    cast_shadow: false
+    transform:
+      translate: [1.2, 4.55, 5.66]
+      rotate_deg: [0, 0, 0]
+      scale: [0.64, 0.86, 0.04]
+    material:
+      color: [0.08, 0.35, 0.88]
+      ambient: 0.32
+      diffuse: 0.62
+      specular: 0.12
+      shininess: 50
+      reflective: 0
+      transparency: 0
+      refractive_index: 1
+  - name: Frame Four
+    type: cube
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [3.6, 4.55, 5.78]
+      rotate_deg: [0, 0, 0]
+      scale: [0.82, 1.05, 0.08]
+    material:
+      color: [0.12, 0.09, 0.07]
+      ambient: 0.16
+      diffuse: 0.7
+      specular: 0.2
+      shininess: 80
+      reflective: 0.05
+      transparency: 0
+      refractive_index: 1
+  - name: Green Study
+    type: cube
+    visible: true
+    cast_shadow: false
+    transform:
+      translate: [3.6, 4.55, 5.66]
+      rotate_deg: [0, 0, 0]
+      scale: [0.64, 0.86, 0.04]
+    material:
+      color: [0.12, 0.7, 0.3]
+      ambient: 0.32
+      diffuse: 0.62
+      specular: 0.12
+      shininess: 50
+      reflective: 0
+      transparency: 0
+      refractive_index: 1
+  - name: Mirror Frame
+    type: cube
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [-5.78, 4.15, 1.2]
+      rotate_deg: [0, 0, 0]
+      scale: [0.08, 1.65, 1.65]
+    material:
+      color: [0.1, 0.075, 0.045]
+      ambient: 0.16
+      diffuse: 0.66
+      specular: 0.3
+      shininess: 100
+      reflective: 0.08
+      transparency: 0
+      refractive_index: 1
+  - name: Square Mirror
+    type: cube
+    visible: true
+    cast_shadow: false
+    transform:
+      translate: [-5.64, 4.15, 0.70972306]
+      rotate_deg: [0, 0, 0]
+      scale: [0.045, 1.38, 1.38]
+    material:
+      color: [0.78, 0.84, 0.88]
+      ambient: 0.04
+      diffuse: 0.12
+      specular: 0.9
+      shininess: 300
+      reflective: 0.88
+      transparency: 0
+      refractive_index: 1

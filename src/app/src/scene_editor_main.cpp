@@ -37,21 +37,23 @@ auto GlfwErrorCallback(int error, const char* description) -> void {
 
 auto DrawMainLayout(SceneEditorApp& app, UiRenderState& render_state, std::array<char, 1024>& path_buffer) -> bool {
   bool changed = false;
+  constexpr auto kFixedPaneFlags =
+      ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse;
 
-  ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Once);
-  ImGui::SetNextWindowSize(ImVec2(430, 900), ImGuiCond_Once);
-  ImGui::Begin("Scene");
+  ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
+  ImGui::SetNextWindowSize(ImVec2(430, 900), ImGuiCond_Always);
+  ImGui::Begin("Scene", nullptr, kFixedPaneFlags);
   changed |= DrawScenePanel(app, render_state, path_buffer);
   ImGui::End();
 
-  ImGui::SetNextWindowPos(ImVec2(1410, 0), ImGuiCond_Once);
-  ImGui::SetNextWindowSize(ImVec2(190, 900), ImGuiCond_Once);
-  ImGui::Begin("Add");
+  ImGui::SetNextWindowPos(ImVec2(1410, 0), ImGuiCond_Always);
+  ImGui::SetNextWindowSize(ImVec2(190, 900), ImGuiCond_Always);
+  ImGui::Begin("Add", nullptr, kFixedPaneFlags);
   changed |= DrawAddPanel(app, render_state);
   ImGui::End();
 
-  ImGui::SetNextWindowPos(ImVec2(435, 0), ImGuiCond_Once);
-  ImGui::SetNextWindowSize(ImVec2(970, 900), ImGuiCond_Once);
+  ImGui::SetNextWindowPos(ImVec2(435, 0), ImGuiCond_Always);
+  ImGui::SetNextWindowSize(ImVec2(970, 900), ImGuiCond_Always);
   const auto viewport_result = DrawViewportPanel(app, render_state);
   changed |= viewport_result.changed || viewport_result.camera_moved;
 

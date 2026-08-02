@@ -110,6 +110,11 @@ auto DrawScenePanel(SceneEditorApp& app, UiRenderState& render_state, std::array
         editor_state.selection = Selection{SelectionTarget::kLight, i};
       }
       ImGui::SameLine();
+      if (ImGui::SmallButton(scene.lights[i].visible ? "Hide" : "Show")) {
+        scene.lights[i].visible = !scene.lights[i].visible;
+        changed = true;
+      }
+      ImGui::SameLine();
       if (ImGui::SmallButton("Remove")) {
         delete_light_index = static_cast<int>(i);
       }

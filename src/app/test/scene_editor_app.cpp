@@ -22,6 +22,11 @@ auto ValidScene() -> scene::Scene {
 
 }  // namespace
 
+SCENARIO("scene editor app: viewport overlays are disabled by default") {
+  const scene_editor::SceneEditorApp app;
+  CHECK_FALSE(app.State().show_viewport_overlays);
+}
+
 SCENARIO("scene editor app: load replaces current scene only on success") {
   scene_editor::SceneEditorApp app;
   REQUIRE(app.SetCurrentScene(ValidScene()));

@@ -273,6 +273,9 @@ auto DrawViewportOverlay(scene::Scene& scene,
   }
 
   for (std::size_t i = 0; i < scene.lights.size(); ++i) {
+    if (!scene.lights[i].visible) {
+      continue;
+    }
     const auto projected = ProjectWorldPoint(*scene.camera, ToPoint(scene.lights[i].position), image_min, image_size);
     if (!projected.has_value()) {
       continue;
@@ -293,7 +296,8 @@ auto DrawViewportOverlay(scene::Scene& scene,
   }
 
   std::optional<Point> selected_center;
-  if (editor_state.selection.target == SelectionTarget::kLight && editor_state.selection.index < scene.lights.size()) {
+  if (editor_state.selection.target == SelectionTarget::kLight && editor_state.selection.index < scene.lights.size() &&
+      scene.lights[editor_state.selection.index].visible) {
     selected_center = ToPoint(scene.lights[editor_state.selection.index].position);
   } else if (editor_state.selection.target == SelectionTarget::kObject && editor_state.selection.index < scene.objects.size()) {
     selected_center = ShapeCenter(scene.objects[editor_state.selection.index]);

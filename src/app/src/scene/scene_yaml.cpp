@@ -227,6 +227,9 @@ auto ParseLight(const YAML::Node& node, const std::string& label) -> scene::Ligh
   scene::Light light;
   light.position = ParseVec3(Required(node, "position", label), label + ".position");
   light.color = ParseColor(Required(node, "color", label), label + ".color");
+  if (const auto visible = node["visible"]) {
+    light.visible = visible.as<bool>();
+  }
   return light;
 }
 
@@ -365,6 +368,7 @@ auto SerializeSceneYaml(const scene::Scene& scene) -> std::string {
   out << YAML::Key << "lights" << YAML::Value << YAML::BeginSeq;
   for (const auto& light : scene.lights) {
     out << YAML::BeginMap;
+    out << YAML::Key << "visible" << YAML::Value << light.visible;
     out << YAML::Key << "position" << YAML::Value;
     EmitVec3(out, light.position);
     out << YAML::Key << "color" << YAML::Value;

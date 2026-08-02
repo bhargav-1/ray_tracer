@@ -29,6 +29,8 @@ auto MakeCompiledSceneModel() -> scene::Scene {
       .fov_deg = 60.0F,
       .resolution = {320, 200}};
   scene.lights.push_back({.position = {-10.0F, 10.0F, -10.0F}, .color = {1.0F, 1.0F, 1.0F}});
+  scene.lights.push_back(
+      {.position = {10.0F, 10.0F, -10.0F}, .color = {1.0F, 1.0F, 1.0F}, .visible = false});
 
   scene::Pattern stripe;
   stripe.type = scene::PatternType::kStripe;

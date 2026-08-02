@@ -40,6 +40,7 @@ SCENARIO("scene model: scenes can contain camera, lights, spheres, planes, and c
 
   CHECK(scene.camera.has_value());
   CHECK(scene.lights.size() == 1);
+  CHECK(scene.lights[0].visible);
   CHECK(scene.objects.size() == 3);
   CHECK(scene.objects[0].type == scene::ObjectType::kSphere);
   CHECK(scene.objects[1].type == scene::ObjectType::kPlane);

@@ -154,6 +154,9 @@ auto CompileScene(const scene::Scene& scene) -> CompileSceneResult {
     }
     ray_tracer::World world;
     for (const auto& light : scene.lights) {
+      if (!light.visible) {
+        continue;
+      }
       world.AddLight(ray_tracer::PointLight(ToPoint(light.position), ToColor(light.color)));
     }
     for (std::size_t index = 0; index < scene.objects.size(); ++index) {

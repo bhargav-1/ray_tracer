@@ -51,6 +51,7 @@ struct Camera {
 struct Light {
   Vec3 position{-10.0F, 10.0F, -10.0F};
   ColorRgb color{1.0F, 1.0F, 1.0F};
+  bool visible{true};
 
   constexpr auto operator==(const Light&) const -> bool = default;
 };

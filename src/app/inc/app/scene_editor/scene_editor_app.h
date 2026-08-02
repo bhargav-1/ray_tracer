@@ -36,7 +36,7 @@ struct EditorState {
   Selection selection;
   GizmoMode gizmo_mode{GizmoMode::kTranslate};
   RenderState render_state;
-  bool show_viewport_overlays{true};
+  bool show_viewport_overlays{false};
   std::string status_message;
 };
 

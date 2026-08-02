@@ -30,7 +30,8 @@ camera:
   fov_deg: 60
   resolution: [320, 200]
 lights:
-  - position: [-10, 10, -10]
+  - visible: false
+    position: [-10, 10, -10]
     color: [1, 1, 1]
 objects:
   - name: floor
@@ -92,6 +93,7 @@ SCENARIO("scene yaml: parses camera, resolution, light, object, material, transf
   REQUIRE(result.scene.lights.size() == 1);
   REQUIRE(result.scene.objects.size() == 1);
   const auto& object = result.scene.objects[0];
+  CHECK_FALSE(result.scene.lights[0].visible);
   CHECK(object.name == "floor");
   CHECK(object.type == scene::ObjectType::kPlane);
   CHECK_FALSE(object.visible);

@@ -43,8 +43,10 @@ auto DrawTopLegend(const scene::Scene& scene, EditorState& state) -> void {
 
 auto DrawViewportPanel(SceneEditorApp& app, UiRenderState& render_state) -> ViewportPanelResult {
   ViewportPanelResult result;
+  constexpr auto kFixedPaneFlags =
+      ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse;
 
-  ImGui::Begin("Viewport");
+  ImGui::Begin("Viewport", nullptr, kFixedPaneFlags);
   DrawTopLegend(app.CurrentScene(), app.MutableState());
   ImGui::Separator();
 

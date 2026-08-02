@@ -9,12 +9,12 @@ target_sources(app_lib
         src/scene_editor/widget_helpers.cpp
         src/scene_editor/object_panel.cpp
         src/scene_editor/render_controller.cpp
-        src/scene_editor/scene_debug_log.cpp
         src/scene_editor/scene_panel.cpp
         src/scene_editor/scene_renderer.cpp
         src/scene_editor/scene_editor_app.cpp
         src/scene_editor/viewport_overlay.cpp
         src/scene_editor/viewport_panel.cpp
+        src/shape_catalog.cpp
         src/scene/scene_yaml.cpp
         src/scene/scene_compiler.cpp
 )
@@ -36,6 +36,8 @@ target_compile_definitions(app_lib
 
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/inc/app/scene" PREFIX "Header Files\\scene"
         FILES inc/app/scene/scene.h inc/app/scene/scene_yaml.h inc/app/scene/scene_compiler.h)
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/inc/app" PREFIX "Header Files"
+        FILES inc/app/shape_catalog.h)
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/inc/app/scene_editor" PREFIX "Header Files\\scene_editor"
         FILES
         inc/app/scene_editor/add_panel.h
@@ -45,7 +47,6 @@ source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/inc/app/scene_editor" PREFIX "Hea
         inc/app/scene_editor/widget_helpers.h
         inc/app/scene_editor/object_panel.h
         inc/app/scene_editor/render_controller.h
-        inc/app/scene_editor/scene_debug_log.h
         inc/app/scene_editor/scene_editor_app.h
         inc/app/scene_editor/scene_panel.h
         inc/app/scene_editor/scene_renderer.h

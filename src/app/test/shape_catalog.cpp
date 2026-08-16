@@ -11,7 +11,7 @@ namespace ray_tracer {
 
 SCENARIO("shape catalog: describes and creates registered shapes") {
   const auto shapes = shape_catalog::All();
-  REQUIRE(shapes.size() == 3);
+  REQUIRE(shapes.size() == 4);
 
   const auto& cube = shape_catalog::Find(scene::ObjectType::kCube);
   CHECK(cube.serialized_name == "cube");

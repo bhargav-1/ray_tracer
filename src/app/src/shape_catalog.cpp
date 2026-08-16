@@ -11,6 +11,7 @@
 
 #include "app/cube.h"
 #include "app/plane.h"
+#include "app/cylinder.h"
 #include "app/scene/scene.h"
 #include "app/shape.h"
 #include "app/sphere.h"
@@ -27,6 +28,7 @@ constexpr std::array kShapes{
     ShapeRegistration{scene::ObjectType::kSphere, "sphere", &CreateShape<Sphere>},
     ShapeRegistration{scene::ObjectType::kPlane, "plane", &CreateShape<Plane>},
     ShapeRegistration{scene::ObjectType::kCube, "cube", &CreateShape<Cube>},
+    ShapeRegistration{scene::ObjectType::kCylinder, "cylinder", &CreateShape<Cylinder>},
 };
 
 }  // namespace

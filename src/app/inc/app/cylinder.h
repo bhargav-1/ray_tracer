@@ -1,5 +1,6 @@
 #pragma once
 #include <cmath>
+#include <limits>
 #include <vector>
 #include "material.h"
 #include "matrix.h"
@@ -17,17 +18,52 @@ class Cylinder : public Shape {
   ~Cylinder() override = default;
   [[nodiscard]] auto LocalIntersect(const Ray& ray) const -> std::vector<Intersection> override;
   [[nodiscard]] auto LocalNormalAt(const ray_tracer::Point& point) const -> ray_tracer::Vec3 override;
-  auto static GlassCylinder(size_t index, double transparency = 1, double refractive_index = 1.5) -> Cylinder;
+  auto static GetMinimum() -> double;
+  auto static GetMaximum() -> double;
+  void SetMinimum(const double minimum) { minimum_ = minimum; }
+  void SetMaximum(const double maximum) { maximum_ = maximum; }
+  void SetClosed(const bool closed) { closed_ = closed; }
+  [[nodiscard]] auto IsClosed() const -> bool { return closed_; }
+
+ private:
+  static auto CheckCap(const Ray& ray, double time) -> bool;
+  void GetCapIntersection(const Ray& ray, std::vector<Intersection>& intersections) const;
+  double minimum_ = -std::numeric_limits<double>::infinity();
+  double maximum_ = std::numeric_limits<double>::infinity();
+  bool closed_ = false;
 };
 
 inline auto operator==(const Cylinder& lhs, const Cylinder& rhs) -> bool { return lhs.GetId() == rhs.GetId(); }
+inline auto Cylinder::CheckCap(const Ray& ray, const double time) -> bool {
+  auto x_var = ray.GetOrigin().GetX() + time * ray.GetDirection().GetX();
+  auto z_var = ray.GetOrigin().GetZ() + time * ray.GetDirection().GetZ();
+  return (x_var * x_var + z_var * z_var <= 1);
+}
+
+inline void Cylinder::GetCapIntersection(const Ray& ray, std::vector<Intersection>& intersections) const {
+  if (!closed_ || utilities::Equal(ray.GetDirection().GetY(), 0)) {
+    return;
+  }
+
+  auto t_var = (minimum_ - ray.GetOrigin().GetY()) / ray.GetDirection().GetY();
+  if (CheckCap(ray, t_var)) {
+    intersections.emplace_back(t_var, *this);
+  }
+
+  auto t_var2 = (maximum_ - ray.GetOrigin().GetY()) / ray.GetDirection().GetY();
+  if (CheckCap(ray, t_var2)) {
+    intersections.emplace_back(t_var2, *this);
+  }
+}
 inline auto Cylinder::LocalIntersect(const Ray& transformed_ray) const -> std::vector<Intersection> {
   // following is just the algorithm for ray/Cylinder intersection
+  std::vector<Intersection> intersections;
   auto a_var = transformed_ray.GetDirection().GetX() * transformed_ray.GetDirection().GetX() +
-           transformed_ray.GetDirection().GetZ() * transformed_ray.GetDirection().GetZ();
+               transformed_ray.GetDirection().GetZ() * transformed_ray.GetDirection().GetZ();
   // ray is parallel to y axis
   if (std::abs(a_var) < utilities::kEpsilon) {
-    return {};
+    GetCapIntersection(transformed_ray, intersections);
+    return intersections;
   }
   auto b_var = 2 * (transformed_ray.GetOrigin().GetX() * transformed_ray.GetDirection().GetX() +
                     transformed_ray.GetOrigin().GetZ() * transformed_ray.GetDirection().GetZ());
@@ -35,26 +71,41 @@ inline auto Cylinder::LocalIntersect(const Ray& transformed_ray) const -> std::v
                transformed_ray.GetOrigin().GetZ() * transformed_ray.GetOrigin().GetZ() - 1;
   auto discriminant = (b_var * b_var) - (4 * a_var * c_var);
   if (discriminant < 0) {
-    return {};
+    GetCapIntersection(transformed_ray, intersections);
+    return intersections;
   }
   // this t is time/unit in the ray
   auto t1_var = (-b_var - std::sqrt(discriminant)) / (2 * a_var);
   auto t2_var = (-b_var + std::sqrt(discriminant)) / (2 * a_var);
-  return {Intersection(t1_var, *this), Intersection(t2_var, *this)};
+  if (t1_var > t2_var) {
+    std::swap(t1_var, t2_var);
+  }
+  auto y0_var = transformed_ray.GetOrigin().GetY() + t1_var * transformed_ray.GetDirection().GetY();
+  if (y0_var > minimum_ && y0_var < maximum_) {
+    intersections.emplace_back(t1_var, *this);
+  }
+  auto y1_var = transformed_ray.GetOrigin().GetY() + t2_var * transformed_ray.GetDirection().GetY();
+  if (y1_var > minimum_ && y1_var < maximum_) {
+    intersections.emplace_back(t2_var, *this);
+  }
+  GetCapIntersection(transformed_ray, intersections);
+  return intersections;
 }
 inline auto Cylinder::LocalNormalAt(const ray_tracer::Point& point) const -> ray_tracer::Vec3 {
-  // all centers are at 0,0,0
-  return {point.GetX(), 0, point.GetZ()};
+  auto dist = point.GetX() * point.GetX() + point.GetZ() * point.GetZ();
+  Vec3 result;
+  if (dist < 1 && point.GetY() >= maximum_ - utilities::kEpsilon) {
+    result = {0, 1, 0};
+  } else if (dist < 1 && point.GetY() <= minimum_ + utilities::kEpsilon) {
+    result = {0, -1, 0};
+  } else {
+    result = {point.GetX(), 0, point.GetZ()};
+  }
+  return result;
 }
 
-inline auto Cylinder::GlassCylinder(const size_t index, const double transparency, const double refractive_index)
-    -> Cylinder {
-  auto cylinder = Cylinder(index);
-  auto material = cylinder.GetMaterial();
-  material.SetTransparency(transparency);
-  material.SetRefractiveIndex(refractive_index);
-  cylinder.SetMaterial(material);
-  return cylinder;
-}
+inline auto Cylinder::GetMinimum() -> double { return -std::numeric_limits<double>::infinity(); }
+
+inline auto Cylinder::GetMaximum() -> double { return std::numeric_limits<double>::infinity(); }
 
 }  // namespace ray_tracer

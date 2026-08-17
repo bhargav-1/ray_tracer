@@ -18,8 +18,8 @@ class Cylinder : public Shape {
   ~Cylinder() override = default;
   [[nodiscard]] auto LocalIntersect(const Ray& ray) const -> std::vector<Intersection> override;
   [[nodiscard]] auto LocalNormalAt(const ray_tracer::Point& point) const -> ray_tracer::Vec3 override;
-  auto static GetMinimum() -> double;
-  auto static GetMaximum() -> double;
+  [[nodiscard]] auto GetMinimum() const -> double { return minimum_; }
+  [[nodiscard]] auto GetMaximum() const -> double { return maximum_; }
   void SetMinimum(const double minimum) { minimum_ = minimum; }
   void SetMaximum(const double maximum) { maximum_ = maximum; }
   void SetClosed(const bool closed) { closed_ = closed; }
@@ -103,9 +103,5 @@ inline auto Cylinder::LocalNormalAt(const ray_tracer::Point& point) const -> ray
   }
   return result;
 }
-
-inline auto Cylinder::GetMinimum() -> double { return -std::numeric_limits<double>::infinity(); }
-
-inline auto Cylinder::GetMaximum() -> double { return std::numeric_limits<double>::infinity(); }
 
 }  // namespace ray_tracer

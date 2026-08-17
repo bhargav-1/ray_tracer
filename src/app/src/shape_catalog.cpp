@@ -9,9 +9,10 @@
 #include <string>
 #include <string_view>
 
+#include "app/cone.h"
 #include "app/cube.h"
-#include "app/plane.h"
 #include "app/cylinder.h"
+#include "app/plane.h"
 #include "app/scene/scene.h"
 #include "app/shape.h"
 #include "app/sphere.h"
@@ -20,15 +21,25 @@ namespace ray_tracer::shape_catalog {
 namespace {
 
 template <typename ShapeType>
-auto CreateShape(std::size_t object_id) -> std::shared_ptr<Shape> {
+auto CreateShape(std::size_t object_id, [[maybe_unused]] const scene::AxialBounds& bounds) -> std::shared_ptr<Shape> {
   return std::make_shared<ShapeType>(object_id);
 }
 
+template <typename ShapeType>
+auto CreateAxialShape(std::size_t object_id, const scene::AxialBounds& bounds) -> std::shared_ptr<Shape> {
+  auto shape = std::make_shared<ShapeType>(object_id);
+  shape->SetMinimum(bounds.minimum);
+  shape->SetMaximum(bounds.maximum);
+  shape->SetClosed(bounds.closed);
+  return shape;
+}
+
 constexpr std::array kShapes{
-    ShapeRegistration{scene::ObjectType::kSphere, "sphere", &CreateShape<Sphere>},
-    ShapeRegistration{scene::ObjectType::kPlane, "plane", &CreateShape<Plane>},
-    ShapeRegistration{scene::ObjectType::kCube, "cube", &CreateShape<Cube>},
-    ShapeRegistration{scene::ObjectType::kCylinder, "cylinder", &CreateShape<Cylinder>},
+    ShapeRegistration{scene::ObjectType::kSphere, "sphere", false, &CreateShape<Sphere>},
+    ShapeRegistration{scene::ObjectType::kPlane, "plane", false, &CreateShape<Plane>},
+    ShapeRegistration{scene::ObjectType::kCube, "cube", false, &CreateShape<Cube>},
+    ShapeRegistration{scene::ObjectType::kCylinder, "cylinder", true, &CreateAxialShape<Cylinder>},
+    ShapeRegistration{scene::ObjectType::kCone, "cone", true, &CreateAxialShape<Cone>},
 };
 
 }  // namespace

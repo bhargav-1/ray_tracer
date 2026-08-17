@@ -22,7 +22,8 @@ auto DrawAddPanel(SceneEditorApp& app, UiRenderState& render_state) -> bool {
       scene::Object object;
       object.name = display_name + " " + std::to_string(scene.objects.size() + 1);
       object.type = registration.type;
-      if (object.type == scene::ObjectType::kSphere || object.type == scene::ObjectType::kCube) {
+      if (object.type == scene::ObjectType::kSphere || object.type == scene::ObjectType::kCube ||
+          registration.supports_axial_bounds) {
         object.transform.translate.y = 1.0F;
       }
       scene.objects.push_back(object);

@@ -84,6 +84,18 @@ auto ParseTransform(const YAML::Node& node, const std::string& label) -> scene::
   return transform;
 }
 
+auto ParseAxialBounds(const YAML::Node& node, const std::string& label) -> scene::AxialBounds {
+  RequireOnlyKeys(node, {"minimum", "maximum", "closed"}, label);
+  scene::AxialBounds bounds;
+  bounds.minimum = Required(node, "minimum", label).as<float>();
+  bounds.maximum = Required(node, "maximum", label).as<float>();
+  bounds.closed = Required(node, "closed", label).as<bool>();
+  if (bounds.minimum >= bounds.maximum) {
+    throw std::runtime_error(label + ".minimum must be less than maximum");
+  }
+  return bounds;
+}
+
 auto PatternTypeFromString(const std::string& type) -> scene::PatternType {
   if (type == "solid") {
     return scene::PatternType::kSolid;
@@ -237,7 +249,15 @@ auto ParseObject(const YAML::Node& node, const std::string& label) -> scene::Obj
   RequireMap(node, label);
   scene::Object object;
   object.name = Required(node, "name", label).as<std::string>();
-  object.type = shape_catalog::Find(Required(node, "type", label).as<std::string>()).type;
+  const auto& registration = shape_catalog::Find(Required(node, "type", label).as<std::string>());
+  object.type = registration.type;
+  if (const auto bounds = node["bounds"]) {
+    if (!registration.supports_axial_bounds) {
+      throw std::runtime_error(label + ".bounds is not supported for type '" +
+                               std::string{registration.serialized_name} + "'");
+    }
+    object.axial_bounds = ParseAxialBounds(bounds, label + ".bounds");
+  }
   if (const auto visible = node["visible"]) {
     object.visible = visible.as<bool>();
   }
@@ -263,6 +283,14 @@ auto EmitTransform(YAML::Emitter& out, const scene::Transform& transform) -> voi
   EmitVec3(out, transform.rotate_deg);
   out << YAML::Key << "scale" << YAML::Value;
   EmitVec3(out, transform.scale);
+  out << YAML::EndMap;
+}
+
+auto EmitAxialBounds(YAML::Emitter& out, const scene::AxialBounds& bounds) -> void {
+  out << YAML::BeginMap;
+  out << YAML::Key << "minimum" << YAML::Value << bounds.minimum;
+  out << YAML::Key << "maximum" << YAML::Value << bounds.maximum;
+  out << YAML::Key << "closed" << YAML::Value << bounds.closed;
   out << YAML::EndMap;
 }
 
@@ -378,9 +406,14 @@ auto SerializeSceneYaml(const scene::Scene& scene) -> std::string {
   out << YAML::EndSeq;
   out << YAML::Key << "objects" << YAML::Value << YAML::BeginSeq;
   for (const auto& object : scene.objects) {
+    const auto& registration = shape_catalog::Find(object.type);
     out << YAML::BeginMap;
     out << YAML::Key << "name" << YAML::Value << object.name;
-    out << YAML::Key << "type" << YAML::Value << shape_catalog::Find(object.type).serialized_name;
+    out << YAML::Key << "type" << YAML::Value << registration.serialized_name;
+    if (registration.supports_axial_bounds) {
+      out << YAML::Key << "bounds" << YAML::Value;
+      EmitAxialBounds(out, object.axial_bounds);
+    }
     out << YAML::Key << "visible" << YAML::Value << object.visible;
     out << YAML::Key << "cast_shadow" << YAML::Value << object.cast_shadow;
     out << YAML::Key << "transform" << YAML::Value;

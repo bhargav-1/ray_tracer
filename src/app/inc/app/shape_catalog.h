@@ -14,11 +14,12 @@ class Shape;
 
 namespace shape_catalog {
 
-using ShapeCreator = auto (*)(std::size_t) -> std::shared_ptr<Shape>;
+using ShapeCreator = auto (*)(std::size_t, const scene::AxialBounds&) -> std::shared_ptr<Shape>;
 
 struct ShapeRegistration {
   scene::ObjectType type;
   std::string_view serialized_name;
+  bool supports_axial_bounds;
   ShapeCreator create;
 };
 

@@ -59,6 +59,21 @@ auto EnsurePatternChildren(scene::Pattern& pattern) -> void {
   }
 }
 
+auto DrawAxialBoundsEditor(scene::AxialBounds& bounds) -> bool {
+  constexpr auto kMinimumGap = 0.01F;
+  bool changed = false;
+  if (ImGui::DragFloat("Minimum", &bounds.minimum, 0.05F)) {
+    bounds.minimum = std::min(bounds.minimum, bounds.maximum - kMinimumGap);
+    changed = true;
+  }
+  if (ImGui::DragFloat("Maximum", &bounds.maximum, 0.05F)) {
+    bounds.maximum = std::max(bounds.maximum, bounds.minimum + kMinimumGap);
+    changed = true;
+  }
+  changed |= ImGui::Checkbox("Closed", &bounds.closed);
+  return changed;
+}
+
 }  // namespace
 
 auto DrawPatternEditor(scene::Pattern& pattern, int depth) -> bool {  // NOLINT(misc-no-recursion)
@@ -147,6 +162,11 @@ auto DrawObjectEditor(scene::Object& object) -> bool {
       }
     }
     ImGui::EndCombo();
+  }
+  if (shape_catalog::Find(object.type).supports_axial_bounds &&
+      ImGui::TreeNodeEx("Geometry", ImGuiTreeNodeFlags_DefaultOpen)) {
+    changed |= DrawAxialBoundsEditor(object.axial_bounds);
+    ImGui::TreePop();
   }
   if (ImGui::TreeNodeEx("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
     changed |= DragF3("Translate", object.transform.translate, 0.1F, -50.0F, 50.0F);

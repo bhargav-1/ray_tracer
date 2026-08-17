@@ -56,7 +56,15 @@ struct Light {
   constexpr auto operator==(const Light&) const -> bool = default;
 };
 
-enum class ObjectType : std::uint8_t { kSphere, kPlane, kCube, kCylinder};
+struct AxialBounds {
+  float minimum{-1.0F};
+  float maximum{1.0F};
+  bool closed{true};
+
+  constexpr auto operator==(const AxialBounds&) const -> bool = default;
+};
+
+enum class ObjectType : std::uint8_t { kSphere, kPlane, kCube, kCylinder, kCone };
 
 enum class PatternType : std::uint8_t {
   kSolid,
@@ -100,6 +108,7 @@ struct Material {
 struct Object {
   std::string name;
   ObjectType type{ObjectType::kSphere};
+  AxialBounds axial_bounds;
   Transform transform;
   Material material;
   bool visible{true};

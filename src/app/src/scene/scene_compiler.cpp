@@ -164,7 +164,11 @@ auto CompileScene(const scene::Scene& scene) -> CompileSceneResult {
       if (!object.visible) {
         continue;
       }
-      auto shape = shape_catalog::Find(object.type).create(index + 1);
+      const auto& registration = shape_catalog::Find(object.type);
+      if (registration.supports_axial_bounds && object.axial_bounds.minimum >= object.axial_bounds.maximum) {
+        throw std::runtime_error("object '" + object.name + "' requires minimum bounds below maximum bounds");
+      }
+      auto shape = registration.create(index + 1, object.axial_bounds);
       shape->SetTransform(BuildTransformMatrix(object.transform));
       shape->SetCastShadow(object.cast_shadow);
       shape->SetMaterial(CompileMaterial(object.material));

@@ -1,0 +1,441 @@
+version: 1
+camera:
+  from: [19, 12, -30]
+  to: [-0.5, 9, 0]
+  up: [0, 1, 0]
+  fov_deg: 42
+  resolution: [960, 600]
+lights:
+  - position: [-12, 24, -18]
+    color: [1, 0.94, 0.84]
+  - position: [14, 14, -4]
+    color: [0.34, 0.42, 0.58]
+objects:
+  - name: Launch Complex Ground
+    type: plane
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [0, 0, 0]
+      rotate_deg: [0, 0, 0]
+      scale: [1, 1, 1]
+    material: &ground_material
+      color: [0.24, 0.26, 0.25]
+      ambient: 0.14
+      diffuse: 0.78
+      specular: 0.05
+      shininess: 25
+      reflective: 0.03
+      transparency: 0
+      refractive_index: 1
+      pattern:
+        type: checkers
+        children:
+          - type: solid
+            color: [0.25, 0.27, 0.26]
+          - type: solid
+            color: [0.18, 0.20, 0.19]
+        transform:
+          translate: [0, 0, 0]
+          rotate_deg: [0, 0, 0]
+          scale: [3, 3, 3]
+
+  - name: Concrete Launch Pedestal
+    type: cube
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [0, 0.45, 0]
+      rotate_deg: [0, 0, 0]
+      scale: [3.1, 0.45, 3.1]
+    material: &concrete_material
+      color: [0.48, 0.49, 0.47]
+      ambient: 0.12
+      diffuse: 0.82
+      specular: 0.08
+      shininess: 35
+      reflective: 0.02
+      transparency: 0
+      refractive_index: 1
+
+  - name: Flame Trench
+    type: cube
+    visible: true
+    cast_shadow: false
+    transform:
+      translate: [0, 0.82, 0]
+      rotate_deg: [0, 0, 0]
+      scale: [1.3, 0.18, 1.3]
+    material: &black_material
+      color: [0.025, 0.028, 0.03]
+      ambient: 0.12
+      diffuse: 0.55
+      specular: 0.42
+      shininess: 140
+      reflective: 0.12
+      transparency: 0
+      refractive_index: 1
+
+  - name: S-IC First Stage
+    type: cylinder
+    bounds: {minimum: -1, maximum: 1, closed: true}
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [0, 4.8, 0]
+      rotate_deg: [0, 0, 0]
+      scale: [1.15, 3.4, 1.15]
+    material: &white_body_material
+      color: [0.88, 0.89, 0.86]
+      ambient: 0.11
+      diffuse: 0.78
+      specular: 0.32
+      shininess: 115
+      reflective: 0.08
+      transparency: 0
+      refractive_index: 1
+
+  - name: S-IC Lower Black Roll Band
+    type: cylinder
+    bounds: {minimum: -1, maximum: 1, closed: true}
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [0, 1.72, 0]
+      rotate_deg: [0, 0, 0]
+      scale: [1.17, 0.24, 1.17]
+    material: *black_material
+
+  - name: S-IC Upper Black Roll Band
+    type: cylinder
+    bounds: {minimum: -1, maximum: 1, closed: true}
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [0, 6.82, 0]
+      rotate_deg: [0, 0, 0]
+      scale: [1.17, 0.32, 1.17]
+    material: *black_material
+
+  - name: S-IC Forward Ring
+    type: cylinder
+    bounds: {minimum: -1, maximum: 1, closed: true}
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [0, 8.12, 0]
+      rotate_deg: [0, 0, 0]
+      scale: [1.18, 0.10, 1.18]
+    material: &silver_material
+      color: [0.55, 0.58, 0.60]
+      ambient: 0.1
+      diffuse: 0.58
+      specular: 0.75
+      shininess: 260
+      reflective: 0.28
+      transparency: 0
+      refractive_index: 1
+
+  - name: S-II Interstage
+    type: cylinder
+    bounds: {minimum: -1, maximum: 1, closed: true}
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [0, 8.55, 0]
+      rotate_deg: [0, 0, 0]
+      scale: [1.05, 0.36, 1.05]
+    material: *black_material
+
+  - name: S-II Second Stage
+    type: cylinder
+    bounds: {minimum: -1, maximum: 1, closed: true}
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [0, 10.2, 0]
+      rotate_deg: [0, 0, 0]
+      scale: [0.86, 1.45, 0.86]
+    material: *white_body_material
+
+  - name: S-II Mid Roll Band
+    type: cylinder
+    bounds: {minimum: -1, maximum: 1, closed: true}
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [0, 10.25, 0]
+      rotate_deg: [0, 0, 0]
+      scale: [0.88, 0.20, 0.88]
+    material: *black_material
+
+  - name: S-II Forward Ring
+    type: cylinder
+    bounds: {minimum: -1, maximum: 1, closed: true}
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [0, 11.68, 0]
+      rotate_deg: [0, 0, 0]
+      scale: [0.89, 0.10, 0.89]
+    material: *silver_material
+
+  - name: S-IVB Interstage
+    type: cylinder
+    bounds: {minimum: -1, maximum: 1, closed: true}
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [0, 11.95, 0]
+      rotate_deg: [0, 0, 0]
+      scale: [0.68, 0.25, 0.68]
+    material: *black_material
+
+  - name: S-IVB Third Stage
+    type: cylinder
+    bounds: {minimum: -1, maximum: 1, closed: true}
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [0, 12.9, 0]
+      rotate_deg: [0, 0, 0]
+      scale: [0.59, 0.82, 0.59]
+    material: *white_body_material
+
+  - name: Instrument Unit Black Ring
+    type: cylinder
+    bounds: {minimum: -1, maximum: 1, closed: true}
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [0, 13.72, 0]
+      rotate_deg: [0, 0, 0]
+      scale: [0.61, 0.13, 0.61]
+    material: *black_material
+
+  - name: Lunar Module Adapter
+    type: cone
+    bounds: {minimum: -1, maximum: 0, closed: true}
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [0, 15.18, 0]
+      rotate_deg: [0, 0, 0]
+      scale: [0.61, 1.34, 0.61]
+    material: *white_body_material
+
+  - name: Command Module
+    type: cone
+    bounds: {minimum: -1, maximum: 0, closed: true}
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [0, 16.08, 0]
+      rotate_deg: [0, 0, 0]
+      scale: [0.34, 0.90, 0.34]
+    material: *silver_material
+
+  - name: Launch Escape Tower Mast
+    type: cylinder
+    bounds: {minimum: -1, maximum: 1, closed: true}
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [0, 17.02, 0]
+      rotate_deg: [0, 0, 0]
+      scale: [0.055, 0.95, 0.055]
+    material: *black_material
+
+  - name: Launch Escape Motor
+    type: cone
+    bounds: {minimum: -1, maximum: 0, closed: true}
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [0, 18.35, 0]
+      rotate_deg: [0, 0, 0]
+      scale: [0.20, 0.48, 0.20]
+    material: *black_material
+
+  - name: Fin East
+    type: cube
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [1.28, 1.75, 0]
+      rotate_deg: [0, 0, -12]
+      scale: [0.42, 0.72, 0.10]
+    material: *black_material
+
+  - name: Fin West
+    type: cube
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [-1.28, 1.75, 0]
+      rotate_deg: [0, 0, 12]
+      scale: [0.42, 0.72, 0.10]
+    material: *black_material
+
+  - name: Fin North
+    type: cube
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [0, 1.75, 1.28]
+      rotate_deg: [12, 0, 0]
+      scale: [0.10, 0.72, 0.42]
+    material: *black_material
+
+  - name: Fin South
+    type: cube
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [0, 1.75, -1.28]
+      rotate_deg: [-12, 0, 0]
+      scale: [0.10, 0.72, 0.42]
+    material: *black_material
+
+  - name: Center F-1 Engine Bell
+    type: cone
+    bounds: {minimum: -1, maximum: -0.22, closed: true}
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [0, 1.55, 0]
+      rotate_deg: [0, 0, 0]
+      scale: [0.30, 0.72, 0.30]
+    material: *black_material
+
+  - name: F-1 Engine Bell NE
+    type: cone
+    bounds: {minimum: -1, maximum: -0.22, closed: true}
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [0.58, 1.55, 0.58]
+      rotate_deg: [0, 0, 0]
+      scale: [0.27, 0.72, 0.27]
+    material: *black_material
+
+  - name: F-1 Engine Bell NW
+    type: cone
+    bounds: {minimum: -1, maximum: -0.22, closed: true}
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [-0.58, 1.55, 0.58]
+      rotate_deg: [0, 0, 0]
+      scale: [0.27, 0.72, 0.27]
+    material: *black_material
+
+  - name: F-1 Engine Bell SE
+    type: cone
+    bounds: {minimum: -1, maximum: -0.22, closed: true}
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [0.58, 1.55, -0.58]
+      rotate_deg: [0, 0, 0]
+      scale: [0.27, 0.72, 0.27]
+    material: *black_material
+
+  - name: F-1 Engine Bell SW
+    type: cone
+    bounds: {minimum: -1, maximum: -0.22, closed: true}
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [-0.58, 1.55, -0.58]
+      rotate_deg: [0, 0, 0]
+      scale: [0.27, 0.72, 0.27]
+    material: *black_material
+
+  - name: Service Tower Front Column
+    type: cube
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [-4.2, 8, -1.15]
+      rotate_deg: [0, 0, 0]
+      scale: [0.14, 8, 0.14]
+    material: &tower_material
+      color: [0.58, 0.09, 0.055]
+      ambient: 0.12
+      diffuse: 0.72
+      specular: 0.24
+      shininess: 85
+      reflective: 0.05
+      transparency: 0
+      refractive_index: 1
+
+  - name: Service Tower Rear Column
+    type: cube
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [-4.2, 8, 1.15]
+      rotate_deg: [0, 0, 0]
+      scale: [0.14, 8, 0.14]
+    material: *tower_material
+
+  - name: Service Tower Inner Front Column
+    type: cube
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [-2.9, 8, -1.15]
+      rotate_deg: [0, 0, 0]
+      scale: [0.14, 8, 0.14]
+    material: *tower_material
+
+  - name: Service Tower Inner Rear Column
+    type: cube
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [-2.9, 8, 1.15]
+      rotate_deg: [0, 0, 0]
+      scale: [0.14, 8, 0.14]
+    material: *tower_material
+
+  - name: Service Platform Lower
+    type: cube
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [-3.55, 4.2, 0]
+      rotate_deg: [0, 0, 0]
+      scale: [0.82, 0.10, 1.35]
+    material: *tower_material
+
+  - name: Service Platform Middle
+    type: cube
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [-3.55, 8.1, 0]
+      rotate_deg: [0, 0, 0]
+      scale: [0.82, 0.10, 1.35]
+    material: *tower_material
+
+  - name: Service Platform Upper
+    type: cube
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [-3.55, 12.0, 0]
+      rotate_deg: [0, 0, 0]
+      scale: [0.82, 0.10, 1.35]
+    material: *tower_material
+
+  - name: Crew Access Arm
+    type: cube
+    visible: true
+    cast_shadow: true
+    transform:
+      translate: [-1.55, 14.8, 0]
+      rotate_deg: [0, 0, 0]
+      scale: [1.45, 0.10, 0.16]
+    material: *tower_material

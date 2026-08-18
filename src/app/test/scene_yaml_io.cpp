@@ -134,7 +134,7 @@ SCENARIO("scene yaml: rejects invalid scenes with useful errors") {
   CHECK_FALSE(scene_io::ParseSceneYaml(std::string{kMinimalSceneYaml} + "\nextra: 1\n").ok);
 
   auto unknown_object = std::string{kFullSceneYaml};
-  unknown_object.replace(unknown_object.find("type: plane"), std::string{"type: plane"}.size(), "type: cone");
+  unknown_object.replace(unknown_object.find("type: plane"), std::string{"type: plane"}.size(), "type: torusy");
   const auto object_result = scene_io::ParseSceneYaml(unknown_object);
   CHECK_FALSE(object_result.ok);
   CHECK_FALSE(object_result.error.empty());

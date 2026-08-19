@@ -1,6 +1,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <memory>
 #include "app/color.h"
+#include "app/group.h"
 #include "app/lighting.h"
 #include "app/material.h"
 #include "app/matrix.h"
@@ -151,6 +152,16 @@ SCENARIO("10: A pattern with both an object and a pattern transformation") {
       CHECK(ColorAtShape(pattern, object, ray_tracer::Point(2.5, 3, 3.5)) == ray_tracer::Color(0.75, 0.5, 0.25));
     }
   }
+}
+
+SCENARIO("14: A pattern on an object in a transformed group") {
+  auto group = std::make_shared<Group>(1);
+  group->SetTransform(Matrix<4, 4>::Scaling(2, 2, 2));
+  auto object = std::make_shared<Sphere>(2);
+  group->AddChild(object);
+  const StripePattern pattern(kWhite, kBlack);
+
+  CHECK(ColorAtShape(pattern, *object, Point(2.5, 0, 0)) == kBlack);
 }
 
 SCENARIO("10: A gradient linearly interpolates between colors") {

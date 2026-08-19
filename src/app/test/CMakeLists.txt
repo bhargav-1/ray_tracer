@@ -18,6 +18,7 @@ target_sources(app_lib_tests
         reflection_refraction_chapter11.cpp
         cubes_chapter12.cpp
         cylinder_chapter13.cpp
+        groups_chapter14.cpp
         shape_catalog.cpp
         scene_model.cpp
         scene_yaml_io.cpp

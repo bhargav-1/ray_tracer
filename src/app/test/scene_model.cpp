@@ -27,24 +27,39 @@ SCENARIO("scene model: scenes can contain camera, lights, spheres, planes, and c
   scene.lights.push_back(scene::Light{});
   scene::Object sphere;
   sphere.name = "sphere";
-  sphere.type = scene::ObjectType::kSphere;
+  sphere.Shape().type = scene::ObjectType::kSphere;
   scene.objects.push_back(sphere);
   scene::Object plane;
   plane.name = "plane";
-  plane.type = scene::ObjectType::kPlane;
+  plane.Shape().type = scene::ObjectType::kPlane;
   scene.objects.push_back(plane);
   scene::Object cube;
   cube.name = "cube";
-  cube.type = scene::ObjectType::kCube;
+  cube.Shape().type = scene::ObjectType::kCube;
   scene.objects.push_back(cube);
 
   CHECK(scene.camera.has_value());
   CHECK(scene.lights.size() == 1);
   CHECK(scene.lights[0].visible);
   CHECK(scene.objects.size() == 3);
-  CHECK(scene.objects[0].type == scene::ObjectType::kSphere);
-  CHECK(scene.objects[1].type == scene::ObjectType::kPlane);
-  CHECK(scene.objects[2].type == scene::ObjectType::kCube);
+  CHECK(scene.objects[0].Shape().type == scene::ObjectType::kSphere);
+  CHECK(scene.objects[1].Shape().type == scene::ObjectType::kPlane);
+  CHECK(scene.objects[2].Shape().type == scene::ObjectType::kCube);
+}
+
+SCENARIO("scene model: groups contain recursive scene objects") {
+  scene::Object group;
+  group.name = "group";
+  group.content = scene::GroupSpec{};
+  scene::Object child;
+  child.name = "child";
+  child.Shape().type = scene::ObjectType::kCube;
+  group.Group().children.push_back(child);
+
+  REQUIRE(group.IsGroup());
+  REQUIRE(group.Group().children.size() == 1);
+  CHECK_FALSE(group.Group().children[0].IsGroup());
+  CHECK(group.Group().children[0].Shape().type == scene::ObjectType::kCube);
 }
 
 SCENARIO("scene model: recursive patterns can be constructed") {

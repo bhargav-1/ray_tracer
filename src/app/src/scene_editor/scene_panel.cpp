@@ -4,7 +4,10 @@
 #include <array>
 #include <cstddef>
 #include <filesystem>
+#include <optional>
 #include <string>
+#include <utility>
+#include <vector>
 
 #include "imgui.h"  // NOLINT
 
@@ -15,6 +18,7 @@
 #include "app/scene_editor/render_controller.h"
 #include "app/scene_editor/render_state.h"
 #include "app/scene_editor/scene_editor_app.h"
+#include "app/shape_catalog.h"
 
 namespace ray_tracer::scene_editor {
 namespace {
@@ -56,6 +60,137 @@ auto DrawFilePanel(SceneEditorApp& app, UiRenderState& render_state, std::array<
   }
 }
 
+using ObjectPath = std::vector<std::size_t>;
+
+auto CountObjects(const std::vector<scene::Object>& objects) -> std::size_t {  // NOLINT(misc-no-recursion)
+  std::size_t count = objects.size();
+  for (const auto& object : objects) {
+    if (object.IsGroup()) {
+      count += CountObjects(object.Group().children);
+    }
+  }
+  return count;
+}
+
+auto FindObject(std::vector<scene::Object>& objects, const ObjectPath& path) -> scene::Object* {
+  auto* current_objects = &objects;
+  scene::Object* object = nullptr;
+  for (std::size_t depth = 0; depth < path.size(); ++depth) {
+    const auto index = path[depth];
+    if (index >= current_objects->size()) {
+      return nullptr;
+    }
+    object = &(*current_objects)[index];
+    if (depth + 1 < path.size()) {
+      if (!object->IsGroup()) {
+        return nullptr;
+      }
+      current_objects = &object->Group().children;
+    }
+  }
+  return object;
+}
+
+auto IsSelected(const Selection& selection, const ObjectPath& path) -> bool {
+  return selection.target == SelectionTarget::kObject && selection.object_path == path;
+}
+
+auto AdjustSelectionAfterErase(Selection& selection, const ObjectPath& parent_path, std::size_t erased_index) -> void {
+  if (selection.target != SelectionTarget::kObject || selection.object_path.size() <= parent_path.size() ||
+      !std::equal(parent_path.begin(), parent_path.end(), selection.object_path.begin())) {
+    return;
+  }
+  auto& selected_index = selection.object_path[parent_path.size()];
+  if (selected_index == erased_index) {
+    selection = Selection{};
+  } else if (selected_index > erased_index) {
+    --selected_index;
+  }
+}
+
+auto AddObjectMenu(std::vector<scene::Object>& objects, const ObjectPath& parent_path, EditorState& state) -> bool {
+  bool changed = false;
+  for (const auto& registration : shape_catalog::All()) {
+    const auto display_name = shape_catalog::DisplayName(registration.serialized_name);
+    if (ImGui::MenuItem(display_name.c_str())) {
+      scene::Object object;
+      object.name = display_name + " " + std::to_string(objects.size() + 1);
+      object.Shape().type = registration.type;
+      if (registration.type == scene::ObjectType::kSphere || registration.type == scene::ObjectType::kCube ||
+          registration.supports_axial_bounds) {
+        object.transform.translate.y = 1.0F;
+      }
+      objects.push_back(std::move(object));
+      auto path = parent_path;
+      path.push_back(objects.size() - 1);
+      state.selection = Selection::ForObject(std::move(path));
+      changed = true;
+    }
+  }
+  ImGui::Separator();
+  if (ImGui::MenuItem("Group")) {
+    scene::Object group;
+    group.name = "Group " + std::to_string(objects.size() + 1);
+    group.content = scene::GroupSpec{};
+    objects.push_back(std::move(group));
+    auto path = parent_path;
+    path.push_back(objects.size() - 1);
+    state.selection = Selection::ForObject(std::move(path));
+    changed = true;
+  }
+  return changed;
+}
+
+auto DrawObjectTree(std::vector<scene::Object>& objects,  // NOLINT(misc-no-recursion)
+                    const ObjectPath& parent_path,
+                    EditorState& state) -> bool {
+  bool changed = false;
+  std::optional<std::size_t> delete_index;
+  for (std::size_t index = 0; index < objects.size(); ++index) {
+    auto path = parent_path;
+    path.push_back(index);
+    auto& object = objects[index];
+    ImGui::PushID(static_cast<int>(index));
+    if (ImGui::SmallButton(IsSelected(state.selection, path) ? "Selected" : "Select")) {
+      state.selection = Selection::ForObject(path);
+    }
+    ImGui::SameLine();
+    if (ImGui::SmallButton(object.visible ? "Hide" : "Show")) {
+      object.visible = !object.visible;
+      changed = true;
+    }
+    ImGui::SameLine();
+    if (ImGui::SmallButton("Remove")) {
+      delete_index = index;
+    }
+    if (object.IsGroup()) {
+      ImGui::SameLine();
+      if (ImGui::SmallButton("+ Child")) {
+        ImGui::OpenPopup("AddChild");
+      }
+      if (ImGui::BeginPopup("AddChild")) {
+        changed |= AddObjectMenu(object.Group().children, path, state);
+        ImGui::EndPopup();
+      }
+    }
+    ImGui::SameLine();
+    const auto flags = object.IsGroup() ? ImGuiTreeNodeFlags_DefaultOpen
+                                        : ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+    const bool open = ImGui::TreeNodeEx(object.name.c_str(), flags);
+    if (object.IsGroup() && open) {
+      changed |= DrawObjectTree(object.Group().children, path, state);
+      ImGui::TreePop();
+    }
+    ImGui::PopID();
+  }
+  if (delete_index.has_value()) {
+    AdjustSelectionAfterErase(state.selection, parent_path, *delete_index);
+    objects.erase(objects.begin() + static_cast<std::ptrdiff_t>(*delete_index));
+    changed = true;
+  }
+  return changed;
+}
+
 }  // namespace
 
 auto CopyPathToBuffer(const std::filesystem::path& path, std::array<char, 1024>& buffer) -> void {
@@ -85,7 +220,7 @@ auto DrawScenePanel(SceneEditorApp& app, UiRenderState& render_state, std::array
   }
   if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen)) {
     if (ImGui::SmallButton(editor_state.selection.target == SelectionTarget::kCamera ? "Selected" : "Select")) {
-      editor_state.selection = Selection{SelectionTarget::kCamera, 0};
+      editor_state.selection = Selection::ForCamera();
     }
     changed |= DragF3("From", scene.camera->from, 0.1F, -50.0F, 50.0F);
     changed |= DragF3("Look At", scene.camera->to, 0.1F, -50.0F, 50.0F);
@@ -107,7 +242,7 @@ auto DrawScenePanel(SceneEditorApp& app, UiRenderState& render_state, std::array
       if (ImGui::SmallButton(editor_state.selection.target == SelectionTarget::kLight && editor_state.selection.index == i
                                  ? "Selected"
                                  : "Select")) {
-        editor_state.selection = Selection{SelectionTarget::kLight, i};
+        editor_state.selection = Selection::ForLight(i);
       }
       ImGui::SameLine();
       if (ImGui::SmallButton(scene.lights[i].visible ? "Hide" : "Show")) {
@@ -140,48 +275,22 @@ auto DrawScenePanel(SceneEditorApp& app, UiRenderState& render_state, std::array
     }
     if (ImGui::Button("+ Light")) {
       scene.lights.push_back(scene::Light{});
-      editor_state.selection = Selection{SelectionTarget::kLight, scene.lights.size() - 1};
+      editor_state.selection = Selection::ForLight(scene.lights.size() - 1);
       changed = true;
     }
   }
 
   ImGui::Separator();
-  ImGui::Text("Objects (%zu)", scene.objects.size());
-  int delete_index = -1;
-  for (std::size_t i = 0; i < scene.objects.size(); ++i) {
-    ImGui::PushID(static_cast<int>(i));
-    const bool selected = editor_state.selection.target == SelectionTarget::kObject && editor_state.selection.index == i;
-    if (ImGui::SmallButton(selected ? "Selected" : "Select")) {
-      editor_state.selection = Selection{SelectionTarget::kObject, i};
+  ImGui::Text("Objects (%zu)", CountObjects(scene.objects));
+  changed |= DrawObjectTree(scene.objects, {}, editor_state);
+  if (editor_state.selection.target == SelectionTarget::kObject) {
+    if (auto* selected = FindObject(scene.objects, editor_state.selection.object_path)) {
+      ImGui::Separator();
+      ImGui::Text("Inspector: %s", selected->name.c_str());
+      changed |= DrawObjectEditor(*selected);
+    } else {
+      editor_state.selection = Selection{};
     }
-    ImGui::SameLine();
-    if (ImGui::SmallButton(scene.objects[i].visible ? "Hide" : "Show")) {
-      scene.objects[i].visible = !scene.objects[i].visible;
-      changed = true;
-    }
-    ImGui::SameLine();
-    if (ImGui::SmallButton("Remove")) {
-      delete_index = static_cast<int>(i);
-    }
-    ImGui::SameLine();
-    const bool open = ImGui::CollapsingHeader(scene.objects[i].name.c_str());
-    if (open) {
-      changed |= DrawObjectEditor(scene.objects[i]);
-    }
-    ImGui::PopID();
-  }
-
-  if (delete_index >= 0 && delete_index < static_cast<int>(scene.objects.size())) {
-    if (editor_state.selection.target == SelectionTarget::kObject) {
-      const auto selected_index = static_cast<int>(editor_state.selection.index);
-      if (selected_index == delete_index) {
-        editor_state.selection = Selection{};
-      } else if (selected_index > delete_index) {
-        --editor_state.selection.index;
-      }
-    }
-    scene.objects.erase(scene.objects.begin() + delete_index);
-    changed = true;
   }
 
   return changed;

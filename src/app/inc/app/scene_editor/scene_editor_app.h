@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <cstddef>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "app/color.h"
@@ -19,6 +20,17 @@ enum class GizmoMode : std::uint8_t { kTranslate, kRotate, kScale };
 struct Selection {
   SelectionTarget target{SelectionTarget::kNone};
   std::size_t index{0};
+  std::vector<std::size_t> object_path;
+
+  [[nodiscard]] static auto ForObject(std::vector<std::size_t> path) -> Selection {
+    return Selection{.target = SelectionTarget::kObject, .index = 0, .object_path = std::move(path)};
+  }
+  [[nodiscard]] static auto ForLight(std::size_t light_index) -> Selection {
+    return Selection{.target = SelectionTarget::kLight, .index = light_index, .object_path = {}};
+  }
+  [[nodiscard]] static auto ForCamera() -> Selection {
+    return Selection{.target = SelectionTarget::kCamera, .index = 0, .object_path = {}};
+  }
 };
 
 struct RenderState {

@@ -3,6 +3,7 @@
 #include <optional>
 #include <cstdint>
 #include <string>
+#include <variant>
 #include <vector>
 
 namespace ray_tracer::scene {
@@ -105,15 +106,37 @@ struct Material {
   auto operator==(const Material&) const -> bool = default;
 };
 
-struct Object {
-  std::string name;
+struct ShapeSpec {
   ObjectType type{ObjectType::kSphere};
   AxialBounds axial_bounds;
-  Transform transform;
   Material material;
-  bool visible{true};
   bool cast_shadow{true};
 
+  auto operator==(const ShapeSpec&) const -> bool = default;
+};
+
+struct Object;
+
+struct GroupSpec {  // NOLINT(misc-no-recursion)
+  std::vector<Object> children;
+
+  // NOLINTNEXTLINE(misc-no-recursion)
+  auto operator==(const GroupSpec&) const -> bool = default;
+};
+
+struct Object {  // NOLINT(misc-no-recursion)
+  std::string name;
+  Transform transform;
+  bool visible{true};
+  std::variant<ShapeSpec, GroupSpec> content;
+
+  [[nodiscard]] auto IsGroup() const -> bool { return std::holds_alternative<GroupSpec>(content); }
+  [[nodiscard]] auto Shape() -> ShapeSpec& { return std::get<ShapeSpec>(content); }
+  [[nodiscard]] auto Shape() const -> const ShapeSpec& { return std::get<ShapeSpec>(content); }
+  [[nodiscard]] auto Group() -> GroupSpec& { return std::get<GroupSpec>(content); }
+  [[nodiscard]] auto Group() const -> const GroupSpec& { return std::get<GroupSpec>(content); }
+
+  // NOLINTNEXTLINE(misc-no-recursion)
   auto operator==(const Object&) const -> bool = default;
 };
 

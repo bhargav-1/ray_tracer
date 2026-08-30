@@ -15,7 +15,7 @@ auto ValidScene() -> scene::Scene {
   scene.lights.push_back(scene::Light{});
   scene::Object sphere;
   sphere.name = "sphere";
-  sphere.type = scene::ObjectType::kSphere;
+  sphere.Shape().type = scene::ObjectType::kSphere;
   scene.objects.push_back(sphere);
   return scene;
 }
@@ -35,7 +35,7 @@ SCENARIO("scene editor app: load replaces current scene only on success") {
   auto replacement = ValidScene();
   scene::Object floor;
   floor.name = "floor";
-  floor.type = scene::ObjectType::kPlane;
+  floor.Shape().type = scene::ObjectType::kPlane;
   replacement.objects.push_back(floor);
   const auto path = std::filesystem::temp_directory_path() / "ray_tracer_scene_editor_load.yaml";
   REQUIRE(scene_io::SaveSceneYaml(replacement, path).ok);

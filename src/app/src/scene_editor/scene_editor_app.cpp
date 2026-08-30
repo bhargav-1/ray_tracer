@@ -25,6 +25,7 @@ auto SceneEditorApp::LoadScene(const std::filesystem::path& path) -> bool {
     compiled_scene_ = std::move(previous_compiled);
     return false;
   }
+  state_.selection = Selection{};
   state_.current_path = path;
   state_.status_message = "Loaded " + path.string();
   return true;
@@ -50,6 +51,7 @@ auto SceneEditorApp::SetCurrentScene(scene::Scene scene) -> bool {
     compiled_scene_ = std::move(previous_compiled);
     return false;
   }
+  state_.selection = Selection{};
   return true;
 }
 

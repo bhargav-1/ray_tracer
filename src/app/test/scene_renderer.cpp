@@ -39,9 +39,9 @@ SCENARIO("scene renderer: renders fast low resolution previews") {
   pattern.children = {red, white};
 
   scene::Object floor;
-  floor.type = scene::ObjectType::kPlane;
-  floor.material.reflective = 0.5F;
-  floor.material.pattern = pattern;
+  floor.Shape().type = scene::ObjectType::kPlane;
+  floor.Shape().material.reflective = 0.5F;
+  floor.Shape().material.pattern = pattern;
   scene.objects.push_back(floor);
 
   auto compiled = scene_runtime::CompileScene(scene);

@@ -6,6 +6,7 @@
 #include <numbers>
 #include <optional>
 #include <string>
+#include <vector>
 
 #include "imgui.h"  // NOLINT
 
@@ -24,6 +25,14 @@ namespace {
 struct ProjectedPoint {
   ImVec2 screen;
   float depth{0.0F};
+};
+
+using ObjectPath = std::vector<std::size_t>;
+
+struct ObjectEntry {
+  scene::Object* object;
+  ObjectPath path;
+  Matrix<4, 4> world_transform;
 };
 
 auto ToPoint(const scene::Vec3& value) -> Point {
@@ -45,15 +54,68 @@ auto BuildTransformMatrix(const scene::Transform& transform) -> Matrix<4, 4> {
   return matrix * Matrix<4, 4>::Scaling(transform.scale.x, transform.scale.y, transform.scale.z);
 }
 
-auto SelectedObject(scene::Scene& scene, const Selection& selection) -> scene::Object* {
-  if (selection.target != SelectionTarget::kObject || selection.index >= scene.objects.size()) {
-    return nullptr;
+auto FindObject(std::vector<scene::Object>& objects, const ObjectPath& path) -> scene::Object* {
+  auto* current_objects = &objects;
+  scene::Object* object = nullptr;
+  for (std::size_t depth = 0; depth < path.size(); ++depth) {
+    const auto index = path[depth];
+    if (index >= current_objects->size()) {
+      return nullptr;
+    }
+    object = &(*current_objects)[index];
+    if (depth + 1 < path.size()) {
+      if (!object->IsGroup()) {
+        return nullptr;
+      }
+      current_objects = &object->Group().children;
+    }
   }
-  return &scene.objects[selection.index];
+  return object;
 }
 
-auto ShapeCenter(const scene::Object& object) -> Point {
-  return {BuildTransformMatrix(object.transform) * Point(0, 0, 0)};
+auto FindObject(const std::vector<scene::Object>& objects, const ObjectPath& path) -> const scene::Object* {
+  const auto* current_objects = &objects;
+  const scene::Object* object = nullptr;
+  for (std::size_t depth = 0; depth < path.size(); ++depth) {
+    const auto index = path[depth];
+    if (index >= current_objects->size()) {
+      return nullptr;
+    }
+    object = &(*current_objects)[index];
+    if (depth + 1 < path.size()) {
+      if (!object->IsGroup()) {
+        return nullptr;
+      }
+      current_objects = &object->Group().children;
+    }
+  }
+  return object;
+}
+
+auto SelectedObject(scene::Scene& scene, const Selection& selection) -> scene::Object* {
+  if (selection.target != SelectionTarget::kObject) {
+    return nullptr;
+  }
+  return FindObject(scene.objects, selection.object_path);
+}
+
+auto CollectObjects(std::vector<scene::Object>& objects,  // NOLINT(misc-no-recursion)
+                    const Matrix<4, 4>& parent_transform,
+                    const ObjectPath& parent_path,
+                    std::vector<ObjectEntry>& entries) -> void {
+  for (std::size_t index = 0; index < objects.size(); ++index) {
+    auto& object = objects[index];
+    if (!object.visible) {
+      continue;
+    }
+    auto path = parent_path;
+    path.push_back(index);
+    const auto world_transform = parent_transform * BuildTransformMatrix(object.transform);
+    entries.push_back(ObjectEntry{&object, path, world_transform});
+    if (object.IsGroup()) {
+      CollectObjects(object.Group().children, world_transform, path, entries);
+    }
+  }
 }
 
 auto DistanceSquared(ImVec2 lhs, ImVec2 rhs) -> float {
@@ -127,32 +189,17 @@ auto ProjectWorldPoint(const scene::Camera& camera,
   return ProjectedPoint{ImVec2(screen_x, screen_y), static_cast<float>(depth)};
 }
 
-auto AxisEndpoint(const scene::Scene& scene,
-                  const Selection& selection,
+auto AxisEndpoint(const Matrix<4, 4>& world_transform,
                   const Point& center,
                   GizmoAxis axis) -> Point {
   constexpr double kAxisLength = 1.25;
-  if (selection.target == SelectionTarget::kObject && selection.index < scene.objects.size()) {
-    const auto transform = BuildTransformMatrix(scene.objects[selection.index].transform);
-    switch (axis) {
-      case GizmoAxis::kX:
-        return {transform * Point(kAxisLength, 0, 0)};
-      case GizmoAxis::kY:
-        return {transform * Point(0, kAxisLength, 0)};
-      case GizmoAxis::kZ:
-        return {transform * Point(0, 0, kAxisLength)};
-      case GizmoAxis::kNone:
-        return center;
-    }
-  }
-
   switch (axis) {
     case GizmoAxis::kX:
-      return {center.GetX() + kAxisLength, center.GetY(), center.GetZ()};
+      return {world_transform * Point(kAxisLength, 0, 0)};
     case GizmoAxis::kY:
-      return {center.GetX(), center.GetY() + kAxisLength, center.GetZ()};
+      return {world_transform * Point(0, kAxisLength, 0)};
     case GizmoAxis::kZ:
-      return {center.GetX(), center.GetY(), center.GetZ() + kAxisLength};
+      return {world_transform * Point(0, 0, kAxisLength)};
     case GizmoAxis::kNone:
       return center;
   }
@@ -224,8 +271,10 @@ auto SelectedName(const scene::Scene& scene, const Selection& selection) -> std:
   if (selection.target == SelectionTarget::kLight && selection.index < scene.lights.size()) {
     return "Light " + std::to_string(selection.index + 1);
   }
-  if (selection.target == SelectionTarget::kObject && selection.index < scene.objects.size()) {
-    return scene.objects[selection.index].name;
+  if (selection.target == SelectionTarget::kObject) {
+    if (const auto* object = FindObject(scene.objects, selection.object_path)) {
+      return object->name;
+    }
   }
   return "None";
 }
@@ -249,25 +298,29 @@ auto DrawViewportOverlay(scene::Scene& scene,
   Selection closest_selection;
   bool marker_hovered = false;
 
-  for (std::size_t i = 0; i < scene.objects.size(); ++i) {
-    if (!scene.objects[i].visible) {
+  std::vector<ObjectEntry> object_entries;
+  CollectObjects(scene.objects, Matrix<4, 4>::IdentityMatrix(), {}, object_entries);
+  for (const auto& entry : object_entries) {
+    if (entry.object->IsGroup()) {
       continue;
     }
-    const auto projected = ProjectWorldPoint(*scene.camera, ShapeCenter(scene.objects[i]), image_min, image_size);
+    const auto center = Point{entry.world_transform * Point(0, 0, 0)};
+    const auto projected = ProjectWorldPoint(*scene.camera, center, image_min, image_size);
     if (!projected.has_value()) {
       continue;
     }
-    const bool selected = editor_state.selection.target == SelectionTarget::kObject && editor_state.selection.index == i;
+    const bool selected = editor_state.selection.target == SelectionTarget::kObject &&
+                          editor_state.selection.object_path == entry.path;
     const ImU32 color = selected ? IM_COL32(255, 225, 80, 255) : IM_COL32(255, 255, 255, 220);
     draw_list->AddCircleFilled(projected->screen, selected ? 6.0F : 4.0F, color);
     draw_list->AddCircle(projected->screen, 10.0F, color, 20, 1.5F);
-    const std::string label = scene.objects[i].name + " (" + ObjectTypeLabel(scene.objects[i].type) + ")";
+    const std::string label = entry.object->name + " (" + ObjectTypeLabel(entry.object->Shape().type) + ")";
     draw_list->AddText(ImVec2(projected->screen.x + 10.0F, projected->screen.y - 10.0F), color, label.c_str());
 
     const float dist_sq = DistanceSquared(projected->screen, mouse);
     if (mouse_in_image && dist_sq < closest_distance_sq) {
       closest_distance_sq = dist_sq;
-      closest_selection = Selection{SelectionTarget::kObject, i};
+      closest_selection = Selection::ForObject(entry.path);
       marker_hovered = true;
     }
   }
@@ -290,17 +343,26 @@ auto DrawViewportOverlay(scene::Scene& scene,
     const float dist_sq = DistanceSquared(projected->screen, mouse);
     if (mouse_in_image && dist_sq < closest_distance_sq) {
       closest_distance_sq = dist_sq;
-      closest_selection = Selection{SelectionTarget::kLight, i};
+      closest_selection = Selection::ForLight(i);
       marker_hovered = true;
     }
   }
 
   std::optional<Point> selected_center;
+  auto selected_transform = Matrix<4, 4>::IdentityMatrix();
   if (editor_state.selection.target == SelectionTarget::kLight && editor_state.selection.index < scene.lights.size() &&
       scene.lights[editor_state.selection.index].visible) {
     selected_center = ToPoint(scene.lights[editor_state.selection.index].position);
-  } else if (editor_state.selection.target == SelectionTarget::kObject && editor_state.selection.index < scene.objects.size()) {
-    selected_center = ShapeCenter(scene.objects[editor_state.selection.index]);
+    selected_transform = Matrix<4, 4>::Translation(
+        selected_center->GetX(), selected_center->GetY(), selected_center->GetZ());
+  } else if (editor_state.selection.target == SelectionTarget::kObject) {
+    const auto selected_entry = std::find_if(object_entries.begin(), object_entries.end(), [&](const ObjectEntry& entry) {
+      return entry.path == editor_state.selection.object_path;
+    });
+    if (selected_entry != object_entries.end()) {
+      selected_transform = selected_entry->world_transform;
+      selected_center = Point{selected_transform * Point(0, 0, 0)};
+    }
   }
 
   bool handle_hovered = false;
@@ -311,7 +373,7 @@ auto DrawViewportOverlay(scene::Scene& scene,
     if (center_projected.has_value()) {
       draw_list->AddCircleFilled(center_projected->screen, 5.0F, IM_COL32(255, 255, 255, 255));
       for (const GizmoAxis axis : {GizmoAxis::kX, GizmoAxis::kY, GizmoAxis::kZ}) {
-        const auto endpoint = AxisEndpoint(scene, editor_state.selection, *selected_center, axis);
+        const auto endpoint = AxisEndpoint(selected_transform, *selected_center, axis);
         const auto endpoint_projected = ProjectWorldPoint(*scene.camera, endpoint, image_min, image_size);
         if (!endpoint_projected.has_value()) {
           continue;

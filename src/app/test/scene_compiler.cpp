@@ -4,9 +4,11 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <filesystem>
+#include <memory>
 #include <numbers>
 
 #include "app/cube.h"
+#include "app/group.h"
 #include "app/matrix.h"
 #include "app/scene/scene.h"
 
@@ -43,35 +45,35 @@ auto MakeCompiledSceneModel() -> scene::Scene {
 
   scene::Object plane;
   plane.name = "floor";
-  plane.type = scene::ObjectType::kPlane;
-  plane.cast_shadow = false;
+  plane.Shape().type = scene::ObjectType::kPlane;
+  plane.Shape().cast_shadow = false;
   plane.transform.translate = {0.0F, -1.0F, 0.0F};
-  plane.material.specular = 0.0F;
-  plane.material.pattern = perturbed;
+  plane.Shape().material.specular = 0.0F;
+  plane.Shape().material.pattern = perturbed;
   scene.objects.push_back(plane);
 
   scene::Object sphere;
   sphere.name = "sphere";
-  sphere.type = scene::ObjectType::kSphere;
+  sphere.Shape().type = scene::ObjectType::kSphere;
   sphere.transform.translate = {1.0F, 2.0F, 3.0F};
   sphere.transform.rotate_deg = {0.0F, 90.0F, 0.0F};
   sphere.transform.scale = {0.5F, 0.5F, 0.5F};
-  sphere.material.color = {0.8F, 1.0F, 0.6F};
-  sphere.material.diffuse = 0.7F;
-  sphere.material.specular = 0.2F;
-  sphere.material.reflective = 0.1F;
+  sphere.Shape().material.color = {0.8F, 1.0F, 0.6F};
+  sphere.Shape().material.diffuse = 0.7F;
+  sphere.Shape().material.specular = 0.2F;
+  sphere.Shape().material.reflective = 0.1F;
   scene.objects.push_back(sphere);
 
   scene::Object cube;
   cube.name = "cube";
-  cube.type = scene::ObjectType::kCube;
+  cube.Shape().type = scene::ObjectType::kCube;
   cube.transform.translate = {-1.0F, 0.0F, 0.0F};
   cube.transform.scale = {0.25F, 0.25F, 0.25F};
   scene.objects.push_back(cube);
 
   scene::Object hidden;
   hidden.name = "hidden";
-  hidden.type = scene::ObjectType::kSphere;
+  hidden.Shape().type = scene::ObjectType::kSphere;
   hidden.visible = false;
   scene.objects.push_back(hidden);
 
@@ -122,11 +124,40 @@ SCENARIO("scene compiler: default asset loads and compiles") {
   REQUIRE(loaded.scene.camera.has_value());
   CHECK(!loaded.scene.lights.empty());
   CHECK(loaded.scene.objects.size() >= 2);
-  CHECK(loaded.scene.objects[0].type == scene::ObjectType::kPlane);
-  CHECK(loaded.scene.objects[1].type == scene::ObjectType::kSphere);
+  CHECK(loaded.scene.objects[0].Shape().type == scene::ObjectType::kPlane);
+  CHECK(loaded.scene.objects[1].Shape().type == scene::ObjectType::kSphere);
 
   const auto compiled = scene_runtime::CompileScene(loaded.scene);
   REQUIRE(compiled.ok);
+}
+
+SCENARIO("scene compiler: compiles recursive groups") {
+  auto scene = MakeCompiledSceneModel();
+  scene.objects.clear();
+  scene::Object group;
+  group.name = "scaled group";
+  group.content = scene::GroupSpec{};
+  group.transform.scale = {2.0F, 2.0F, 2.0F};
+  scene::Object child;
+  child.name = "child cube";
+  child.Shape().type = scene::ObjectType::kCube;
+  child.transform.translate = {1.0F, 0.0F, 0.0F};
+  group.Group().children.push_back(child);
+  scene.objects.push_back(group);
+
+  const auto compiled = scene_runtime::CompileScene(scene);
+
+  REQUIRE(compiled.ok);
+  if (!compiled.compiled.has_value()) {
+    FAIL("expected compiled scene");
+  }
+  const auto& runtime = *compiled.compiled;
+  REQUIRE(runtime.world.Objects().size() == 1);
+  const auto runtime_group = std::dynamic_pointer_cast<Group>(runtime.world.Objects()[0]);
+  REQUIRE(runtime_group != nullptr);
+  REQUIRE(runtime_group->GetChildren().size() == 1);
+  CHECK(dynamic_cast<const Cube*>(runtime_group->GetChildren()[0].get()) != nullptr);
+  CHECK(runtime_group->GetChildren()[0]->GetParentGroup().lock() == runtime_group);
 }
 
 }  // namespace ray_tracer

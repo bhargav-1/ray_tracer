@@ -245,25 +245,43 @@ auto ParseLight(const YAML::Node& node, const std::string& label) -> scene::Ligh
   return light;
 }
 
-auto ParseObject(const YAML::Node& node, const std::string& label) -> scene::Object {
+auto ParseObject(const YAML::Node& node, const std::string& label) -> scene::Object {  // NOLINT(misc-no-recursion)
   RequireMap(node, label);
   scene::Object object;
   object.name = Required(node, "name", label).as<std::string>();
-  const auto& registration = shape_catalog::Find(Required(node, "type", label).as<std::string>());
-  object.type = registration.type;
+  const auto type_name = Required(node, "type", label).as<std::string>();
+  object.transform = ParseTransform(Required(node, "transform", label), label + ".transform");
+  if (const auto visible = node["visible"]) {
+    object.visible = visible.as<bool>();
+  }
+
+  if (type_name == "group") {
+    RequireOnlyKeys(node, {"name", "type", "visible", "transform", "children"}, label);
+    scene::GroupSpec group;
+    const auto children = Required(node, "children", label);
+    RequireSequence(children, label + ".children");
+    for (std::size_t index = 0; index < children.size(); ++index) {
+      group.children.push_back(ParseObject(children[index], label + ".children[" + std::to_string(index) + "]"));
+    }
+    object.content = std::move(group);
+    return object;
+  }
+
+  RequireOnlyKeys(
+      node, {"name", "type", "bounds", "visible", "cast_shadow", "transform", "material"}, label);
+  const auto& registration = shape_catalog::Find(type_name);
+  scene::ShapeSpec shape;
+  shape.type = registration.type;
   if (const auto bounds = node["bounds"]) {
     if (!registration.supports_axial_bounds) {
       throw std::runtime_error(label + ".bounds is not supported for type '" +
                                std::string{registration.serialized_name} + "'");
     }
-    object.axial_bounds = ParseAxialBounds(bounds, label + ".bounds");
+    shape.axial_bounds = ParseAxialBounds(bounds, label + ".bounds");
   }
-  if (const auto visible = node["visible"]) {
-    object.visible = visible.as<bool>();
-  }
-  object.cast_shadow = Required(node, "cast_shadow", label).as<bool>();
-  object.transform = ParseTransform(Required(node, "transform", label), label + ".transform");
-  object.material = ParseMaterial(Required(node, "material", label), label + ".material");
+  shape.cast_shadow = Required(node, "cast_shadow", label).as<bool>();
+  shape.material = ParseMaterial(Required(node, "material", label), label + ".material");
+  object.content = std::move(shape);
   return object;
 }
 
@@ -338,6 +356,38 @@ auto EmitMaterial(YAML::Emitter& out, const scene::Material& material) -> void {
   out << YAML::EndMap;
 }
 
+auto EmitObject(YAML::Emitter& out, const scene::Object& object) -> void {  // NOLINT(misc-no-recursion)
+  out << YAML::BeginMap;
+  out << YAML::Key << "name" << YAML::Value << object.name;
+  out << YAML::Key << "type" << YAML::Value;
+  if (object.IsGroup()) {
+    out << "group";
+  } else {
+    out << shape_catalog::Find(object.Shape().type).serialized_name;
+  }
+  out << YAML::Key << "visible" << YAML::Value << object.visible;
+  out << YAML::Key << "transform" << YAML::Value;
+  EmitTransform(out, object.transform);
+  if (object.IsGroup()) {
+    out << YAML::Key << "children" << YAML::Value << YAML::BeginSeq;
+    for (const auto& child : object.Group().children) {
+      EmitObject(out, child);
+    }
+    out << YAML::EndSeq;
+  } else {
+    const auto& shape = object.Shape();
+    const auto& registration = shape_catalog::Find(shape.type);
+    if (registration.supports_axial_bounds) {
+      out << YAML::Key << "bounds" << YAML::Value;
+      EmitAxialBounds(out, shape.axial_bounds);
+    }
+    out << YAML::Key << "cast_shadow" << YAML::Value << shape.cast_shadow;
+    out << YAML::Key << "material" << YAML::Value;
+    EmitMaterial(out, shape.material);
+  }
+  out << YAML::EndMap;
+}
+
 }  // namespace
 
 auto ParseSceneYaml(std::string_view yaml_text) -> LoadSceneResult {
@@ -406,21 +456,7 @@ auto SerializeSceneYaml(const scene::Scene& scene) -> std::string {
   out << YAML::EndSeq;
   out << YAML::Key << "objects" << YAML::Value << YAML::BeginSeq;
   for (const auto& object : scene.objects) {
-    const auto& registration = shape_catalog::Find(object.type);
-    out << YAML::BeginMap;
-    out << YAML::Key << "name" << YAML::Value << object.name;
-    out << YAML::Key << "type" << YAML::Value << registration.serialized_name;
-    if (registration.supports_axial_bounds) {
-      out << YAML::Key << "bounds" << YAML::Value;
-      EmitAxialBounds(out, object.axial_bounds);
-    }
-    out << YAML::Key << "visible" << YAML::Value << object.visible;
-    out << YAML::Key << "cast_shadow" << YAML::Value << object.cast_shadow;
-    out << YAML::Key << "transform" << YAML::Value;
-    EmitTransform(out, object.transform);
-    out << YAML::Key << "material" << YAML::Value;
-    EmitMaterial(out, object.material);
-    out << YAML::EndMap;
+    EmitObject(out, object);
   }
   out << YAML::EndSeq;
   out << YAML::EndMap;

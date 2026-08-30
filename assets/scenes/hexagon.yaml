@@ -1,0 +1,369 @@
+version: 1
+camera:
+  from: [9.628839, 4.165968, -5.568642]
+  to: [0, 3, 0]
+  up: [0, 1, 0]
+  fov_deg: 48
+  resolution: [900, 600]
+lights:
+  - visible: true
+    position: [-7, 10, -9]
+    color: [1, 0.96, 0.9]
+  - visible: true
+    position: [6, 7, -2]
+    color: [0.35, 0.5, 0.8]
+objects:
+  - name: Fairground Floor
+    type: plane
+    visible: true
+    transform:
+      translate: [0, 0, 0]
+      rotate_deg: [0, 0, 0]
+      scale: [1, 1, 1]
+    cast_shadow: true
+    material:
+      color: [0.12, 0.16, 0.2]
+      ambient: 0.12
+      diffuse: 0.75
+      specular: 0.15
+      shininess: 40
+      reflective: 0.12
+      transparency: 0
+      refractive_index: 1
+      pattern:
+        type: checkers
+        children:
+          - type: solid
+            color: [0.1, 0.14, 0.18]
+            transform:
+              translate: [0, 0, 0]
+              rotate_deg: [0, 0, 0]
+              scale: [1, 1, 1]
+          - type: solid
+            color: [0.18, 0.22, 0.26]
+            transform:
+              translate: [0, 0, 0]
+              rotate_deg: [0, 0, 0]
+              scale: [1, 1, 1]
+        transform:
+          translate: [0, 0, 0]
+          rotate_deg: [0, 0, 0]
+          scale: [1.5, 1.5, 1.5]
+  - name: Hexagon Ferris Wheel
+    type: group
+    visible: true
+    transform:
+      translate: [0, 3.2, 0]
+      rotate_deg: [90, 0, 0]
+      scale: [2, 2, 2]
+    children:
+      - name: Front Hexagon
+        type: group
+        visible: true
+        transform:
+          translate: [0, -0.22, 0]
+          rotate_deg: [0, 0, 0]
+          scale: [1, 1, 1]
+        children:
+          - name: Side 1
+            type: group
+            visible: true
+            transform:
+              translate: [0, 0, 0]
+              rotate_deg: [0, 0, 0]
+              scale: [1, 1, 1]
+            children:
+              - name: Corner
+                type: sphere
+                visible: true
+                transform:
+                  translate: [0, 0, -1]
+                  rotate_deg: [0, 0, 0]
+                  scale: [0.25, 0.25, 0.25]
+                cast_shadow: true
+                material:
+                  color: [0.04, 0.72, 0.72]
+                  ambient: 0.12
+                  diffuse: 0.72
+                  specular: 0.75
+                  shininess: 160
+                  reflective: 0.22
+                  transparency: 0
+                  refractive_index: 1
+                  pattern:
+                    type: solid
+                    color: [0.08035372, 0.8627451, 0.3795033]
+                    transform:
+                      translate: [0, 0, 0]
+                      rotate_deg: [0, 0, 0]
+                      scale: [1, 1, 1]
+              - name: Edge
+                type: cylinder
+                visible: true
+                transform:
+                  translate: [0, 0, -1]
+                  rotate_deg: [0, -30, -90]
+                  scale: [0.25, 1, 0.25]
+                bounds:
+                  minimum: 0
+                  maximum: 1
+                  closed: true
+                cast_shadow: true
+                material:
+                  color: [0.04, 0.72, 0.72]
+                  ambient: 0.12
+                  diffuse: 0.72
+                  specular: 0.75
+                  shininess: 160
+                  reflective: 0.22
+                  transparency: 0
+                  refractive_index: 1
+                  pattern:
+                    type: gradient
+                    children:
+                      - type: solid
+                        color: [1, 1, 1]
+                        transform:
+                          translate: [0, 0, 0]
+                          rotate_deg: [0, 0, 0]
+                          scale: [1, 1, 1]
+                      - type: solid
+                        color: [0.034674156, 0.1845105, 0.5441177]
+                        transform:
+                          translate: [0, 0, 0]
+                          rotate_deg: [0, 0, 0]
+                          scale: [1, 1, 1]
+                    transform:
+                      translate: [0, 0, 0]
+                      rotate_deg: [0, 0, 0]
+                      scale: [1, 1, 1]
+          - name: Side 2
+            type: group
+            visible: true
+            transform:
+              translate: [0, 0, 0]
+              rotate_deg: [0, 60, 0]
+              scale: [1, 1, 1]
+            children:
+              - name: Corner
+                type: sphere
+                visible: true
+                transform:
+                  translate: [0, 0, -1]
+                  rotate_deg: [0, 0, 0]
+                  scale: [0.25, 0.25, 0.25]
+                cast_shadow: true
+                material:
+                  color: [0.04, 0.72, 0.72]
+                  ambient: 0.12
+                  diffuse: 0.72
+                  specular: 0.75
+                  shininess: 160
+                  reflective: 0.22
+                  transparency: 0
+                  refractive_index: 1
+              - name: Edge
+                type: cylinder
+                visible: true
+                transform:
+                  translate: [0, 0, -1]
+                  rotate_deg: [0, -30, -90]
+                  scale: [0.25, 1, 0.25]
+                bounds:
+                  minimum: 0
+                  maximum: 1
+                  closed: true
+                cast_shadow: true
+                material:
+                  color: [0.04, 0.72, 0.72]
+                  ambient: 0.12
+                  diffuse: 0.72
+                  specular: 0.75
+                  shininess: 160
+                  reflective: 0.22
+                  transparency: 0
+                  refractive_index: 1
+          - name: Side 3
+            type: group
+            visible: true
+            transform:
+              translate: [0, 0, 0]
+              rotate_deg: [0, 120, 0]
+              scale: [1, 1, 1]
+            children:
+              - name: Corner
+                type: sphere
+                visible: true
+                transform:
+                  translate: [0, 0, -1]
+                  rotate_deg: [0, 0, 0]
+                  scale: [0.25, 0.25, 0.25]
+                cast_shadow: true
+                material:
+                  color: [0.04, 0.72, 0.72]
+                  ambient: 0.12
+                  diffuse: 0.72
+                  specular: 0.75
+                  shininess: 160
+                  reflective: 0.22
+                  transparency: 0
+                  refractive_index: 1
+              - name: Edge
+                type: cylinder
+                visible: true
+                transform:
+                  translate: [0, 0, -1]
+                  rotate_deg: [0, -30, -90]
+                  scale: [0.25, 1, 0.25]
+                bounds:
+                  minimum: 0
+                  maximum: 1
+                  closed: true
+                cast_shadow: true
+                material:
+                  color: [0.04, 0.72, 0.72]
+                  ambient: 0.12
+                  diffuse: 0.72
+                  specular: 0.75
+                  shininess: 160
+                  reflective: 0.22
+                  transparency: 0
+                  refractive_index: 1
+          - name: Side 4
+            type: group
+            visible: true
+            transform:
+              translate: [0, 0, 0]
+              rotate_deg: [0, 180, 0]
+              scale: [1, 1, 1]
+            children:
+              - name: Corner
+                type: sphere
+                visible: true
+                transform:
+                  translate: [0, 0, -1]
+                  rotate_deg: [0, 0, 0]
+                  scale: [0.25, 0.25, 0.25]
+                cast_shadow: true
+                material:
+                  color: [0.04, 0.72, 0.72]
+                  ambient: 0.12
+                  diffuse: 0.72
+                  specular: 0.75
+                  shininess: 160
+                  reflective: 0.22
+                  transparency: 0
+                  refractive_index: 1
+              - name: Edge
+                type: cylinder
+                visible: true
+                transform:
+                  translate: [0, 0, -1]
+                  rotate_deg: [0, -30, -90]
+                  scale: [0.25, 1, 0.25]
+                bounds:
+                  minimum: 0
+                  maximum: 1
+                  closed: true
+                cast_shadow: true
+                material:
+                  color: [0.04, 0.72, 0.72]
+                  ambient: 0.12
+                  diffuse: 0.72
+                  specular: 0.75
+                  shininess: 160
+                  reflective: 0.22
+                  transparency: 0
+                  refractive_index: 1
+          - name: Side 5
+            type: group
+            visible: true
+            transform:
+              translate: [0, 0, 0]
+              rotate_deg: [0, 240, 0]
+              scale: [1, 1, 1]
+            children:
+              - name: Corner
+                type: sphere
+                visible: true
+                transform:
+                  translate: [0, 0, -1]
+                  rotate_deg: [0, 0, 0]
+                  scale: [0.25, 0.25, 0.25]
+                cast_shadow: true
+                material:
+                  color: [0.04, 0.72, 0.72]
+                  ambient: 0.12
+                  diffuse: 0.72
+                  specular: 0.75
+                  shininess: 160
+                  reflective: 0.22
+                  transparency: 0
+                  refractive_index: 1
+              - name: Edge
+                type: cylinder
+                visible: true
+                transform:
+                  translate: [0, 0, -1]
+                  rotate_deg: [0, -30, -90]
+                  scale: [0.25, 1, 0.25]
+                bounds:
+                  minimum: 0
+                  maximum: 1
+                  closed: true
+                cast_shadow: true
+                material:
+                  color: [0.04, 0.72, 0.72]
+                  ambient: 0.12
+                  diffuse: 0.72
+                  specular: 0.75
+                  shininess: 160
+                  reflective: 0.22
+                  transparency: 0
+                  refractive_index: 1
+          - name: Side 6
+            type: group
+            visible: true
+            transform:
+              translate: [0, 0, 0]
+              rotate_deg: [0, 300, 0]
+              scale: [1, 1, 1]
+            children:
+              - name: Corner
+                type: sphere
+                visible: true
+                transform:
+                  translate: [0, 0, -1]
+                  rotate_deg: [0, 0, 0]
+                  scale: [0.25, 0.25, 0.25]
+                cast_shadow: true
+                material:
+                  color: [0.04, 0.72, 0.72]
+                  ambient: 0.12
+                  diffuse: 0.72
+                  specular: 0.75
+                  shininess: 160
+                  reflective: 0.22
+                  transparency: 0
+                  refractive_index: 1
+              - name: Edge
+                type: cylinder
+                visible: true
+                transform:
+                  translate: [0, 0, -1]
+                  rotate_deg: [0, -30, -90]
+                  scale: [0.25, 1, 0.25]
+                bounds:
+                  minimum: 0
+                  maximum: 1
+                  closed: true
+                cast_shadow: true
+                material:
+                  color: [0.04, 0.72, 0.72]
+                  ambient: 0.12
+                  diffuse: 0.72
+                  specular: 0.75
+                  shininess: 160
+                  reflective: 0.22
+                  transparency: 0
+                  refractive_index: 1

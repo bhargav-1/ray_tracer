@@ -12,6 +12,7 @@
 
 #include "app/camera.h"
 #include "app/color.h"
+#include "app/group.h"
 #include "app/material.h"
 #include "app/matrix.h"
 #include "app/pattern.h"
@@ -145,6 +146,32 @@ auto CompileMaterial(const scene::Material& material) -> ray_tracer::Material {
   return compiled;
 }
 
+auto CompileObject(const scene::Object& object, std::size_t& next_id)  // NOLINT(misc-no-recursion)
+    -> std::shared_ptr<ray_tracer::Shape> {
+  if (object.IsGroup()) {
+    auto group = std::make_shared<ray_tracer::Group>(next_id++);
+    group->SetTransform(BuildTransformMatrix(object.transform));
+    for (const auto& child : object.Group().children) {
+      if (child.visible) {
+        group->AddChild(CompileObject(child, next_id));
+      }
+    }
+    return group;
+  }
+
+  const auto& shape_spec = object.Shape();
+  const auto& registration = shape_catalog::Find(shape_spec.type);
+  if (registration.supports_axial_bounds &&
+      shape_spec.axial_bounds.minimum >= shape_spec.axial_bounds.maximum) {
+    throw std::runtime_error("object '" + object.name + "' requires minimum bounds below maximum bounds");
+  }
+  auto shape = registration.create(next_id++, shape_spec.axial_bounds);
+  shape->SetTransform(BuildTransformMatrix(object.transform));
+  shape->SetCastShadow(shape_spec.cast_shadow);
+  shape->SetMaterial(CompileMaterial(shape_spec.material));
+  return shape;
+}
+
 }  // namespace
 
 auto CompileScene(const scene::Scene& scene) -> CompileSceneResult {
@@ -159,20 +186,12 @@ auto CompileScene(const scene::Scene& scene) -> CompileSceneResult {
       }
       world.AddLight(ray_tracer::PointLight(ToPoint(light.position), ToColor(light.color)));
     }
-    for (std::size_t index = 0; index < scene.objects.size(); ++index) {
-      const auto& object = scene.objects[index];
+    std::size_t next_id = 1;
+    for (const auto& object : scene.objects) {
       if (!object.visible) {
         continue;
       }
-      const auto& registration = shape_catalog::Find(object.type);
-      if (registration.supports_axial_bounds && object.axial_bounds.minimum >= object.axial_bounds.maximum) {
-        throw std::runtime_error("object '" + object.name + "' requires minimum bounds below maximum bounds");
-      }
-      auto shape = registration.create(index + 1, object.axial_bounds);
-      shape->SetTransform(BuildTransformMatrix(object.transform));
-      shape->SetCastShadow(object.cast_shadow);
-      shape->SetMaterial(CompileMaterial(object.material));
-      world.AddObject(std::move(shape));
+      world.AddObject(CompileObject(object, next_id));
     }
 
     const auto& camera_spec = *scene.camera;

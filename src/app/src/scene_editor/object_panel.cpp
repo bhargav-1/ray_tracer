@@ -148,13 +148,26 @@ auto DrawMaterialEditor(scene::Material& material) -> bool {
 
 auto DrawObjectEditor(scene::Object& object) -> bool {
   bool changed = false;
-  const auto current_name = shape_catalog::DisplayName(object.type);
+  if (ImGui::TreeNodeEx("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
+    changed |= DragF3("Translate", object.transform.translate, 0.1F, -50.0F, 50.0F);
+    changed |= DragF3("Scale", object.transform.scale, 0.01F, 0.01F, 20.0F);
+    changed |= DragF3("Rotate (deg)", object.transform.rotate_deg, 1.0F, -360.0F, 360.0F);
+    changed |= ImGui::Checkbox("Visible", &object.visible);
+    ImGui::TreePop();
+  }
+  if (object.IsGroup()) {
+    ImGui::Text("Children: %zu", object.Group().children.size());
+    return changed;
+  }
+
+  auto& shape = object.Shape();
+  const auto current_name = shape_catalog::DisplayName(shape.type);
   if (ImGui::BeginCombo("Shape", current_name.c_str())) {
     for (const auto& registration : shape_catalog::All()) {
-      const bool selected = registration.type == object.type;
+      const bool selected = registration.type == shape.type;
       const auto display_name = shape_catalog::DisplayName(registration.serialized_name);
       if (ImGui::Selectable(display_name.c_str(), selected)) {
-        object.type = registration.type;
+        shape.type = registration.type;
         changed = true;
       }
       if (selected) {
@@ -163,21 +176,14 @@ auto DrawObjectEditor(scene::Object& object) -> bool {
     }
     ImGui::EndCombo();
   }
-  if (shape_catalog::Find(object.type).supports_axial_bounds &&
+  if (shape_catalog::Find(shape.type).supports_axial_bounds &&
       ImGui::TreeNodeEx("Geometry", ImGuiTreeNodeFlags_DefaultOpen)) {
-    changed |= DrawAxialBoundsEditor(object.axial_bounds);
+    changed |= DrawAxialBoundsEditor(shape.axial_bounds);
     ImGui::TreePop();
   }
-  if (ImGui::TreeNodeEx("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
-    changed |= DragF3("Translate", object.transform.translate, 0.1F, -50.0F, 50.0F);
-    changed |= DragF3("Scale", object.transform.scale, 0.01F, 0.01F, 20.0F);
-    changed |= DragF3("Rotate (deg)", object.transform.rotate_deg, 1.0F, -360.0F, 360.0F);
-    changed |= ImGui::Checkbox("Visible", &object.visible);
-    changed |= ImGui::Checkbox("Cast Shadow", &object.cast_shadow);
-    ImGui::TreePop();
-  }
+  changed |= ImGui::Checkbox("Cast Shadow", &shape.cast_shadow);
   if (ImGui::TreeNodeEx("Material", ImGuiTreeNodeFlags_DefaultOpen)) {
-    changed |= DrawMaterialEditor(object.material);
+    changed |= DrawMaterialEditor(shape.material);
     ImGui::TreePop();
   }
   return changed;

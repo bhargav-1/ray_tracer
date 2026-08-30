@@ -93,19 +93,20 @@ SCENARIO("scene yaml: parses camera, resolution, light, object, material, transf
   REQUIRE(result.scene.lights.size() == 1);
   REQUIRE(result.scene.objects.size() == 1);
   const auto& object = result.scene.objects[0];
+  const auto& shape = object.Shape();
   CHECK_FALSE(result.scene.lights[0].visible);
   CHECK(object.name == "floor");
-  CHECK(object.type == scene::ObjectType::kPlane);
+  CHECK(shape.type == scene::ObjectType::kPlane);
   CHECK_FALSE(object.visible);
-  CHECK_FALSE(object.cast_shadow);
+  CHECK_FALSE(shape.cast_shadow);
   CHECK(object.transform.translate == scene::Vec3{1.0F, 2.0F, 3.0F});
   CHECK(object.transform.rotate_deg == scene::Vec3{10.0F, 20.0F, 30.0F});
   CHECK(object.transform.scale == scene::Vec3{4.0F, 5.0F, 6.0F});
-  CHECK(object.material.color == scene::ColorRgb{0.8F, 0.7F, 0.6F});
-  if (!object.material.pattern.has_value()) {
+  CHECK(shape.material.color == scene::ColorRgb{0.8F, 0.7F, 0.6F});
+  if (!shape.material.pattern.has_value()) {
     FAIL("expected parsed object pattern");
   }
-  const auto& pattern = *object.material.pattern;
+  const auto& pattern = *shape.material.pattern;
   CHECK(pattern.type == scene::PatternType::kPerturbed);
   REQUIRE(pattern.children.size() == 1);
   CHECK(pattern.children[0].type == scene::PatternType::kStripe);
@@ -119,11 +120,54 @@ SCENARIO("scene yaml: parses and serializes cube objects") {
 
   REQUIRE(parsed.ok);
   REQUIRE(parsed.scene.objects.size() == 1);
-  CHECK(parsed.scene.objects[0].type == scene::ObjectType::kCube);
+  CHECK(parsed.scene.objects[0].Shape().type == scene::ObjectType::kCube);
 
   const auto serialized = scene_io::SerializeSceneYaml(parsed.scene);
   CHECK(serialized.find("type: cube") != std::string::npos);
 
+  const auto reparsed = scene_io::ParseSceneYaml(serialized);
+  REQUIRE(reparsed.ok);
+  CHECK(reparsed.scene == parsed.scene);
+}
+
+SCENARIO("scene yaml: parses and serializes nested groups") {
+  const auto group_yaml = std::string{kMinimalSceneYaml}.replace(
+      std::string{kMinimalSceneYaml}.find("objects: []"), std::string{"objects: []"}.size(), R"yaml(objects:
+  - name: furniture
+    type: group
+    visible: true
+    transform:
+      translate: [1, 0, 0]
+      rotate_deg: [0, 45, 0]
+      scale: [1, 1, 1]
+    children:
+      - name: tabletop
+        type: cube
+        visible: true
+        cast_shadow: true
+        transform:
+          translate: [0, 1, 0]
+          rotate_deg: [0, 0, 0]
+          scale: [2, 0.1, 1]
+        material:
+          color: [1, 1, 1]
+          ambient: 0.1
+          diffuse: 0.9
+          specular: 0.9
+          shininess: 200
+          reflective: 0
+          transparency: 0
+          refractive_index: 1)yaml");
+
+  const auto parsed = scene_io::ParseSceneYaml(group_yaml);
+
+  REQUIRE(parsed.ok);
+  REQUIRE(parsed.scene.objects.size() == 1);
+  REQUIRE(parsed.scene.objects[0].IsGroup());
+  REQUIRE(parsed.scene.objects[0].Group().children.size() == 1);
+  CHECK(parsed.scene.objects[0].Group().children[0].Shape().type == scene::ObjectType::kCube);
+  const auto serialized = scene_io::SerializeSceneYaml(parsed.scene);
+  CHECK(serialized.find("type: group") != std::string::npos);
   const auto reparsed = scene_io::ParseSceneYaml(serialized);
   REQUIRE(reparsed.ok);
   CHECK(reparsed.scene == parsed.scene);

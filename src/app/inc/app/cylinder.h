@@ -24,6 +24,7 @@ class Cylinder : public Shape {
   void SetMaximum(const double maximum) { maximum_ = maximum; }
   void SetClosed(const bool closed) { closed_ = closed; }
   [[nodiscard]] auto IsClosed() const -> bool { return closed_; }
+  auto BoundsOf() const -> BoundingBox override;
 
  private:
   static auto CheckCap(const Ray& ray, double time) -> bool;
@@ -104,4 +105,7 @@ inline auto Cylinder::LocalNormalAt(const ray_tracer::Point& point) const -> ray
   return result;
 }
 
+inline auto Cylinder::BoundsOf() const -> BoundingBox {
+  return {Point(-1, minimum_, -1), Point(1, maximum_, 1)};
+}
 }  // namespace ray_tracer

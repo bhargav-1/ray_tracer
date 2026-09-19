@@ -5,7 +5,9 @@
 namespace utilities {
 constexpr double kEpsilon = 0.0001;
 constexpr auto Abs(const double value) noexcept -> double { return value < 0 ? -value : value; }
-constexpr auto Equal(double left, double right) -> bool { return (Abs(left - right) < kEpsilon); }
+constexpr auto Equal(double left, double right) -> bool {
+  return left == right || Abs(left - right) < kEpsilon;
+}
 
 inline auto GetLines(int start_line_number, int end_line_number, const std::string& filename) -> std::string {
   std::ifstream file(filename);

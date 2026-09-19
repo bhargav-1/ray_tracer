@@ -9,6 +9,7 @@
 #include "app/matrix.h"
 #include "app/ray.h"
 #include "app/shape.h"
+#include "app/bounding_box.h"
 #include <numbers>
 
 namespace ray_tracer {
@@ -23,6 +24,9 @@ public:
   [[nodiscard]] auto LocalNormalAt(const ray_tracer::Point& point) const -> ray_tracer::Vec3 override {
     return  {point.GetX(), point.GetY(), point.GetZ()};
   };
+  auto BoundsOf() const -> BoundingBox override {
+    return {Point(-1, -1, -1), Point(1, 1, 1)};
+  }
 };
 
 SCENARIO("9: The default material of shape") {

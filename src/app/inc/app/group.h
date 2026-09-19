@@ -23,6 +23,14 @@ class Group : public Shape, public std::enable_shared_from_this<Group> {
     children_.push_back(child);
   }
   auto GetChildren() const -> std::vector<std::shared_ptr<Shape>> { return children_; }
+  auto BoundsOf() const -> BoundingBox override {
+    BoundingBox box;
+    for (const auto& child : children_) {
+      box.AddPoint(child->ParentSpaceBounds().GetMin());
+      box.AddPoint(child->ParentSpaceBounds().GetMax());
+    }
+    return box;
+  }
  private:
   std::vector<std::shared_ptr<Shape>> children_;
 };

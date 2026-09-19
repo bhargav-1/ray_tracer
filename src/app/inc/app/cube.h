@@ -20,6 +20,7 @@ class Cube : public Shape {
   ~Cube() override = default;
   [[nodiscard]] auto LocalIntersect(const Ray& transformed_ray) const -> std::vector<Intersection> override;
   [[nodiscard]] auto LocalNormalAt(const ray_tracer::Point& point) const -> ray_tracer::Vec3 override;
+  auto BoundsOf() const -> BoundingBox override;
 
  private:
   [[nodiscard]] static auto CheckAxis(double origin, double direction) -> std::pair<double, double>;
@@ -81,5 +82,8 @@ inline auto Cube::LocalNormalAt(const ray_tracer::Point& point) const -> ray_tra
     result = {0, 0, point.GetZ()};
   }
   return result;
+}
+inline auto Cube::BoundsOf() const -> BoundingBox {
+  return {Point(-1, -1, -1), Point(1, 1, 1)};
 }
 }  // namespace ray_tracer

@@ -7,6 +7,7 @@
 #include "intersection.h"
 #include <vector>
 #include <optional>
+#include "app/bounding_box.h"
 
 namespace ray_tracer {
 class Group;
@@ -59,6 +60,11 @@ public:
     // https:  //www.scratchapixel.com/lessons/mathematics-physics-for-computer-graphics/geometry/transforming-normals.html
     return NormalToWorld(local_normal).Normalize();
   }
+
+  [[nodiscard]] auto ParentSpaceBounds() const -> BoundingBox {
+    return BoundsOf().Transform(GetTransform());
+  }
+  [[nodiscard]] virtual auto BoundsOf() const -> BoundingBox = 0;
 private:
   std::size_t id_;
   Matrix<4, 4> transform_ = Matrix<4, 4>::IdentityMatrix();

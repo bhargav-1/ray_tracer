@@ -24,6 +24,7 @@ class Cone : public Shape {
   void SetMaximum(const double maximum) { maximum_ = maximum; }
   void SetClosed(const bool closed) { closed_ = closed; }
   [[nodiscard]] auto IsClosed() const -> bool { return closed_; }
+  auto BoundsOf() const -> BoundingBox override;
 
  private:
   static auto CheckCap(const Ray& ray, double time, double cap) -> bool;
@@ -99,7 +100,7 @@ inline auto Cone::LocalIntersect(const Ray& transformed_ray) const -> std::vecto
 inline auto Cone::LocalNormalAt(const ray_tracer::Point& point) const -> ray_tracer::Vec3 {
   auto dist = point.GetX() * point.GetX() + point.GetZ() * point.GetZ();
   Vec3 result;
-  auto  y = std::sqrt(dist); // NOLINT
+  auto y = std::sqrt(dist);  // NOLINT
   if (point.GetY() > 0) {
     y = -y;
   }
@@ -113,4 +114,8 @@ inline auto Cone::LocalNormalAt(const ray_tracer::Point& point) const -> ray_tra
   return result;
 }
 
+inline auto Cone::BoundsOf() const -> BoundingBox {
+  auto limit = std::max(std::abs(minimum_), std::abs(maximum_));
+        return {Point(-limit, minimum_, -limit), Point(limit, maximum_, limit)};
+}
 }  // namespace ray_tracer

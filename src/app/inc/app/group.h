@@ -38,6 +38,9 @@ class Group : public Shape, public std::enable_shared_from_this<Group> {
 inline auto operator==(const Group& lhs, const Group& rhs) -> bool { return lhs.GetId() == rhs.GetId(); }
 
 inline auto Group::LocalIntersect(const Ray& transformed_ray) const -> std::vector<Intersection> {
+  if (!BoundsOf().Intersects(transformed_ray)) {
+    return {};
+  }
   std::vector<Intersection> intersections;
   for (const auto& child : children_) {
     auto child_intersections = child->Intersect(transformed_ray);

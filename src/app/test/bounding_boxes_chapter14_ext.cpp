@@ -11,6 +11,7 @@
 #include "app/cube.h"
 #include "app/cylinder.h"
 #include "app/group.h"
+#include "app/intersection.h"
 #include "app/matrix.h"
 #include "app/plane.h"
 #include "app/point.h"
@@ -21,7 +22,7 @@
 
 namespace ray_tracer {
 class TestShape : public Shape {
-public:
+ public:
   explicit TestShape(const std::size_t shape_id) : Shape(shape_id) {}
   ~TestShape() override = default;
   [[nodiscard]] auto LocalIntersect(const Ray& ray) const -> std::vector<Intersection> override {
@@ -205,7 +206,7 @@ SCENARIO("14_ext: Checking to see if a box contains a given point") {
   }
 }
 
-SCENARIO("Checking to see if a box contains a given box") {
+SCENARIO("14_ext: Checking to see if a box contains a given box") {
   GIVEN("box = bb((5,-2,0),(11,4,7), bb2 = bb(min, max))") {
     THEN("bb.contains(bb2) ==result") {
       auto box1 = BoundingBox(Point(5, -2, 0), Point(11, 4, 7));
@@ -274,6 +275,123 @@ SCENARIO("14_ext: A group has a bounding box that contains its children") {
 //       auto box = csg_var->BoundsOf();
 //       CHECK(box.GetMin() == Point(-1, -1, -1));
 //       CHECK(box.GetMax() == Point(4, 5, 6));
+//     }
+//   }
+// }
+SCENARIO("14_ext: Intersecting a ray with bb at the origin") {
+  GIVEN("bb = (p(-1,-1,-1),p(1,1,1), dir= normalize(<dir>), r= ray(<origin>, dir)") {
+    THEN("bb.intersect(r) == result") {
+      auto box = BoundingBox(Point(-1, -1, -1), Point(1, 1, 1));
+      auto result1 = box.Intersects(Ray(Point(5, 0.5, 0), Vec3(-1, 0, 0).Normalize()));
+      CHECK(result1 == true);
+      auto result2 = box.Intersects(Ray(Point(-5, 0.5, 0), Vec3(1, 0, 0).Normalize()));
+      CHECK(result2 == true);
+      auto result3 = box.Intersects(Ray(Point(0.5, 5, 0), Vec3(0, -1, 0).Normalize()));
+      CHECK(result3 == true);
+      auto result4 = box.Intersects(Ray(Point(0.5, -5, 0), Vec3(0, 1, 0).Normalize()));
+      CHECK(result4 == true);
+      auto result5 = box.Intersects(Ray(Point(0.5, 0, 5), Vec3(0, 0, -1).Normalize()));
+      CHECK(result5 == true);
+      auto result6 = box.Intersects(Ray(Point(0.5, 0, -5), Vec3(0, 0, 1).Normalize()));
+      CHECK(result6 == true);
+      auto result7 = box.Intersects(Ray(Point(0, 0.5, 0), Vec3(0, 0, 1).Normalize()));
+      CHECK(result7 == true);
+      auto result8 = box.Intersects(Ray(Point(-2, 0, 0), Vec3(2, 4, 6).Normalize()));
+      CHECK(result8 == false);
+      auto result9 = box.Intersects(Ray(Point(0, -2, 0), Vec3(6, 2, 4).Normalize()));
+      CHECK(result9 == false);
+      auto result10 = box.Intersects(Ray(Point(0, 0, -2), Vec3(4, 6, 2).Normalize()));
+      CHECK(result10 == false);
+      auto result11 = box.Intersects(Ray(Point(2, 0, 2), Vec3(0, 0, -1).Normalize()));
+      CHECK(result11 == false);
+      auto result12 = box.Intersects(Ray(Point(0, 2, 2), Vec3(0, -1, 0).Normalize()));
+      CHECK(result12 == false);
+      auto result13 = box.Intersects(Ray(Point(2, 2, 0), Vec3(-1, 0, 0).Normalize()));
+      CHECK(result13 == false);
+    }
+  }
+}
+SCENARIO("14_ext: Intersecting a ray with a non-cubic bb") {
+  GIVEN("bb = ((5, -2,0), (11,4,7)), dir= normalize(<dir>), r= ray(<origin>, dir)") {
+    THEN("bb.intersect(r) == result") {
+      auto box = BoundingBox(Point(5, -2, 0), Point(11, 4, 7));
+      auto result1 = box.Intersects(Ray(Point(15, 1, 2), Vec3(-1, 0, 0).Normalize()));
+      CHECK(result1 == true);
+      auto result2 = box.Intersects(Ray(Point(-5, 1, 4), Vec3(1, 0, 0).Normalize()));
+      CHECK(result2 == true);
+      auto result3 = box.Intersects(Ray(Point(7, 6, 5), Vec3(0, -1, 0).Normalize()));
+      CHECK(result3 == true);
+      auto result4 = box.Intersects(Ray(Point(9, -5, 6), Vec3(0, 1, 0).Normalize()));
+      CHECK(result4 == true);
+      auto result5 = box.Intersects(Ray(Point(8, 2, 12), Vec3(0, 0, -1).Normalize()));
+      CHECK(result5 == true);
+      auto result6 = box.Intersects(Ray(Point(6, 0, -5), Vec3(0, 0, 1).Normalize()));
+      CHECK(result6 == true);
+      auto result7 = box.Intersects(Ray(Point(8, 1, 3.5), Vec3(0, 0, 1).Normalize()));
+      CHECK(result7 == true);
+      auto result8 = box.Intersects(Ray(Point(9, -1, -8), Vec3(2, 4, 6).Normalize()));
+      CHECK(result8 == false);
+      auto result9 = box.Intersects(Ray(Point(8, 3, -4), Vec3(6, 2, 4).Normalize()));
+      CHECK(result9 == false);
+      auto result10 = box.Intersects(Ray(Point(9, -1, -2), Vec3(4, 6, 2).Normalize()));
+      CHECK(result10 == false);
+      auto result11 = box.Intersects(Ray(Point(4, 0, 9), Vec3(0, 0, -1).Normalize()));
+      CHECK(result11 == false);
+      auto result12 = box.Intersects(Ray(Point(8, 6, -1), Vec3(0, -1, 0).Normalize()));
+      CHECK(result12 == false);
+      auto result13 = box.Intersects(Ray(Point(12, 5, 4), Vec3(-1, 0, 0).Normalize()));
+      CHECK(result13 == false);
+    }
+  }
+}
+SCENARIO("14_ext: Intersecting ray+group doesn't test children if box is missed") {
+  GIVEN("child =test_shape(), shape=group();shape.add(child),r=ray(point(0,0,-5),vec(0,1,0))") {
+    THEN("intersect(r) == 0") {
+      auto child = std::make_shared<TestShape>(1);
+      auto shape = std::make_shared<Group>(2);
+      shape->AddChild(child);
+      auto ray_var = Ray(Point(0, 0, -5), Vec3(0, 1, 0));
+      auto intesect_xs = shape->Intersect(ray_var);
+      CHECK(child->GetSavedRay().has_value() == false);
+    }
+  }
+}
+
+SCENARIO("14_ext: Intersecting ray+group does test children if box is hit") {
+  GIVEN("child =test_shape(), shape=group();shape.add(child),r=ray(point(0,0,-5),vec(0,0,1))") {
+    THEN("intersect(r) == 0") {
+      auto child = std::make_shared<TestShape>(1);
+      auto shape = std::make_shared<Group>(2);
+      shape->AddChild(child);
+      auto ray_var = Ray(Point(0, 0, -5), Vec3(0, 0, 1));
+      auto intesect_xs = shape->Intersect(ray_var);
+      CHECK(child->GetSavedRay().has_value() == true);
+    }
+  }
+}
+// SCENARIO("14_ext: Interseting ray+csg doesnot test children if box is missed") {
+//   GIVEN("left = test_shape(), right = test_shape(), csg = csg(diff, left, right), r=ray(point(0,0,-5),vec(0,1,0))") {
+//     THEN("intersect(r) == 0") {
+//       auto left = std::make_shared<TestShape>(1);
+//       auto right = std::make_shared<TestShape>(2);
+//       auto csg_var = std::make_shared<CSG>(CSGOperation::Difference, left, right);
+//       auto ray_var = Ray(Point(0, 0, -5), Vec3(0, 1, 0));
+//       auto intesect_xs = csg_var->Intersect(ray_var);
+//       CHECK(left->GetSavedRay().has_value() == false);
+//       CHECK(right->GetSavedRay().has_value() == false);
+//     }
+//   }
+// }
+// SCENARIO("14_ext: Intersecting ray+csg does test children if box is hit") {
+//   GIVEN("left = test_shape(), right = test_shape(), csg = csg(diff, left, right), r=ray(point(0,0,-5),vec(0,0,1))") {
+//     THEN("intersect(r) == 0") {
+//       auto left = std::make_shared<TestShape>(1);
+//       auto right = std::make_shared<TestShape>(2);
+//       auto csg_var = std::make_shared<CSG>(CSGOperation::Difference, left, right);
+//       auto ray_var = Ray(Point(0, 0, -5), Vec3(0, 0, 1));
+//       auto intesect_xs = csg_var->Intersect(ray_var);
+//       CHECK(left->GetSavedRay().has_value() == true);
+//       CHECK(right->GetSavedRay().has_value() == true);
 //     }
 //   }
 // }

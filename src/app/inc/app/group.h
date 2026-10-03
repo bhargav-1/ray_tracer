@@ -1,6 +1,7 @@
 #pragma once
 #include <cmath>
 #include <limits>
+#include <utility>
 #include <vector>
 #include "material.h"
 #include "matrix.h"
@@ -30,6 +31,46 @@ class Group : public Shape, public std::enable_shared_from_this<Group> {
       box.AddPoint(child->ParentSpaceBounds().GetMax());
     }
     return box;
+  }
+  auto PartitionChildren() -> std::pair<std::vector<std::shared_ptr<Shape>>, std::vector<std::shared_ptr<Shape>>> {
+    auto box = BoundsOf();
+    auto [left_box, right_box] = box.SplitBounds();
+    std::vector<std::shared_ptr<Shape>> left_children;
+    std::vector<std::shared_ptr<Shape>> right_children;
+    std::vector<std::shared_ptr<Shape>> remaining_children;
+    for (const auto& child : children_) {
+      if (left_box.Contains(child->ParentSpaceBounds())) {
+        left_children.push_back(child);
+      } else if (right_box.Contains(child->ParentSpaceBounds())) {
+        right_children.push_back(child);
+      } else {
+        remaining_children.push_back(child);
+      }
+    }
+    children_ = std::move(remaining_children);
+    return {left_children, right_children};
+  }
+  auto MakeSubGroup(const std::vector<std::shared_ptr<Shape>>& children) -> std::shared_ptr<Group> {
+    auto sub_group = std::make_shared<Group>(GetId());
+    for (const auto& child : children) {
+      sub_group->AddChild(child);
+    }
+    AddChild(sub_group);
+    return sub_group;
+  }
+  void Divide(const int &threshold) override {
+    if (std::cmp_less_equal(threshold ,GetChildren().size())) {
+        auto [left_children, right_children] = PartitionChildren();
+        if (!left_children.empty()) {
+          MakeSubGroup(left_children);
+        }
+        if (!right_children.empty()) {
+          MakeSubGroup(right_children);
+        }
+    }
+    for (const auto& child : children_) {
+      child->Divide(threshold);
+    }
   }
  private:
   std::vector<std::shared_ptr<Shape>> children_;

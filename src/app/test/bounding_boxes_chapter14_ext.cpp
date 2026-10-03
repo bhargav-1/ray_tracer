@@ -396,4 +396,217 @@ SCENARIO("14_ext: Intersecting ray+group does test children if box is hit") {
 //   }
 // }
 
+SCENARIO("14_ext: Splitting a perfect cube") {
+  GIVEN("box = bb((-1,-4,-5), (9,6,5)), left, right = box.split()") {
+    THEN(
+        "left.min == point(-1,-4,-5) and left.max == point(4,6,5) and right.min == point(4,-4,-5) and right.max == "
+        "point(9,6,5)") {
+      auto box = BoundingBox(Point(-1, -4, -5), Point(9, 6, 5));
+      auto [left, right] = box.SplitBounds();
+      CHECK(left.GetMin() == Point(-1, -4, -5));
+      CHECK(left.GetMax() == Point(4, 6, 5));
+      CHECK(right.GetMin() == Point(4, -4, -5));
+      CHECK(right.GetMax() == Point(9, 6, 5));
+    }
+  }
+}
+SCENARIO("14_ext: splitting an x_wide box") {
+  GIVEN("box= bb((-1,-2,-3),(9,5.5,3)), left, right = box.split()") {
+    THEN(
+        "left.min == point(-1,-2,-3) and left.max == point(4,5.5,3) and right.min == point(4,-2,-3) and right.max == "
+        "point(9,5.5,3)") {
+      auto box = BoundingBox(Point(-1, -2, -3), Point(9, 5.5, 3));
+      auto [left, right] = box.SplitBounds();
+      CHECK(left.GetMin() == Point(-1, -2, -3));
+      CHECK(left.GetMax() == Point(4, 5.5, 3));
+      CHECK(right.GetMin() == Point(4, -2, -3));
+      CHECK(right.GetMax() == Point(9, 5.5, 3));
+    }
+  }
+}
+SCENARIO("14_ext: splitting a y_wide box") {
+  GIVEN("box= bb((-1,-2,-3),(5,8,3)), left, right = box.split()") {
+    THEN(
+        "left.min == point(-1,-2,-3) and left.max == point(5,3,3) and right.min == point(-1,3,-3) and right.max "
+        "== point(5,8,3)") {
+      auto box = BoundingBox(Point(-1, -2, -3), Point(5, 8, 3));
+      auto [left, right] = box.SplitBounds();
+      CHECK(left.GetMin() == Point(-1, -2, -3));
+      CHECK(left.GetMax() == Point(5, 3, 3));
+      CHECK(right.GetMin() == Point(-1, 3, -3));
+      CHECK(right.GetMax() == Point(5, 8, 3));
+    }
+  }
+}
+SCENARIO("14_ext: splitting a z_wide box") {
+  GIVEN("box= bb((-1,-2,-3),(5,3,7)), left, right = box.split()") {
+    THEN(
+        "left.min == point(-1,-2,-3) and left.max == point(5,3,2) and right.min == point(-1,-2,2) and right.max "
+        "== point(5,3,7)") {
+      auto box = BoundingBox(Point(-1, -2, -3), Point(5, 3, 7));
+      auto [left, right] = box.SplitBounds();
+      CHECK(left.GetMin() == Point(-1, -2, -3));
+      CHECK(left.GetMax() == Point(5, 3, 2));
+      CHECK(right.GetMin() == Point(-1, -2, 2));
+      CHECK(right.GetMax() == Point(5, 3, 7));
+    }
+  }
+}
+SCENARIO("14_ext: Partitioning a group's children") {
+  GIVEN(
+      "s1 = sphere(1), s2 = sphere(2), s3 = sphere(3), s1.transform=translation(-2,0,0), "
+      "s2.transform=translation(2,0,0), group=group(), group.add(s1,s2,s3)") {
+    THEN("left, right = group.partition_children()") {
+      auto s1_sphere = std::make_shared<Sphere>(1);
+      auto s2_sphere = std::make_shared<Sphere>(2);
+      auto s3_sphere = std::make_shared<Sphere>(3);
+      s1_sphere->SetTransform(Matrix<4, 4>::Translation(-2, 0, 0));
+      s2_sphere->SetTransform(Matrix<4, 4>::Translation(2, 0, 0));
+      auto group_var = std::make_shared<Group>(4);
+      group_var->AddChild(s1_sphere);
+      group_var->AddChild(s2_sphere);
+      group_var->AddChild(s3_sphere);
+      auto [left, right] = group_var->PartitionChildren();
+      CHECK(group_var->GetChildren() == std::vector<std::shared_ptr<Shape>>{s3_sphere});
+      CHECK(left == std::vector<std::shared_ptr<Shape>>{s1_sphere});
+      CHECK(right == std::vector<std::shared_ptr<Shape>>{s2_sphere});
+    }
+  }
+}
+SCENARIO("14_ext: Creating a sub-group from a list of children") {
+  GIVEN("s1 = sphere(1), s2 = sphere(2), s3 = sphere(3), children = [s1,s2], group=group()") {
+    THEN("sub_group = group.make_sub_group(children)") {
+      auto s1_sphere = std::make_shared<Sphere>(1);
+      auto s2_sphere = std::make_shared<Sphere>(2);
+      auto s3_sphere = std::make_shared<Sphere>(3);
+      const std::vector<std::shared_ptr<Shape>> children{s1_sphere, s2_sphere};
+      auto group_var = std::make_shared<Group>(5);
+      auto sub_group = group_var->MakeSubGroup(children);
+      const auto group_children = group_var->GetChildren();
+      REQUIRE(group_children.size() == 1);
+      CHECK(std::dynamic_pointer_cast<Group>(group_children[0]) == sub_group);
+      CHECK(sub_group->GetParentGroup().lock() == group_var);
+      REQUIRE(sub_group->GetChildren().size() == 2);
+      CHECK(sub_group->GetChildren()[0] == s1_sphere);
+      CHECK(sub_group->GetChildren()[1] == s2_sphere);
+      CHECK(s1_sphere->GetParentGroup().lock() == sub_group);
+      CHECK(s2_sphere->GetParentGroup().lock() == sub_group);
+    }
+  }
+}
+SCENARIO("14_ext: Subdividing a primitive does nothing") {
+  GIVEN("s = sphere(1), s.subdivide()") {
+    THEN("s is unchanged") {
+      auto shape = std::make_shared<Sphere>(1);
+      shape->Divide(1);
+      CHECK(*shape == Sphere(1));
+    }
+  }
+}
+SCENARIO("14_ext: Subdividing a group partitions its children") {
+  GIVEN(
+      "s1 = sphere(1), s2 = sphere(2), s3 = sphere(3), s1.transform=translation(-2,-2,0), "
+      "s2.transform=translation(-2,2,0),s3.scale(4,4,4); group=group(), group.add(s1,s2,s3)") {
+    THEN("group.subdivide()") {
+      auto s1_sphere = std::make_shared<Sphere>(1);
+      auto s2_sphere = std::make_shared<Sphere>(2);
+      auto s3_sphere = std::make_shared<Sphere>(3);
+      s1_sphere->SetTransform(Matrix<4, 4>::Translation(-2, -2, 0));
+      s2_sphere->SetTransform(Matrix<4, 4>::Translation(-2, 2, 0));
+      s3_sphere->SetTransform(Matrix<4, 4>::Scaling(4, 4, 4));
+      auto group_var = std::make_shared<Group>(6);
+      group_var->AddChild(s1_sphere);
+      group_var->AddChild(s2_sphere);
+      group_var->AddChild(s3_sphere);
+      group_var->Divide(1);
+      const auto children = group_var->GetChildren();
+      REQUIRE(children.size() == 2);
+      CHECK(children[0] == s3_sphere);
+      const auto subgroup = std::dynamic_pointer_cast<Group>(children[1]);
+      REQUIRE(subgroup != nullptr);
+      const auto nested = subgroup->GetChildren();
+      REQUIRE(nested.size() == 2);
+      const auto first = std::dynamic_pointer_cast<Group>(nested[0]);
+      const auto second = std::dynamic_pointer_cast<Group>(nested[1]);
+      REQUIRE(first != nullptr);
+      REQUIRE(second != nullptr);
+      CHECK(first->GetChildren() == std::vector<std::shared_ptr<Shape>>{s1_sphere});
+      CHECK(second->GetChildren() == std::vector<std::shared_ptr<Shape>>{s2_sphere});
+    }
+  }
+}
+
+SCENARIO("14_ext: subdividing a group with too few children") {
+  GIVEN(
+      "s1= sphere,s1.translate(-2,0,0),s2=sphere.translate(2,1,0), s3.sphere.translate(2,-1,0), sbgrp =group(s1, "
+      "s2,s3);s4=sphere;g=groupof(sbgrp, s4)") {
+    THEN("g.divide(3); g[0] = sbgrp; g[1]=s4;sbgrp.count =2; sbgrp[0] =[s1];sbgrp[1]=[s2,s3]") {
+      auto s1_sphere = std::make_shared<Sphere>(1);
+      auto s2_sphere = std::make_shared<Sphere>(2);
+      auto s3_sphere = std::make_shared<Sphere>(3);
+      s1_sphere->SetTransform(Matrix<4, 4>::Translation(-2, 0, 0));
+      s2_sphere->SetTransform(Matrix<4, 4>::Translation(2, 1, 0));
+      s3_sphere->SetTransform(Matrix<4, 4>::Translation(2, -1, 0));
+      auto sbgrp = std::make_shared<Group>(7);
+      sbgrp->AddChild(s1_sphere);
+      sbgrp->AddChild(s2_sphere);
+      sbgrp->AddChild(s3_sphere);
+      auto s4_sphere = std::make_shared<Sphere>(4);
+      auto group_var = std::make_shared<Group>(8);
+      group_var->AddChild(sbgrp);
+      group_var->AddChild(s4_sphere);
+      group_var->Divide(3);
+      const auto children = group_var->GetChildren();
+      REQUIRE(children.size() == 2);
+      CHECK(children[0] == sbgrp);
+      CHECK(children[1] == s4_sphere);
+      const auto nested = sbgrp->GetChildren();
+      REQUIRE(nested.size() == 2);
+      const auto left = std::dynamic_pointer_cast<Group>(nested[0]);
+      const auto right = std::dynamic_pointer_cast<Group>(nested[1]);
+      REQUIRE(left != nullptr);
+      REQUIRE(right != nullptr);
+      CHECK(left->GetChildren() == std::vector<std::shared_ptr<Shape>>{s1_sphere});
+      const std::vector<std::shared_ptr<Shape>> expected_right{s2_sphere, s3_sphere};
+      CHECK(right->GetChildren() == expected_right);
+    }
+  }
+}
+
+// SCENARIO("14_ext: subdividing a csg shape subdivides its children") {
+//   GIVEN(
+//       "s1=sphere;s1.translate(-1.5,0,0);s2=sphere;s2.translate(1.5,0,0);left= group(s1, "
+//       "s2);s3=sphere;s3.translate(0,0,-1.5);s4=sphere;s4.translate(0,0,1.5);right=group(s3,s4);csg= "
+//       "csg(diff,left,right)") {
+//     THEN("csg_var.divide(1);left(0) = group(s1);left(1)=group(s2);right(0)=group(s3);right(1)=group(s4)") {
+//       auto s1_sphere = std::make_shared<Sphere>(1);
+//       auto s2_sphere = std::make_shared<Sphere>(2);
+//       s1_sphere->SetTransform(Matrix<4, 4>::Translation(-1.5, 0, 0));
+//       s2_sphere->SetTransform(Matrix<4, 4>::Translation(1.5, 0, 0));
+//       auto left_group = std::make_shared<Group>(9);
+//       left_group->AddChild(s1_sphere);
+//       left_group->AddChild(s2_sphere);
+//
+//       auto s3_sphere = std::make_shared<Sphere>(3);
+//       auto s4_sphere = std::make_shared<Sphere>(4);
+//       s3_sphere->SetTransform(Matrix<4, 4>::Translation(0, 0, -1.5));
+//       s4_sphere->SetTransform(Matrix<4, 4>::Translation(0, 0, 1.5));
+//       auto right_group = std::make_shared<Group>(10);
+//       right_group->AddChild(s3_sphere);
+//       right_group->AddChild(s4_sphere);
+//
+//       auto csg_var = std::make_shared<CSG>(CSGOperation::Difference, left_group, right_group);
+//       csg_var->Divide(1);
+//
+//       CHECK(left_group->GetChildren().size() == 2);
+//       CHECK(left_group->GetChildren()[0] == s1_sphere || left_group->GetChildren()[0] == s2_sphere);
+//       CHECK(left_group->GetChildren()[1] == s1_sphere || left_group->GetChildren()[1] == s2_sphere);
+//
+//       CHECK(right_group->GetChildren().size() == 2);
+//       CHECK(right_group->GetChildren()[0] == s3_sphere || right_group->GetChildren()[0] == s4_sphere);
+//       CHECK(right_group->GetChildren()[1] == s3_sphere || right_group->GetChildren()[1] == s4_sphere);
+//     }
+//   }
+// }
+
 }  // namespace ray_tracer

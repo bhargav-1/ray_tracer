@@ -18,7 +18,7 @@ class Sphere : public Shape {
   [[nodiscard]] auto LocalIntersect(const Ray& ray) const -> std::vector<Intersection> override;
   [[nodiscard]] auto LocalNormalAt(const ray_tracer::Point& point) const -> ray_tracer::Vec3 override;
   auto static GlassSphere(size_t index, double transparency = 1, double refractive_index = 1.5) -> Sphere;
-  auto BoundsOf() const -> BoundingBox override {
+  [[nodiscard]] auto BoundsOf() const -> BoundingBox override {
     return {Point(-1, -1, -1), Point(1, 1, 1)};
   }
 };

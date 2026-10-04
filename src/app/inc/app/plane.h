@@ -20,7 +20,7 @@ class Plane : public Shape {
   ~Plane() override = default;
   [[nodiscard]] auto LocalIntersect(const Ray& ray) const -> std::vector<Intersection> override;
   [[nodiscard]] auto LocalNormalAt(const ray_tracer::Point& point) const -> ray_tracer::Vec3 override;
-  auto BoundsOf() const -> BoundingBox override;
+  [[nodiscard]] auto BoundsOf() const -> BoundingBox override;
 };
 
 inline auto operator==(const Plane& lhs, const Plane& rhs) -> bool { return lhs.GetId() == rhs.GetId(); }

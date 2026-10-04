@@ -18,7 +18,7 @@ class Cube : public Shape {
   ~Cube() override = default;
   [[nodiscard]] auto LocalIntersect(const Ray& transformed_ray) const -> std::vector<Intersection> override;
   [[nodiscard]] auto LocalNormalAt(const ray_tracer::Point& point) const -> ray_tracer::Vec3 override;
-  auto BoundsOf() const -> BoundingBox override;
+  [[nodiscard]] auto BoundsOf() const -> BoundingBox override;
 };
 
 inline auto operator==(const Cube& lhs, const Cube& rhs) -> bool { return lhs.GetId() == rhs.GetId(); }

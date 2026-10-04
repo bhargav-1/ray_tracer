@@ -1,5 +1,6 @@
 #include <catch2/catch_test_macros.hpp>
 #include <cstddef>
+#include <optional>
 #include <vector>
 #include "app/point.h"
 #include "app/vec3.h"
@@ -18,7 +19,7 @@ public:
   explicit TestShape(const std::size_t shape_id) : Shape(shape_id) {}
   ~TestShape() override = default;
   [[nodiscard]] auto LocalIntersect(const Ray& ray) const -> std::vector<Intersection> override {
-    (void)ray;
+    saved_ray_ = ray;
     return {};
   };
   [[nodiscard]] auto LocalNormalAt(const ray_tracer::Point& point) const -> ray_tracer::Vec3 override {
@@ -27,6 +28,10 @@ public:
   auto BoundsOf() const -> BoundingBox override {
     return {Point(-1, -1, -1), Point(1, 1, 1)};
   }
+  [[nodiscard]] auto GetSavedRay() const -> std::optional<Ray> { return saved_ray_; }
+
+ private:
+  mutable std::optional<Ray> saved_ray_;
 };
 
 SCENARIO("9: The default material of shape") {

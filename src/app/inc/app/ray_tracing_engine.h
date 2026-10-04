@@ -4,6 +4,8 @@
 #include <chrono>
 #include <cmath>
 #include <iostream>
+#include <memory>
+#include <mutex>
 #include <optional>
 #include <vector>
 
@@ -16,6 +18,7 @@
 #include "point.h"
 #include "point_light.h"
 #include "ray.h"
+#include "render_rows.h"
 #include "shape.h"
 #include "sphere.h"
 #include "utilities.h"
@@ -115,9 +118,8 @@ inline auto IsShadowed(const World& world, const Point& point, const PointLight&
   const Vec3 vector_to_light = light.GetPosition() - point;
   const double distance_to_light = vector_to_light.Magnitude();
   const Ray shadow_ray(point, vector_to_light.Normalize());
-  return std::ranges::any_of(Intersect(shadow_ray, world), [distance_to_light](const Intersection& intersection) {
-    return intersection.GetTime() > utilities::kEpsilon && intersection.GetTime() < distance_to_light &&
-           intersection.GetObject()->GetCastShadow();
+  return std::ranges::any_of(world.Objects(), [&](const std::shared_ptr<Shape>& object) {
+    return object->Occludes(shadow_ray, distance_to_light);
   });
 }
 
@@ -227,19 +229,26 @@ inline auto Schlick(const Computations& computations) -> double {
 inline auto Render(Camera& camera, const World& world) -> Canvas {
   auto image = Canvas(camera.GetHorizontalSize(), camera.GetVerticalSize());
   int last_bucket = -1;
+  int completed_rows = 0;
+  std::mutex progress_mutex;
+  for (const auto& object : world.Objects()) {
+    (void)object->BoundsOf();
+  }
   auto start = std::chrono::high_resolution_clock::now();
-  for (auto y_size = 0; y_size < camera.GetVerticalSize(); y_size++) {
+  ParallelRenderRows(camera.GetVerticalSize(), [&](const int y_size) {
     for (auto x_size = 0; x_size < camera.GetHorizontalSize(); x_size++) {
       auto ray = camera.GetRayForPixel(x_size, y_size);
       auto color = ColorAt(world, ray);
       image.WritePixelColor(x_size, y_size, color);
     }
-    const int percent = ((y_size + 1) * 100) / camera.GetVerticalSize();
+    const std::lock_guard lock{progress_mutex};
+    const int percent = (++completed_rows * 100) / camera.GetVerticalSize();
     if (const int bucket = percent / 10; bucket != last_bucket) {
       last_bucket = bucket;
       std::cout << "Render progress: " << bucket * 10 << "%\n";
     }
-  }
+    return true;
+  });
   const auto end = std::chrono::high_resolution_clock::now();
   std::cout << "Writing Pixel time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()
             << "ms\n";

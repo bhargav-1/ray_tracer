@@ -38,7 +38,7 @@ SCENARIO("8: No shadow when nothing is collinear with point and light") {
     constexpr auto kPoint = ray_tracer::Point(0, 10, 0);
     const auto world = ray_tracer::World::DefaultWorld();
     THEN("there is no shadow") {
-      CHECK_FALSE(IsShadowed(world,kPoint));
+      CHECK_FALSE(IsShadowed(world, kPoint, world.Lights()[0]));
     }
   }
 }
@@ -48,7 +48,7 @@ SCENARIO("8: The shadow when an object is between the point and the light") {
     constexpr auto kPoint = ray_tracer::Point(10, -10, 10);
     const auto world = ray_tracer::World::DefaultWorld();
     THEN("there is a shadow") {
-      CHECK(IsShadowed(world,kPoint));
+      CHECK(IsShadowed(world, kPoint, world.Lights()[0]));
     }
   }
 }
@@ -58,7 +58,7 @@ SCENARIO("8: There is no shadow when an object is behind the light") {
     constexpr auto kPoint = ray_tracer::Point(-20, 20, -20);
     const auto world = ray_tracer::World::DefaultWorld();
     THEN("there is no shadow") {
-      CHECK_FALSE(IsShadowed(world,kPoint));
+      CHECK_FALSE(IsShadowed(world, kPoint, world.Lights()[0]));
     }
   }
 }
@@ -68,7 +68,7 @@ SCENARIO("8: There  is no shadow when an object is behind the point") {
     constexpr auto kPoint = ray_tracer::Point(-2, 2, -2);
     const auto world = ray_tracer::World::DefaultWorld();
     THEN("there is no shadow") {
-      CHECK_FALSE(IsShadowed(world,kPoint));
+      CHECK_FALSE(IsShadowed(world, kPoint, world.Lights()[0]));
     }
   }
 }

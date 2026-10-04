@@ -14,6 +14,7 @@
 #include "intersection.h"
 #include "lighting.h"
 #include "point.h"
+#include "point_light.h"
 #include "ray.h"
 #include "shape.h"
 #include "sphere.h"
@@ -110,26 +111,16 @@ inline auto PrepareComputations(const Intersection& intersection,
                       under_point};
 }
 
-inline auto IsShadowed(const World& world, const Point& point) -> bool {
-  for (const auto& light : world.Lights()) {
-    Vec3 const vector_to_light = light.GetPosition() - point;
-    double const distance_to_light = vector_to_light.Magnitude();
-    Vec3 const direction_to_light = vector_to_light.Normalize();
-    Ray const shadow_ray(point, direction_to_light);
-    auto intersections = Intersect(shadow_ray, world);
-    auto shadow_intersections = std::vector<Intersection>{};
-    shadow_intersections.reserve(intersections.size());
-    for (const auto& each_intersection : intersections) {
-      if (each_intersection.GetTime() > utilities::kEpsilon && each_intersection.GetObject()->GetCastShadow()) {
-       shadow_intersections.push_back(each_intersection);
-      }
-    }
-    if (auto hit = Hit(shadow_intersections); hit.has_value() && hit.value().GetTime() < distance_to_light) {
-      return true;
-    }
-  }
-  return false;
+inline auto IsShadowed(const World& world, const Point& point, const PointLight& light) -> bool {
+  const Vec3 vector_to_light = light.GetPosition() - point;
+  const double distance_to_light = vector_to_light.Magnitude();
+  const Ray shadow_ray(point, vector_to_light.Normalize());
+  return std::ranges::any_of(Intersect(shadow_ray, world), [distance_to_light](const Intersection& intersection) {
+    return intersection.GetTime() > utilities::kEpsilon && intersection.GetTime() < distance_to_light &&
+           intersection.GetObject()->GetCastShadow();
+  });
 }
+
 auto GetReflectedColor(const World& world, const Computations& computations, int remaining = 5) -> Color;
 auto GetRefractedColor(const World& world, const Computations& computations, int remaining = 5) -> Color;
 inline auto Schlick(const Computations& computations) -> double;
@@ -140,8 +131,8 @@ inline auto ShadeHit(const World& world, const Computations& computations, const
   Color reflected_color{0, 0, 0};
   Color refracted_color{0, 0, 0};
 
-  for (auto world_light : world.Lights()) {
-    const auto shadowed = IsShadowed(world, computations.GetOverPoint());
+  for (const auto& world_light : world.Lights()) {
+    const auto shadowed = IsShadowed(world, computations.GetOverPoint(), world_light);
     color = color + Lighting(computations.GetObject()->GetMaterial(),
                              *computations.GetObject(),
                              world_light,

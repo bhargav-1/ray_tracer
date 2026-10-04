@@ -3,6 +3,7 @@
 #include <array>
 #include <cctype>
 #include <cstddef>
+#include <cmath>
 #include <memory>
 #include <span>
 #include <stdexcept>
@@ -13,25 +14,46 @@
 #include "app/cube.h"
 #include "app/cylinder.h"
 #include "app/plane.h"
+#include "app/point.h"
 #include "app/scene/scene.h"
 #include "app/shape.h"
 #include "app/sphere.h"
+#include "app/triangle.h"
+#include "app/tuple.h"
 
 namespace ray_tracer::shape_catalog {
 namespace {
 
 template <typename ShapeType>
-auto CreateShape(std::size_t object_id, [[maybe_unused]] const scene::AxialBounds& bounds) -> std::shared_ptr<Shape> {
+auto CreateShape(std::size_t object_id, [[maybe_unused]] const scene::ShapeSpec& spec) -> std::shared_ptr<Shape> {
   return std::make_shared<ShapeType>(object_id);
 }
 
 template <typename ShapeType>
-auto CreateAxialShape(std::size_t object_id, const scene::AxialBounds& bounds) -> std::shared_ptr<Shape> {
+auto CreateAxialShape(std::size_t object_id, const scene::ShapeSpec& spec) -> std::shared_ptr<Shape> {
+  const auto& bounds = spec.axial_bounds;
   auto shape = std::make_shared<ShapeType>(object_id);
   shape->SetMinimum(bounds.minimum);
   shape->SetMaximum(bounds.maximum);
   shape->SetClosed(bounds.closed);
   return shape;
+}
+
+auto CreateTriangle(std::size_t object_id, const scene::ShapeSpec& spec)
+    -> std::shared_ptr<Shape> {
+  std::array<Point, 3> vertices;
+  for (std::size_t index = 0; index < vertices.size(); ++index) {
+    const auto& vertex = spec.vertices[index];
+    if (!std::isfinite(vertex.x) || !std::isfinite(vertex.y) || !std::isfinite(vertex.z)) {
+      throw std::invalid_argument("triangle vertices must be finite");
+    }
+    vertices[index] = Point(vertex.x, vertex.y, vertex.z);
+  }
+  const auto normal = Vec3(vertices[1] - vertices[0]).Cross(Vec3(vertices[2] - vertices[0]));
+  if (normal.Dot(normal) == 0) {
+    throw std::invalid_argument("triangle vertices must not be collinear or coincident");
+  }
+  return std::make_shared<Triangle>(object_id, vertices);
 }
 
 constexpr std::array kShapes{
@@ -40,6 +62,7 @@ constexpr std::array kShapes{
     ShapeRegistration{scene::ObjectType::kCube, "cube", false, &CreateShape<Cube>},
     ShapeRegistration{scene::ObjectType::kCylinder, "cylinder", true, &CreateAxialShape<Cylinder>},
     ShapeRegistration{scene::ObjectType::kCone, "cone", true, &CreateAxialShape<Cone>},
+    ShapeRegistration{scene::ObjectType::kTriangle, "triangle", false, &CreateTriangle},
 };
 
 }  // namespace

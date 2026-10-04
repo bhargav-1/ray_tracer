@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <optional>
 #include <cstdint>
 #include <string>
@@ -65,7 +66,7 @@ struct AxialBounds {
   constexpr auto operator==(const AxialBounds&) const -> bool = default;
 };
 
-enum class ObjectType : std::uint8_t { kSphere, kPlane, kCube, kCylinder, kCone };
+enum class ObjectType : std::uint8_t { kSphere, kPlane, kCube, kCylinder, kCone, kTriangle };
 
 enum class PatternType : std::uint8_t {
   kSolid,
@@ -109,6 +110,7 @@ struct Material {
 struct ShapeSpec {
   ObjectType type{ObjectType::kSphere};
   AxialBounds axial_bounds;
+  std::array<Vec3, 3> vertices{Vec3{0, 1, 0}, Vec3{-1, 0, 0}, Vec3{1, 0, 0}};
   Material material;
   bool cast_shadow{true};
 

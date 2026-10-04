@@ -20,6 +20,7 @@ target_sources(app_lib_tests
         cylinder_chapter13.cpp
         groups_chapter14.cpp
         bounding_boxes_chapter14_ext.cpp
+        triangles_chapter15.cpp
         shape_catalog.cpp
         scene_model.cpp
         scene_yaml_io.cpp

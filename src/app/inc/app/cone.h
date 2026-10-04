@@ -20,8 +20,14 @@ class Cone : public Shape {
   [[nodiscard]] auto LocalNormalAt(const ray_tracer::Point& point) const -> ray_tracer::Vec3 override;
   [[nodiscard]] auto GetMinimum() const -> double { return minimum_; }
   [[nodiscard]] auto GetMaximum() const -> double { return maximum_; }
-  void SetMinimum(const double minimum) { minimum_ = minimum; }
-  void SetMaximum(const double maximum) { maximum_ = maximum; }
+  void SetMinimum(const double minimum) {
+    minimum_ = minimum;
+    InvalidateBounds();
+  }
+  void SetMaximum(const double maximum) {
+    maximum_ = maximum;
+    InvalidateBounds();
+  }
   void SetClosed(const bool closed) { closed_ = closed; }
   [[nodiscard]] auto IsClosed() const -> bool { return closed_; }
   auto BoundsOf() const -> BoundingBox override;

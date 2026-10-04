@@ -1,6 +1,7 @@
 #pragma once
 #include <cmath>
 #include <limits>
+#include <optional>
 #include <utility>
 #include <vector>
 #include "material.h"
@@ -22,14 +23,20 @@ class Group : public Shape, public std::enable_shared_from_this<Group> {
   void AddChild(const std::shared_ptr<Shape>& child) {
     child->SetParentGroup(shared_from_this());
     children_.push_back(child);
+    InvalidateBounds();
   }
   auto GetChildren() const -> std::vector<std::shared_ptr<Shape>> { return children_; }
   auto BoundsOf() const -> BoundingBox override {
+    if (cached_bounds_.has_value()) {
+      return *cached_bounds_;
+    }
     BoundingBox box;
     for (const auto& child : children_) {
-      box.AddPoint(child->ParentSpaceBounds().GetMin());
-      box.AddPoint(child->ParentSpaceBounds().GetMax());
+      const auto child_bounds = child->ParentSpaceBounds();
+      box.AddPoint(child_bounds.GetMin());
+      box.AddPoint(child_bounds.GetMax());
     }
+    cached_bounds_ = box;
     return box;
   }
   auto PartitionChildren() -> std::pair<std::vector<std::shared_ptr<Shape>>, std::vector<std::shared_ptr<Shape>>> {
@@ -48,6 +55,7 @@ class Group : public Shape, public std::enable_shared_from_this<Group> {
       }
     }
     children_ = std::move(remaining_children);
+    InvalidateBounds();
     return {left_children, right_children};
   }
   auto MakeSubGroup(const std::vector<std::shared_ptr<Shape>>& children) -> std::shared_ptr<Group> {
@@ -73,6 +81,11 @@ class Group : public Shape, public std::enable_shared_from_this<Group> {
     }
   }
  private:
+  void InvalidateBounds() override {
+    cached_bounds_.reset();
+    Shape::InvalidateBounds();
+  }
+  mutable std::optional<BoundingBox> cached_bounds_;
   std::vector<std::shared_ptr<Shape>> children_;
 };
 

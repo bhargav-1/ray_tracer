@@ -25,6 +25,7 @@ class Shape {
     transform_ = transform;
     inverse_transform_ = transform.Inverse();
     transpose_inverse_ = Transpose(inverse_transform_);
+    InvalidateBounds();
   }
   [[nodiscard]] auto GetMaterial() const -> const Material& { return material_; }
   void SetMaterial(const Material& material) { material_ = material; }
@@ -64,6 +65,12 @@ class Shape {
   [[nodiscard]] auto ParentSpaceBounds() const -> BoundingBox { return BoundsOf().Transform(GetTransform()); }
   [[nodiscard]] virtual auto BoundsOf() const -> BoundingBox = 0;
   virtual void Divide(const int& threshold) {(void)threshold;}
+ protected:
+  virtual void InvalidateBounds() {  // NOLINT(misc-no-recursion)
+    if (const auto parent = parent_group_.lock()) {
+      parent->InvalidateBounds();
+    }
+  }
  private:
   std::size_t id_;
   Matrix<4, 4> transform_ = Matrix<4, 4>::IdentityMatrix();

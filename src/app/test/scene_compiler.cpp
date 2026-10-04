@@ -2,15 +2,21 @@
 #include <app/scene/scene_compiler.h>
 #include <app/utilities.h>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/catch_message.hpp>
 
 #include <filesystem>
 #include <memory>
 #include <numbers>
+#include <string>
 
 #include "app/cube.h"
 #include "app/group.h"
 #include "app/matrix.h"
+#include "app/point.h"
+#include "app/ray.h"
 #include "app/scene/scene.h"
+#include "app/triangle.h"
+#include "app/tuple.h"
 
 namespace ray_tracer {
 namespace {
@@ -81,6 +87,56 @@ auto MakeCompiledSceneModel() -> scene::Scene {
 }
 
 }  // namespace
+
+SCENARIO("scene compiler: compiles a transformed triangle") {
+  scene::Scene scene;
+  scene.camera = scene::Camera{};
+  scene::Object object;
+  object.Shape().type = scene::ObjectType::kTriangle;
+  object.Shape().vertices = {scene::Vec3{-2, 0, 2}, scene::Vec3{2, 0, 2}, scene::Vec3{0, 3, 2}};
+  object.transform.translate = {0.0F, 0.0F, 3.0F};
+  scene.objects.push_back(object);
+
+  const auto result = scene_runtime::CompileScene(scene);
+  REQUIRE(result.ok);
+  if (!result.compiled.has_value()) {
+    FAIL("expected compiled scene");
+  }
+  const auto& objects = result.compiled->world.Objects();
+  REQUIRE(objects.size() == 1);
+  CHECK(dynamic_cast<const Triangle*>(objects[0].get()) != nullptr);
+  const auto intersections = objects[0]->Intersect(Ray(Point(0, 0.5, -2), Vec3(0, 0, 1)));
+  REQUIRE(intersections.size() == 1);
+  CHECK(utilities::Equal(intersections[0].GetTime(), 7));
+  CHECK(objects[0]->BoundsOf().GetMin() == Point(-2, 0, 2));
+  CHECK(objects[0]->BoundsOf().GetMax() == Point(2, 3, 2));
+}
+
+SCENARIO("scene compiler: rejects degenerate triangle vertices") {
+  scene::Scene scene;
+  scene.camera = scene::Camera{};
+  scene::Object object;
+  object.Shape().type = scene::ObjectType::kTriangle;
+  object.Shape().vertices = {scene::Vec3{0, 0, 0}, scene::Vec3{1, 1, 1}, scene::Vec3{2, 2, 2}};
+  scene.objects.push_back(object);
+  const auto result = scene_runtime::CompileScene(scene);
+  CHECK_FALSE(result.ok);
+  CHECK(result.error.find("collinear") != std::string::npos);
+}
+
+SCENARIO("scene compiler: compiles the editable triangle solids example") {
+  const auto path = std::filesystem::path{RAY_TRACER_ASSET_DIR} / "scenes" / "triangle_solids.yaml";
+  const auto loaded = scene_io::LoadSceneYaml(path);
+  REQUIRE(loaded.ok);
+  REQUIRE(loaded.scene.objects.size() == 5);
+  CHECK(loaded.scene.objects[1].Group().children.size() == 8);
+  CHECK(loaded.scene.objects[2].Group().children.size() == 4);
+  CHECK(loaded.scene.objects[3].Group().children.size() == 6);
+  CHECK(loaded.scene.objects[4].Group().children.size() == 10);
+  const auto result = scene_runtime::CompileScene(loaded.scene);
+  INFO(result.error);
+  CHECK(result.ok);
+}
 
 SCENARIO("scene compiler: compiles camera, lights, objects, transforms, materials, shadows, and patterns") {
   const auto scene = MakeCompiledSceneModel();

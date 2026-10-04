@@ -130,6 +130,46 @@ SCENARIO("scene yaml: parses and serializes cube objects") {
   CHECK(reparsed.scene == parsed.scene);
 }
 
+SCENARIO("scene yaml: parses and serializes triangle objects") {
+  auto triangle_yaml = std::string{kFullSceneYaml};
+  triangle_yaml.replace(triangle_yaml.find("type: plane"), std::string{"type: plane"}.size(), "type: triangle");
+
+  const auto parsed = scene_io::ParseSceneYaml(triangle_yaml);
+  REQUIRE(parsed.ok);
+  REQUIRE(parsed.scene.objects.size() == 1);
+  CHECK(parsed.scene.objects[0].Shape().type == scene::ObjectType::kTriangle);
+  CHECK(parsed.scene.objects[0].Shape().vertices[0] == scene::Vec3{0, 1, 0});
+
+  const auto serialized = scene_io::SerializeSceneYaml(parsed.scene);
+  CHECK(serialized.find("type: triangle") != std::string::npos);
+  const auto reparsed = scene_io::ParseSceneYaml(serialized);
+  REQUIRE(reparsed.ok);
+  CHECK(reparsed.scene == parsed.scene);
+}
+
+SCENARIO("scene yaml: preserves custom triangle vertices and rejects malformed geometry") {
+  auto yaml = std::string{kFullSceneYaml};
+  yaml.replace(yaml.find("type: plane"), std::string{"type: plane"}.size(),
+               "type: triangle\n    vertices: [[-2, 0, 2], [2, 0, 2], [0, 3, 2]]");
+  const auto parsed = scene_io::ParseSceneYaml(yaml);
+  REQUIRE(parsed.ok);
+  const auto& vertices = parsed.scene.objects[0].Shape().vertices;
+  CHECK(vertices[0] == scene::Vec3{-2, 0, 2});
+  CHECK(vertices[1] == scene::Vec3{2, 0, 2});
+  CHECK(vertices[2] == scene::Vec3{0, 3, 2});
+  const auto reparsed = scene_io::ParseSceneYaml(scene_io::SerializeSceneYaml(parsed.scene));
+  REQUIRE(reparsed.ok);
+  CHECK(reparsed.scene == parsed.scene);
+
+  auto malformed = yaml;
+  const auto valid_vertices = std::string{"[[-2, 0, 2], [2, 0, 2], [0, 3, 2]]"};
+  malformed.replace(malformed.find(valid_vertices), valid_vertices.size(), "[[0, 0, 0], [1, 0, 0]]");
+  CHECK_FALSE(scene_io::ParseSceneYaml(malformed).ok);
+  auto unsupported = yaml;
+  unsupported.replace(unsupported.find("type: triangle"), std::string{"type: triangle"}.size(), "type: cube");
+  CHECK_FALSE(scene_io::ParseSceneYaml(unsupported).ok);
+}
+
 SCENARIO("scene yaml: parses and serializes nested groups") {
   const auto group_yaml = std::string{kMinimalSceneYaml}.replace(
       std::string{kMinimalSceneYaml}.find("objects: []"), std::string{"objects: []"}.size(), R"yaml(objects:

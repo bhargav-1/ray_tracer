@@ -268,10 +268,22 @@ auto ParseObject(const YAML::Node& node, const std::string& label) -> scene::Obj
   }
 
   RequireOnlyKeys(
-      node, {"name", "type", "bounds", "visible", "cast_shadow", "transform", "material"}, label);
+      node, {"name", "type", "bounds", "vertices", "visible", "cast_shadow", "transform", "material"}, label);
   const auto& registration = shape_catalog::Find(type_name);
   scene::ShapeSpec shape;
   shape.type = registration.type;
+  if (const auto vertices = node["vertices"]) {
+    if (shape.type != scene::ObjectType::kTriangle) {
+      throw std::runtime_error(label + ".vertices is only supported for triangles");
+    }
+    RequireSequence(vertices, label + ".vertices");
+    if (vertices.size() != 3) {
+      throw std::runtime_error(label + ".vertices must contain exactly 3 points");
+    }
+    for (std::size_t index = 0; index < shape.vertices.size(); ++index) {
+      shape.vertices[index] = ParseVec3(vertices[index], label + ".vertices[" + std::to_string(index) + "]");
+    }
+  }
   if (const auto bounds = node["bounds"]) {
     if (!registration.supports_axial_bounds) {
       throw std::runtime_error(label + ".bounds is not supported for type '" +
@@ -377,6 +389,13 @@ auto EmitObject(YAML::Emitter& out, const scene::Object& object) -> void {  // N
   } else {
     const auto& shape = object.Shape();
     const auto& registration = shape_catalog::Find(shape.type);
+    if (shape.type == scene::ObjectType::kTriangle) {
+      out << YAML::Key << "vertices" << YAML::Value << YAML::BeginSeq;
+      for (const auto& vertex : shape.vertices) {
+        EmitVec3(out, vertex);
+      }
+      out << YAML::EndSeq;
+    }
     if (registration.supports_axial_bounds) {
       out << YAML::Key << "bounds" << YAML::Value;
       EmitAxialBounds(out, shape.axial_bounds);

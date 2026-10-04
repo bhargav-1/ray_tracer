@@ -174,7 +174,7 @@ auto CompileObject(const scene::Object& object, std::size_t& next_id)  // NOLINT
       shape_spec.axial_bounds.minimum >= shape_spec.axial_bounds.maximum) {
     throw std::runtime_error("object '" + object.name + "' requires minimum bounds below maximum bounds");
   }
-  auto shape = registration.create(next_id++, shape_spec.axial_bounds);
+  auto shape = registration.create(next_id++, shape_spec);
   shape->SetTransform(BuildTransformMatrix(object.transform));
   shape->SetCastShadow(shape_spec.cast_shadow);
   shape->SetMaterial(CompileMaterial(shape_spec.material));

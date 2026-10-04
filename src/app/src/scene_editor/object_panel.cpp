@@ -181,6 +181,14 @@ auto DrawObjectEditor(scene::Object& object) -> bool {
     changed |= DrawAxialBoundsEditor(shape.axial_bounds);
     ImGui::TreePop();
   }
+  if (shape.type == scene::ObjectType::kTriangle &&
+      ImGui::TreeNodeEx("Geometry", ImGuiTreeNodeFlags_DefaultOpen)) {
+    for (std::size_t index = 0; index < shape.vertices.size(); ++index) {
+      const auto label = "Vertex " + std::to_string(index + 1);
+      changed |= DragF3(label.c_str(), shape.vertices[index], 0.05F, 0.0F, 0.0F);
+    }
+    ImGui::TreePop();
+  }
   changed |= ImGui::Checkbox("Cast Shadow", &shape.cast_shadow);
   if (ImGui::TreeNodeEx("Material", ImGuiTreeNodeFlags_DefaultOpen)) {
     changed |= DrawMaterialEditor(shape.material);

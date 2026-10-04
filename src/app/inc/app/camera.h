@@ -32,7 +32,7 @@ class Camera {
     transform_ = transform;
     inverse_transform_ = transform.Inverse();
   }
-  [[nodiscard]] constexpr auto GetRayForPixel(const int pixel_x, const int pixel_y) -> ray_tracer::Ray {
+  [[nodiscard]] constexpr auto GetRayForPixel(const int pixel_x, const int pixel_y) const -> ray_tracer::Ray {
     auto const x_offset = (pixel_x + 0.5) * pixel_size_;
     auto const y_offset = (pixel_y + 0.5) * pixel_size_;
     auto const world_x = half_width_ - x_offset;

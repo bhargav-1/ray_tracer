@@ -30,7 +30,7 @@ class Cylinder : public Shape {
   }
   void SetClosed(const bool closed) { closed_ = closed; }
   [[nodiscard]] auto IsClosed() const -> bool { return closed_; }
-  auto BoundsOf() const -> BoundingBox override;
+  [[nodiscard]] auto BoundsOf() const -> BoundingBox override;
 
  private:
   static auto CheckCap(const Ray& ray, double time) -> bool;

@@ -9,6 +9,7 @@
 #include <stdexcept>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "app/camera.h"
 #include "app/color.h"
@@ -37,6 +38,14 @@ auto ToPoint(const scene::Vec3& value) -> ray_tracer::Point {
 
 auto ToVec3(const scene::Vec3& value) -> ray_tracer::Vec3 {
   return {value.x, value.y, value.z};
+}
+
+auto HasFiniteBounds(const ray_tracer::Shape& shape) -> bool {
+  const auto bounds = shape.ParentSpaceBounds();
+  const auto min = bounds.GetMin();
+  const auto max = bounds.GetMax();
+  return std::isfinite(min.GetX()) && std::isfinite(min.GetY()) && std::isfinite(min.GetZ()) &&
+         std::isfinite(max.GetX()) && std::isfinite(max.GetY()) && std::isfinite(max.GetZ());
 }
 
 auto BuildTransformMatrix(const scene::Transform& transform) -> ray_tracer::Matrix<4, 4> {
@@ -187,11 +196,38 @@ auto CompileScene(const scene::Scene& scene) -> CompileSceneResult {
       world.AddLight(ray_tracer::PointLight(ToPoint(light.position), ToColor(light.color)));
     }
     std::size_t next_id = 1;
+    constexpr int kBvhThreshold = 4;
+    std::vector<std::shared_ptr<ray_tracer::Shape>> objects;
+    std::vector<std::shared_ptr<ray_tracer::Shape>> finite_objects;
     for (const auto& object : scene.objects) {
       if (!object.visible) {
         continue;
       }
-      world.AddObject(CompileObject(object, next_id));
+      auto compiled_object = CompileObject(object, next_id);
+      if (HasFiniteBounds(*compiled_object)) {
+        finite_objects.push_back(compiled_object);
+      }
+      objects.push_back(std::move(compiled_object));
+    }
+    if (finite_objects.size() >= static_cast<std::size_t>(kBvhThreshold)) {
+      auto root = std::make_shared<ray_tracer::Group>(next_id++);
+      for (const auto& object : finite_objects) {
+        root->AddChild(object);
+      }
+      root->Divide(kBvhThreshold);
+      world.AddObject(root);
+      for (const auto& object : objects) {
+        if (!HasFiniteBounds(*object)) {
+          world.AddObject(object);
+        }
+      }
+    } else {
+      for (const auto& object : objects) {
+        if (HasFiniteBounds(*object)) {
+          object->Divide(kBvhThreshold);
+        }
+        world.AddObject(object);
+      }
     }
 
     const auto& camera_spec = *scene.camera;

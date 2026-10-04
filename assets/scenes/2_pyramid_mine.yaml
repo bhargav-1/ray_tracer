@@ -1,0 +1,255 @@
+version: 1
+camera:
+  from: [-18.798168, 17.116055, -3.2998257]
+  to: [1.0554192, 0.6977524, 0.94817126]
+  up: [0, 1, 0]
+  fov_deg: 44.791
+  resolution: [800, 400]
+lights:
+  - visible: true
+    position: [-10, 10, -10]
+    color: [1, 1, 1]
+objects:
+  - name: Floor (Plane)
+    type: plane
+    visible: true
+    transform:
+      translate: [0, 0, 0]
+      rotate_deg: [0, 0, 0]
+      scale: [1, 1, 1]
+    cast_shadow: true
+    material:
+      color: [0.5514932, 0.5156671, 0.5686275]
+      ambient: 0.1
+      diffuse: 0.9
+      specular: 0
+      shininess: 423.886
+      reflective: 0
+      transparency: 0
+      refractive_index: 1
+  - name: Group 3
+    type: group
+    visible: true
+    transform:
+      translate: [0, 0, 5]
+      rotate_deg: [-90, 0, 40]
+      scale: [2, 2, 2]
+    children:
+      - name: Triangle 1
+        type: triangle
+        visible: true
+        transform:
+          translate: [0, 0, 0]
+          rotate_deg: [0, 0, 0]
+          scale: [1, 1, 1]
+        vertices:
+          - [0, 1, 0]
+          - [-1, 0, 0]
+          - [1, 0, 0]
+        cast_shadow: true
+        material:
+          color: [0.7794118, 0.183391, 0.183391]
+          ambient: 0.1
+          diffuse: 0.9
+          specular: 0.9
+          shininess: 92.072
+          reflective: 0.354
+          transparency: 0.928
+          refractive_index: 1
+      - name: Triangle 2
+        type: triangle
+        visible: true
+        transform:
+          translate: [0, 0, 0]
+          rotate_deg: [0, 0, 0]
+          scale: [1, 1, 1]
+        vertices:
+          - [0, 1, 0]
+          - [-1, 0, 0]
+          - [0.3333, 0.3333, 1]
+        cast_shadow: true
+        material:
+          color: [0.78039217, 0.18431373, 0.18431373]
+          ambient: 0.1
+          diffuse: 0.9
+          specular: 0.9
+          shininess: 200
+          reflective: 0
+          transparency: 0
+          refractive_index: 1
+      - name: Triangle 3
+        type: triangle
+        visible: true
+        transform:
+          translate: [0, 0, 0]
+          rotate_deg: [0, 0, 0]
+          scale: [1, 1, 1]
+        vertices:
+          - [0, 1, 0]
+          - [0.3333, 0.3333, 1]
+          - [1, 0, 0]
+        cast_shadow: true
+        material:
+          color: [0.78039217, 0.18431373, 0.18431373]
+          ambient: 0.1
+          diffuse: 0.9
+          specular: 0.9
+          shininess: 200
+          reflective: 0
+          transparency: 0.76
+          refractive_index: 1
+      - name: Triangle 4
+        type: triangle
+        visible: true
+        transform:
+          translate: [0, 0, 0]
+          rotate_deg: [0, 0, 0]
+          scale: [1, 1, 1]
+        vertices:
+          - [0.333, 0.3333, 1]
+          - [-1, 0, 0]
+          - [1, 0, 0]
+        cast_shadow: true
+        material:
+          color: [0.78039217, 0.18431373, 0.18431373]
+          ambient: 0.1
+          diffuse: 0.9
+          specular: 0.9
+          shininess: 200
+          reflective: 0.262
+          transparency: 0.669
+          refractive_index: 1.761
+  - name: Group 3
+    type: group
+    visible: true
+    transform:
+      translate: [0, 2, -4]
+      rotate_deg: [-90, 0, 0]
+      scale: [3, 3, 3]
+    children:
+      - name: Triangle 1
+        type: triangle
+        visible: true
+        transform:
+          translate: [0, 0, 0]
+          rotate_deg: [0, 0, 0]
+          scale: [1, 1, 1]
+        vertices:
+          - [0, 1, 0]
+          - [-1, 0, 0]
+          - [1, 0, 0]
+        cast_shadow: true
+        material:
+          color: [0.4897014, 0.6372549, 0.18118033]
+          ambient: 0.1
+          diffuse: 0.9
+          specular: 0.9
+          shininess: 200
+          reflective: 0
+          transparency: 0
+          refractive_index: 1
+      - name: Triangle 2
+        type: triangle
+        visible: true
+        transform:
+          translate: [0, 0, 0]
+          rotate_deg: [0, 0, 0]
+          scale: [1, 1, 1]
+        vertices:
+          - [0, -1, 0]
+          - [-1, 0, 0]
+          - [1, 0, 0]
+        cast_shadow: true
+        material:
+          color: [0.49019608, 0.6392157, 0.18039216]
+          ambient: 0.1
+          diffuse: 0.9
+          specular: 0.9
+          shininess: 200
+          reflective: 0
+          transparency: 0
+          refractive_index: 1
+      - name: Triangle 3
+        type: triangle
+        visible: true
+        transform:
+          translate: [0, 0, 0]
+          rotate_deg: [0, 0, 0]
+          scale: [1, 1, 1]
+        vertices:
+          - [0, 1, 0]
+          - [-1, 0, 0]
+          - [0, 0, 1]
+        cast_shadow: true
+        material:
+          color: [0.49019608, 0.6392157, 0.18039216]
+          ambient: 0.1
+          diffuse: 0.9
+          specular: 0.9
+          shininess: 200
+          reflective: 0
+          transparency: 0
+          refractive_index: 1
+      - name: Triangle 4
+        type: triangle
+        visible: true
+        transform:
+          translate: [0, 0, 0]
+          rotate_deg: [0, 0, 0]
+          scale: [1, 1, 1]
+        vertices:
+          - [0, 1, 0]
+          - [0, 0, 1]
+          - [1, 0, 0]
+        cast_shadow: true
+        material:
+          color: [0.49019608, 0.6392157, 0.18039216]
+          ambient: 0.1
+          diffuse: 0.9
+          specular: 0.9
+          shininess: 200
+          reflective: 0
+          transparency: 0
+          refractive_index: 1
+      - name: Triangle 5
+        type: triangle
+        visible: true
+        transform:
+          translate: [0, 0, 0]
+          rotate_deg: [0, 0, 0]
+          scale: [1, 1, 1]
+        vertices:
+          - [0, -1, 0]
+          - [-1, 0, 0]
+          - [0, 0, 1]
+        cast_shadow: true
+        material:
+          color: [0.49019608, 0.6392157, 0.18039216]
+          ambient: 0.1
+          diffuse: 0.9
+          specular: 0.9
+          shininess: 200
+          reflective: 0
+          transparency: 0
+          refractive_index: 1
+      - name: Triangle 6
+        type: triangle
+        visible: true
+        transform:
+          translate: [0, 0, 0]
+          rotate_deg: [0, 0, 0]
+          scale: [1, 1, 1]
+        vertices:
+          - [0, 0, 1]
+          - [1, 0, 0]
+          - [0, -1, 0]
+        cast_shadow: true
+        material:
+          color: [1, 1, 1]
+          ambient: 0.1
+          diffuse: 0.9
+          specular: 0.9
+          shininess: 200
+          reflective: 0
+          transparency: 0
+          refractive_index: 1

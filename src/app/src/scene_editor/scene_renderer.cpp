@@ -8,6 +8,7 @@
 #include <utility>
 
 #include "app/ray_tracing_engine.h"
+#include "app/render_rows.h"
 #include "app/scene/scene_compiler.h"
 
 namespace ray_tracer::scene_editor {
@@ -38,7 +39,7 @@ auto SceneRenderer::Render(const scene_runtime::CompiledScene& scene,
                              const bool preview,
                              std::atomic<bool>* cancel,
                              std::atomic<int>* progress) -> RenderPixels {
-  auto camera = scene.camera;
+  const auto& camera = scene.camera;
   const int full_width = camera.GetHorizontalSize();
   const int full_height = camera.GetVerticalSize();
   int width = full_width;
@@ -54,16 +55,13 @@ auto SceneRenderer::Render(const scene_runtime::CompiledScene& scene,
   image.height = height;
   image.pixels.resize(static_cast<std::size_t>(width) * static_cast<std::size_t>(height));
 
-  if (progress != nullptr) {
-    progress->store(0);
+  for (const auto& object : scene.world.Objects()) {
+    (void)object->BoundsOf();
   }
-  for (int row = 0; row < height; ++row) {
-    if (cancel != nullptr && cancel->load()) {
-      return {};
-    }
+  const auto render_row = [&](const int row) -> bool {
     for (int column = 0; column < width; ++column) {
       if (cancel != nullptr && cancel->load()) {
-        return {};
+        return false;
       }
       auto& output = image.pixels[static_cast<std::size_t>(row) * static_cast<std::size_t>(width) +
                                   static_cast<std::size_t>(column)];
@@ -78,9 +76,10 @@ auto SceneRenderer::Render(const scene_runtime::CompiledScene& scene,
       auto ray = camera.GetRayForPixel(source_x, source_y);
       output = ray_tracer::ColorAt(scene.world, ray);
     }
-    if (progress != nullptr) {
-      progress->store(((row + 1) * 100) / height);
-    }
+    return true;
+  };
+  if (!ParallelRenderRows(height, render_row, cancel, progress)) {
+    return {};
   }
   return image;
 }

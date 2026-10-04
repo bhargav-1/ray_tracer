@@ -10,6 +10,7 @@
 #include "ray.h"
 #include "shape.h"
 #include "tuple.h"
+#include "utilities.h"
 
 namespace ray_tracer {
 class Intersection;
@@ -19,6 +20,7 @@ class Group : public Shape, public std::enable_shared_from_this<Group> {
   constexpr Group(size_t id) : Shape(id) {}  // NOLINT [readability-identifier-naming]
   ~Group() override = default;
   [[nodiscard]] auto LocalIntersect(const Ray& ray) const -> std::vector<Intersection> override;
+  [[nodiscard]] auto LocalOccludes(const Ray& ray, double max_distance) const -> bool override;
   [[nodiscard]] auto LocalNormalAt(const ray_tracer::Point& point) const -> ray_tracer::Vec3 override;
   void AddChild(const std::shared_ptr<Shape>& child) {
     child->SetParentGroup(shared_from_this());
@@ -107,6 +109,17 @@ inline auto Group::LocalIntersect(const Ray& transformed_ray) const -> std::vect
 inline auto Group::LocalNormalAt(const ray_tracer::Point& point) const -> ray_tracer::Vec3 {
   (void)point;
   throw std::logic_error("a group has no surface normal");
+}
+
+inline auto Group::LocalOccludes(const Ray& ray, const double max_distance) const -> bool {
+  double entry = 0;
+  double exit = 0;
+  if (!BoundsOf().Intersects(ray, entry, exit) || exit <= utilities::kEpsilon || entry >= max_distance) {
+    return false;
+  }
+  return std::ranges::any_of(children_, [&](const std::shared_ptr<Shape>& child) {
+    return child->Occludes(ray, max_distance);
+  });
 }
 
 }  // namespace ray_tracer

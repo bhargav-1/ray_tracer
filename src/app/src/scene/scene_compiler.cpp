@@ -230,6 +230,11 @@ auto CompileScene(const scene::Scene& scene) -> CompileSceneResult {
       }
     }
 
+    // Populate the group caches after subdivision, before any render rays are traced.
+    for (const auto& object : world.Objects()) {
+      (void)object->BoundsOf();
+    }
+
     const auto& camera_spec = *scene.camera;
     ray_tracer::Camera camera{
         camera_spec.resolution.width,

@@ -1,5 +1,5 @@
 #pragma once
-#include <optional>
+#include <algorithm>
 #include <vector>
 #include "app/bounding_box.h"
 #include "intersection.h"
@@ -8,6 +8,7 @@
 #include "point.h"
 #include "ray.h"
 #include "tuple.h"
+#include "utilities.h"
 
 namespace ray_tracer {
 class Group;
@@ -31,16 +32,17 @@ class Shape {
   void SetMaterial(const Material& material) { material_ = material; }
   [[nodiscard]] auto Intersect(const Ray& ray) const -> std::vector<Intersection> {
     const auto local_ray = ray.Transform(inverse_transform_);
-    saved_ray_ = local_ray;
     return LocalIntersect(local_ray);
   };
-  [[nodiscard]] auto GetSavedRay() const -> std::optional<Ray> { return saved_ray_; }
+  [[nodiscard]] auto Occludes(const Ray& ray, const double max_distance) const -> bool {
+    return max_distance > utilities::kEpsilon && LocalOccludes(ray.Transform(inverse_transform_), max_distance);
+  }
   [[nodiscard]] virtual auto LocalIntersect(const Ray& ray) const -> std::vector<Intersection> = 0;
   [[nodiscard]] virtual auto LocalNormalAt(const ray_tracer::Point& point) const -> ray_tracer::Vec3 = 0;
   [[nodiscard]] auto GetCastShadow() const -> bool { return cast_shadow_; }
   void SetCastShadow(const bool cast_shadow) { cast_shadow_ = cast_shadow; }
   void SetParentGroup(const std::weak_ptr<Shape>& parent_group) noexcept { parent_group_ = parent_group; }
-  auto GetParentGroup() const -> std::weak_ptr<Shape> { return parent_group_; }
+  [[nodiscard]] auto GetParentGroup() const -> std::weak_ptr<Shape> { return parent_group_; }
   auto WorldToObject(Point point) const -> Point {  // NOLINT (misc-no-recursion)
     if (const auto parent = parent_group_.lock()) {
       point = parent->WorldToObject(point);
@@ -66,6 +68,18 @@ class Shape {
   [[nodiscard]] virtual auto BoundsOf() const -> BoundingBox = 0;
   virtual void Divide(const int& threshold) {(void)threshold;}
  protected:
+  [[nodiscard]] virtual auto LocalOccludes(const Ray& ray, const double max_distance) const -> bool {
+    if (!GetCastShadow()) {
+      return false;
+    }
+    const auto blocks_light = [max_distance](const Intersection& intersection) {
+      const double hit_distance = intersection.GetTime();
+      return hit_distance > utilities::kEpsilon && hit_distance < max_distance;
+    };
+    const auto intersections = LocalIntersect(ray);
+    //does any intersection block any light? If so, return true. Otherwise, return false.
+    return std::ranges::any_of(intersections, blocks_light);
+  }
   virtual void InvalidateBounds() {  // NOLINT(misc-no-recursion)
     if (const auto parent = parent_group_.lock()) {
       parent->InvalidateBounds();
@@ -77,7 +91,6 @@ class Shape {
   Matrix<4, 4> inverse_transform_ = Matrix<4, 4>::IdentityMatrix();
   Matrix<4, 4> transpose_inverse_ = Matrix<4, 4>::IdentityMatrix();
   Material material_;
-  mutable std::optional<Ray> saved_ray_;
   bool cast_shadow_ = true;
   std::weak_ptr<Shape> parent_group_;
 };

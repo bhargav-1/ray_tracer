@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <memory>
 #include <numbers>
+#include <optional>
 #include <vector>
 #include "app/bounding_box.h"
 #include "app/cone.h"
@@ -26,13 +27,17 @@ class TestShape : public Shape {
   explicit TestShape(const std::size_t shape_id) : Shape(shape_id) {}
   ~TestShape() override = default;
   [[nodiscard]] auto LocalIntersect(const Ray& ray) const -> std::vector<Intersection> override {
-    (void)ray;
+    saved_ray_ = ray;
     return {};
   };
   [[nodiscard]] auto LocalNormalAt(const ray_tracer::Point& point) const -> ray_tracer::Vec3 override {
     return {point.GetX(), point.GetY(), point.GetZ()};
   };
   auto BoundsOf() const -> BoundingBox override { return {Point(-1, -1, -1), Point(1, 1, 1)}; }
+  [[nodiscard]] auto GetSavedRay() const -> std::optional<Ray> { return saved_ray_; }
+
+ private:
+  mutable std::optional<Ray> saved_ray_;
 };
 
 SCENARIO("14_ext: Creating an empty bb") {

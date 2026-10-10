@@ -92,7 +92,7 @@ inline auto PrepareComputations(const Intersection& intersection,
   const auto* object = intersection.GetObject();
   const auto point = ray.Position(time);
   const auto eye_v = -ray.GetDirection();
-  auto normal_v = object->NormalAt(point);
+  auto normal_v = object->NormalAt(point, intersection);
   bool inside = false;
   if (normal_v.Dot(eye_v) < 0) {
     inside = true;

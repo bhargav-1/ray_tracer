@@ -1,6 +1,8 @@
 #pragma once
 #include <algorithm>
 #include <cmath>
+#include <array>
+#include <cstddef>
 #include <vector>
 #include "material.h"
 #include "matrix.h"
@@ -8,6 +10,8 @@
 #include "ray.h"
 #include "shape.h"
 #include "tuple.h"
+#include "intersection.h"
+#include "vec3.h"
 
 namespace ray_tracer {
 class Intersection;
@@ -27,6 +31,9 @@ class Triangle : public Shape {
   [[nodiscard]] auto LocalIntersect(const Ray& transformed_ray) const -> std::vector<Intersection> override;
   [[nodiscard]] auto LocalNormalAt(const ray_tracer::Point& point) const -> ray_tracer::Vec3 override;
   [[nodiscard]] auto BoundsOf() const -> BoundingBox override;
+  [[nodiscard]] auto IntersectionWithUV(double time, double u, double v) const -> Intersection { // NOLINT
+    return {time, *this, u, v};
+  }
 
  private:
   std::array<Point, 3> vertices_;
@@ -46,17 +53,17 @@ inline auto Triangle::LocalIntersect(const Ray& transformed_ray) const -> std::v
   }
   auto f_value = 1.0/determinant;
   auto p1_to_origin = Vec3(transformed_ray.GetOrigin() - vertices_[0]);
-  auto u_value = f_value * transformed_ray.GetDirection().Cross(edge2_).Dot(p1_to_origin);
+  const auto u_value = f_value * transformed_ray.GetDirection().Cross(edge2_).Dot(p1_to_origin);
   if (u_value < 0.0 || u_value > 1.0) {
     return {};
   }
   auto origin_cross_e1 = p1_to_origin.Cross(edge1_);
-  auto v_value = f_value * transformed_ray.GetDirection().Dot(origin_cross_e1);
+  const auto v_value = f_value * transformed_ray.GetDirection().Dot(origin_cross_e1);
   if (v_value < 0.0 || (u_value + v_value) > 1.0) {
     return {};
   }
   auto time = f_value * edge2_.Dot(origin_cross_e1);
-  return {Intersection(time, *this)};
+  return {IntersectionWithUV(time, u_value, v_value)};
 }
 
 inline auto Triangle::LocalNormalAt(const ray_tracer::Point& point) const -> ray_tracer::Vec3 {
@@ -70,4 +77,22 @@ inline auto Triangle::BoundsOf() const -> BoundingBox {
   }
   return bounds;
 }
+class SmoothTriangle : public Triangle {
+ public:
+  constexpr SmoothTriangle(std::size_t object_id, const std::array<Point, 3>& vertices,
+                           const std::array<Vec3, 3>& normals)
+      : Triangle(object_id, vertices), normals_(normals) {}
+  [[nodiscard]] auto GetNormals() const -> const std::array<Vec3, 3>& { return normals_; }
+  using Triangle::LocalNormalAt;
+  [[nodiscard]] auto LocalNormalAt([[maybe_unused]] const Point& point, const Intersection& intersection) const
+      -> Vec3 override {
+    const auto u_value = intersection.GetU();
+    const auto v_value = intersection.GetV();
+    return normals_[0] * (1 - u_value - v_value) + normals_[1] * u_value + normals_[2] * v_value;
+  }
+
+ private:
+  std::array<Vec3, 3> normals_;
+};
+
 }  // namespace ray_tracer

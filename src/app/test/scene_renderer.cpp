@@ -1,8 +1,13 @@
 #include <app/scene_editor/scene_renderer.h>
 #include <app/scene/scene_compiler.h>
+#include <app/scene/scene_yaml.h>
 #include <catch2/catch_test_macros.hpp>
+#include <algorithm>
+#include <filesystem>
+#include <cmath>
 
 #include "app/scene/scene.h"
+#include "app/color.h"
 
 namespace ray_tracer {
 
@@ -54,6 +59,27 @@ SCENARIO("scene renderer: renders fast low resolution previews") {
 
   CHECK(preview.width == 40);
   CHECK(preview.height == 20);
+}
+
+SCENARIO("scene renderer: renders an OBJ-backed YAML scene") {
+  auto loaded = scene_io::LoadSceneYaml(
+      std::filesystem::path{RAY_TRACER_ASSET_DIR} / "scenes" / "obj_model.yaml");
+  REQUIRE(loaded.ok);
+  if (!loaded.scene.camera.has_value()) {
+    FAIL("expected OBJ scene camera");
+  }
+  loaded.scene.camera->resolution = {80, 40};
+  const auto compiled = scene_runtime::CompileScene(loaded.scene);
+  REQUIRE(compiled.ok);
+  if (!compiled.compiled.has_value()) {
+    FAIL("expected compiled OBJ scene");
+  }
+  const auto image = scene_editor::SceneRenderer::Render(*compiled.compiled, false, nullptr, nullptr);
+  REQUIRE(image.pixels.size() == 3200);
+  CHECK(std::ranges::any_of(image.pixels, [](const Color& color) { return color.GetBlue() > 0; }));
+  CHECK(std::ranges::all_of(image.pixels, [](const Color& color) {
+    return std::isfinite(color.GetRed()) && std::isfinite(color.GetGreen()) && std::isfinite(color.GetBlue());
+  }));
 }
 
 }  // namespace ray_tracer

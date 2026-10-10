@@ -268,10 +268,18 @@ auto ParseObject(const YAML::Node& node, const std::string& label) -> scene::Obj
   }
 
   RequireOnlyKeys(
-      node, {"name", "type", "bounds", "vertices", "visible", "cast_shadow", "transform", "material"}, label);
+      node, {"name", "type", "bounds", "vertices", "source", "visible", "cast_shadow", "transform", "material"}, label);
   const auto& registration = shape_catalog::Find(type_name);
   scene::ShapeSpec shape;
   shape.type = registration.type;
+  if (shape.type == scene::ObjectType::kObj) {
+    shape.source = Required(node, "source", label).as<std::string>();
+    if (shape.source.empty()) {
+      throw std::runtime_error(label + ".source must not be empty");
+    }
+  } else if (node["source"]) {
+    throw std::runtime_error(label + ".source is only supported for OBJ objects");
+  }
   if (const auto vertices = node["vertices"]) {
     if (shape.type != scene::ObjectType::kTriangle) {
       throw std::runtime_error(label + ".vertices is only supported for triangles");
@@ -389,6 +397,9 @@ auto EmitObject(YAML::Emitter& out, const scene::Object& object) -> void {  // N
   } else {
     const auto& shape = object.Shape();
     const auto& registration = shape_catalog::Find(shape.type);
+    if (shape.type == scene::ObjectType::kObj) {
+      out << YAML::Key << "source" << YAML::Value << shape.source;
+    }
     if (shape.type == scene::ObjectType::kTriangle) {
       out << YAML::Key << "vertices" << YAML::Value << YAML::BeginSeq;
       for (const auto& vertex : shape.vertices) {
@@ -405,6 +416,18 @@ auto EmitObject(YAML::Emitter& out, const scene::Object& object) -> void {  // N
     EmitMaterial(out, shape.material);
   }
   out << YAML::EndMap;
+}
+
+// NOLINTNEXTLINE(misc-no-recursion)
+auto ResolveObjSources(std::vector<scene::Object>& objects, const std::filesystem::path& directory)
+    -> void {
+  for (auto& object : objects) {
+    if (object.IsGroup()) {
+      ResolveObjSources(object.Group().children, directory);
+    } else if (object.Shape().type == scene::ObjectType::kObj) {
+      object.Shape().source = (directory / object.Shape().source).lexically_normal().string();
+    }
+  }
 }
 
 }  // namespace
@@ -442,6 +465,9 @@ auto LoadSceneYaml(const std::filesystem::path& path) -> LoadSceneResult {
   auto result = ParseSceneYaml(buffer.str());
   if (!result.ok) {
     result.error = path.string() + ": " + result.error;
+  } else {
+    // Keep references valid even if the editor later saves the scene elsewhere.
+    ResolveObjSources(result.scene.objects, std::filesystem::absolute(path).parent_path());
   }
   return result;
 }

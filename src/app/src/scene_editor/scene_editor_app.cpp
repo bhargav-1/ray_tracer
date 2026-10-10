@@ -1,8 +1,12 @@
 #include "app/scene_editor/scene_editor_app.h"
 
 #include <utility>
+#include <cstddef>
+#include <filesystem>
+#include <vector>
 
 #include "app/scene/scene_compiler.h"
+#include "app/scene/scene.h"
 #include "app/scene/scene_yaml.h"
 
 namespace ray_tracer::scene_editor {
@@ -52,6 +56,32 @@ auto SceneEditorApp::SetCurrentScene(scene::Scene scene) -> bool {
     return false;
   }
   state_.selection = Selection{};
+  return true;
+}
+
+auto SceneEditorApp::AddObj(const std::filesystem::path& path,
+                            const std::vector<std::size_t>& parent_path) -> bool {
+  auto candidate = current_scene_;
+  auto* destination = &candidate.objects;
+  for (const auto index : parent_path) {
+    if (index >= destination->size() || !(*destination)[index].IsGroup()) {
+      state_.status_message = "OBJ import destination is no longer a group";
+      return false;
+    }
+    destination = &(*destination)[index].Group().children;
+  }
+  scene::Object object;
+  object.name = path.stem().string();
+  object.Shape().type = scene::ObjectType::kObj;
+  object.Shape().source = std::filesystem::absolute(path).lexically_normal().string();
+  destination->push_back(std::move(object));
+  auto selection_path = parent_path;
+  selection_path.push_back(destination->size() - 1);
+  if (!SetCurrentScene(std::move(candidate))) {
+    return false;
+  }
+  state_.selection = Selection::ForObject(std::move(selection_path));
+  state_.status_message = "Added OBJ " + path.string();
   return true;
 }
 

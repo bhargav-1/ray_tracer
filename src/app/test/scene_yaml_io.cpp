@@ -1,5 +1,6 @@
 #include <app/scene/scene_yaml.h>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/catch_message.hpp>
 
 #include <filesystem>
 #include <string>
@@ -235,6 +236,29 @@ SCENARIO("scene yaml: rejects invalid scenes with useful errors") {
   const auto vector_result = scene_io::ParseSceneYaml(malformed_vector);
   CHECK_FALSE(vector_result.ok);
   CHECK_FALSE(vector_result.error.empty());
+}
+
+SCENARIO("scene yaml: loads relative OBJ sources and preserves them through Save As") {
+  const auto path = std::filesystem::path{RAY_TRACER_ASSET_DIR} / "scenes" / "obj_model.yaml";
+  const auto loaded = scene_io::LoadSceneYaml(path);
+  INFO(loaded.error);
+  REQUIRE(loaded.ok);
+  REQUIRE(loaded.scene.objects.size() == 1);
+  const auto& shape = loaded.scene.objects[0].Shape();
+  CHECK(shape.type == scene::ObjectType::kObj);
+  CHECK(std::filesystem::path(shape.source).is_absolute());
+  CHECK(std::filesystem::is_regular_file(shape.source));
+  const auto serialized = scene_io::SerializeSceneYaml(loaded.scene);
+  const auto reparsed = scene_io::ParseSceneYaml(serialized);
+  REQUIRE(reparsed.ok);
+  CHECK(reparsed.scene == loaded.scene);
+
+  const auto saved_path = std::filesystem::temp_directory_path() / "ray_tracer_obj_save_as.yaml";
+  REQUIRE(scene_io::SaveSceneYaml(loaded.scene, saved_path).ok);
+  const auto reloaded = scene_io::LoadSceneYaml(saved_path);
+  std::filesystem::remove(saved_path);
+  REQUIRE(reloaded.ok);
+  CHECK(reloaded.scene == loaded.scene);
 }
 
 SCENARIO("scene yaml: serializes and round trips scenes") {

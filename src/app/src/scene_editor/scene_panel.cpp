@@ -111,6 +111,9 @@ auto AdjustSelectionAfterErase(Selection& selection, const ObjectPath& parent_pa
 auto AddObjectMenu(std::vector<scene::Object>& objects, const ObjectPath& parent_path, EditorState& state) -> bool {
   bool changed = false;
   for (const auto& registration : shape_catalog::All()) {
+    if (registration.type == scene::ObjectType::kObj) {
+      continue;  // OBJ imports use the file picker in the Add panel.
+    }
     const auto display_name = shape_catalog::DisplayName(registration.serialized_name);
     if (ImGui::MenuItem(display_name.c_str())) {
       scene::Object object;

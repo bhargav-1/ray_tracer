@@ -6,6 +6,7 @@
 #include <exception>
 #include <filesystem>
 #include <string>
+#include <sstream>
 #include <vector>
 
 #include "imgui.h"  // NOLINT
@@ -17,9 +18,15 @@ struct FileDialogEntry {
   bool directory{false};
 };
 
-auto HasYamlExtension(const std::filesystem::path& path) -> bool {
-  const auto extension = path.extension().string();
-  return extension == ".yaml" || extension == ".yml";
+auto HasAllowedExtension(const std::filesystem::path& path, const std::string& filters) -> bool {
+  std::istringstream extensions(filters);
+  std::string extension;
+  while (std::getline(extensions, extension, ',')) {
+    if (path.extension() == extension) {
+      return true;
+    }
+  }
+  return false;
 }
 
 auto CopyToBuffer(const std::string& text, std::array<char, 1024>& buffer) -> void {
@@ -28,13 +35,14 @@ auto CopyToBuffer(const std::string& text, std::array<char, 1024>& buffer) -> vo
   std::memcpy(buffer.data(), text.data(), count);
 }
 
-auto SortedEntries(const std::filesystem::path& directory, std::string& error) -> std::vector<FileDialogEntry> {
+auto SortedEntries(const std::filesystem::path& directory, const std::string& filters,
+                   std::string& error) -> std::vector<FileDialogEntry> {
   std::vector<FileDialogEntry> entries;
   error.clear();
   try {
     for (const auto& entry : std::filesystem::directory_iterator(directory)) {
       const bool is_directory = entry.is_directory();
-      if (!is_directory && !HasYamlExtension(entry.path())) {
+      if (!is_directory && !HasAllowedExtension(entry.path(), filters)) {
         continue;
       }
       entries.push_back({entry.path(), is_directory});
@@ -113,7 +121,7 @@ auto ImGuiFileDialog::Display(const std::string& key) -> bool {
     }
     ImGui::Separator();
 
-    auto entries = SortedEntries(current_directory_, error_);
+    auto entries = SortedEntries(current_directory_, filters_, error_);
     if (!error_.empty()) {
       ImGui::TextWrapped("%s", error_.c_str());
     }
@@ -178,15 +186,15 @@ auto ImGuiFileDialog::AcceptSelection() -> void {
     selected_path_ = current_directory_ / typed_filename_;
   }
   if (selected_path_.empty()) {
-    error_ = "Select a .yaml file.";
+    error_ = "Select a file matching " + filters_;
     accepted_ = false;
     return;
   }
   if (accept_label_ == "Save" && !selected_path_.has_extension()) {
     selected_path_ += ".yaml";
   }
-  if (!HasYamlExtension(selected_path_)) {
-    error_ = "Select a .yaml or .yml file.";
+  if (!HasAllowedExtension(selected_path_, filters_)) {
+    error_ = "Select a file matching " + filters_;
     accepted_ = false;
     return;
   }

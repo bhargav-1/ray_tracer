@@ -182,6 +182,9 @@ auto ImGuiFileDialog::AcceptSelection() -> void {
     accepted_ = false;
     return;
   }
+  if (accept_label_ == "Save" && !selected_path_.has_extension()) {
+    selected_path_ += ".yaml";
+  }
   if (!HasYamlExtension(selected_path_)) {
     error_ = "Select a .yaml or .yml file.";
     accepted_ = false;

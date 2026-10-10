@@ -50,6 +50,7 @@ struct EditorState {
   RenderState render_state;
   bool show_viewport_overlays{false};
   std::string status_message;
+  std::vector<std::size_t> obj_import_parent_path;
 };
 
 class SceneEditorApp {
@@ -67,6 +68,7 @@ class SceneEditorApp {
   auto LoadDefaultScene() -> bool;
   auto LoadScene(const std::filesystem::path& path) -> bool;
   auto SaveScene(const std::filesystem::path& path) -> bool;
+  auto AddObj(const std::filesystem::path& path, const std::vector<std::size_t>& parent_path = {}) -> bool;
   auto SetCurrentScene(scene::Scene scene) -> bool;
   auto RecompileCurrentScene() -> bool;
   auto ClearRenderRequest() -> void { state_.render_state.render_requested = false; }

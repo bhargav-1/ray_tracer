@@ -66,7 +66,7 @@ struct AxialBounds {
   constexpr auto operator==(const AxialBounds&) const -> bool = default;
 };
 
-enum class ObjectType : std::uint8_t { kSphere, kPlane, kCube, kCylinder, kCone, kTriangle };
+enum class ObjectType : std::uint8_t { kSphere, kPlane, kCube, kCylinder, kCone, kTriangle, kObj };
 
 enum class PatternType : std::uint8_t {
   kSolid,
@@ -111,6 +111,7 @@ struct ShapeSpec {
   ObjectType type{ObjectType::kSphere};
   AxialBounds axial_bounds;
   std::array<Vec3, 3> vertices{Vec3{0, 1, 0}, Vec3{-1, 0, 0}, Vec3{1, 0, 0}};
+  std::string source;
   Material material;
   bool cast_shadow{true};
 

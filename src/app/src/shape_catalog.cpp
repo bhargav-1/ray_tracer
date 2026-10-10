@@ -14,6 +14,7 @@
 #include "app/cube.h"
 #include "app/cylinder.h"
 #include "app/plane.h"
+#include "app/obj_parser.h"
 #include "app/point.h"
 #include "app/scene/scene.h"
 #include "app/shape.h"
@@ -56,6 +57,17 @@ auto CreateTriangle(std::size_t object_id, const scene::ShapeSpec& spec)
   return std::make_shared<Triangle>(object_id, vertices);
 }
 
+auto CreateObj(std::size_t object_id, const scene::ShapeSpec& spec) -> std::shared_ptr<Shape> {
+  if (spec.source.empty()) {
+    throw std::invalid_argument("OBJ object requires a source file");
+  }
+  const ObjParser parser(spec.source, object_id);
+  if (parser.Triangles().empty()) {
+    throw std::invalid_argument("OBJ file contains no faces: " + spec.source);
+  }
+  return parser.ObjToGroup();
+}
+
 constexpr std::array kShapes{
     ShapeRegistration{scene::ObjectType::kSphere, "sphere", false, &CreateShape<Sphere>},
     ShapeRegistration{scene::ObjectType::kPlane, "plane", false, &CreateShape<Plane>},
@@ -63,6 +75,7 @@ constexpr std::array kShapes{
     ShapeRegistration{scene::ObjectType::kCylinder, "cylinder", true, &CreateAxialShape<Cylinder>},
     ShapeRegistration{scene::ObjectType::kCone, "cone", true, &CreateAxialShape<Cone>},
     ShapeRegistration{scene::ObjectType::kTriangle, "triangle", false, &CreateTriangle},
+    ShapeRegistration{scene::ObjectType::kObj, "obj", false, &CreateObj},
 };
 
 }  // namespace

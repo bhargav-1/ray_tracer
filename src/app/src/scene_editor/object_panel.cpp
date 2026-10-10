@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <array>
 #include <cstddef>
+#include <cstring>
+#include <filesystem>
 #include <optional>
 #include <string>
 
@@ -10,6 +12,7 @@
 
 #include "app/scene/scene.h"
 #include "app/scene_editor/widget_helpers.h"
+#include "app/scene_editor/imgui_file_dialog.h"
 #include "app/shape_catalog.h"
 
 namespace ray_tracer::scene_editor {
@@ -161,6 +164,25 @@ auto DrawObjectEditor(scene::Object& object) -> bool {
   }
 
   auto& shape = object.Shape();
+  if (shape.type == scene::ObjectType::kObj) {
+    std::array<char, 1024> source_buffer{};
+    std::memcpy(source_buffer.data(), shape.source.data(),
+                std::min(shape.source.size(), source_buffer.size() - 1));
+    if (ImGui::InputText("OBJ source", source_buffer.data(), source_buffer.size())) {
+      shape.source = source_buffer.data();
+    }
+    changed |= ImGui::IsItemDeactivatedAfterEdit();
+    const auto dialog_key = "ObjSourceDialog" + std::to_string(ImGui::GetID("OBJ source"));
+    if (ImGui::Button("Browse OBJ")) {
+      ImGuiFileDialog::Instance()->OpenDialog(dialog_key, "Select OBJ Model", ".obj",
+                                             shape.source.empty() ? std::filesystem::path{RAY_TRACER_ASSET_DIR}
+                                                                  : std::filesystem::path{shape.source});
+    }
+    if (ImGuiFileDialog::Instance()->Display(dialog_key) && ImGuiFileDialog::Instance()->IsOk()) {
+      shape.source = ImGuiFileDialog::Instance()->GetFilePathName();
+      changed = true;
+    }
+  }
   const auto current_name = shape_catalog::DisplayName(shape.type);
   if (ImGui::BeginCombo("Shape", current_name.c_str())) {
     for (const auto& registration : shape_catalog::All()) {

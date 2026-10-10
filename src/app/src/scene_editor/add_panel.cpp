@@ -1,6 +1,7 @@
 #include "app/scene_editor/add_panel.h"
 
 #include <cstddef>
+#include <filesystem>
 #include <string>
 #include <utility>
 #include <vector>
@@ -8,6 +9,7 @@
 #include "imgui.h"  // NOLINT
 
 #include "app/scene/scene.h"
+#include "app/scene_editor/imgui_file_dialog.h"
 #include "app/scene_editor/render_state.h"
 #include "app/scene_editor/scene_editor_app.h"
 #include "app/shape_catalog.h"
@@ -57,6 +59,12 @@ auto DrawAddPanel(SceneEditorApp& app, UiRenderState& render_state) -> bool {
     const auto display_name = shape_catalog::DisplayName(registration.serialized_name);
     const auto button_label = "+ " + display_name;
     if (ImGui::Button(button_label.c_str(), ImVec2(-1.0F, 40.0F))) {
+      if (registration.type == scene::ObjectType::kObj) {
+        state.obj_import_parent_path = destination_path;
+        ImGuiFileDialog::Instance()->OpenDialog("AddObjDialog", "Add OBJ Model", ".obj",
+                                               std::filesystem::path{RAY_TRACER_ASSET_DIR}, "Add");
+        continue;
+      }
       scene::Object object;
       object.name = display_name + " " + std::to_string(destination->size() + 1);
       object.Shape().type = registration.type;
@@ -69,6 +77,11 @@ auto DrawAddPanel(SceneEditorApp& app, UiRenderState& render_state) -> bool {
       path.push_back(destination->size() - 1);
       state.selection = Selection::ForObject(std::move(path));
       changed = true;
+    }
+  }
+  if (ImGuiFileDialog::Instance()->Display("AddObjDialog") && ImGuiFileDialog::Instance()->IsOk()) {
+    if (app.AddObj(ImGuiFileDialog::Instance()->GetFilePathName(), state.obj_import_parent_path)) {
+      return true;  // The scene was replaced; recompute destination pointers on the next frame.
     }
   }
   if (ImGui::Button("+ Group", ImVec2(-1.0F, 40.0F))) {

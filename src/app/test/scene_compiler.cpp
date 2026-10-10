@@ -10,12 +10,15 @@
 #include <string>
 
 #include "app/cube.h"
+#include "app/color.h"
+#include "app/material.h"
 #include "app/group.h"
 #include "app/matrix.h"
 #include "app/point.h"
 #include "app/ray.h"
 #include "app/scene/scene.h"
 #include "app/triangle.h"
+#include "app/shape.h"
 #include "app/tuple.h"
 
 namespace ray_tracer {

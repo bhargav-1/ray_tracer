@@ -155,6 +155,20 @@ auto CompileMaterial(const scene::Material& material) -> ray_tracer::Material {
   return compiled;
 }
 
+// NOLINTNEXTLINE(misc-no-recursion)
+auto ConfigureObjChildren(ray_tracer::Group& group, const ray_tracer::Material& material,
+                          bool cast_shadow, std::size_t& next_id) -> void {
+  for (const auto& child : group.GetChildren()) {
+    // The parser assigned consecutive IDs starting at the imported root's ID.
+    ++next_id;
+    child->SetMaterial(material);
+    child->SetCastShadow(cast_shadow);
+    if (auto* subgroup = dynamic_cast<ray_tracer::Group*>(child.get())) {
+      ConfigureObjChildren(*subgroup, material, cast_shadow, next_id);
+    }
+  }
+}
+
 auto CompileObject(const scene::Object& object, std::size_t& next_id)  // NOLINT(misc-no-recursion)
     -> std::shared_ptr<ray_tracer::Shape> {
   if (object.IsGroup()) {
@@ -177,7 +191,11 @@ auto CompileObject(const scene::Object& object, std::size_t& next_id)  // NOLINT
   auto shape = registration.create(next_id++, shape_spec);
   shape->SetTransform(BuildTransformMatrix(object.transform));
   shape->SetCastShadow(shape_spec.cast_shadow);
-  shape->SetMaterial(CompileMaterial(shape_spec.material));
+  const auto material = CompileMaterial(shape_spec.material);
+  shape->SetMaterial(material);
+  if (shape_spec.type == scene::ObjectType::kObj) {
+    ConfigureObjChildren(dynamic_cast<ray_tracer::Group&>(*shape), material, shape_spec.cast_shadow, next_id);
+  }
   return shape;
 }
 

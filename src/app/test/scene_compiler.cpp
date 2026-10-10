@@ -128,11 +128,12 @@ SCENARIO("scene compiler: compiles the editable triangle solids example") {
   const auto path = std::filesystem::path{RAY_TRACER_ASSET_DIR} / "scenes" / "triangle_solids.yaml";
   const auto loaded = scene_io::LoadSceneYaml(path);
   REQUIRE(loaded.ok);
-  REQUIRE(loaded.scene.objects.size() == 5);
+  REQUIRE(loaded.scene.objects.size() == 6);
   CHECK(loaded.scene.objects[1].Group().children.size() == 8);
   CHECK(loaded.scene.objects[2].Group().children.size() == 4);
   CHECK(loaded.scene.objects[3].Group().children.size() == 6);
   CHECK(loaded.scene.objects[4].Group().children.size() == 10);
+  CHECK(loaded.scene.objects[5].Group().children.size() == 36);
   const auto result = scene_runtime::CompileScene(loaded.scene);
   INFO(result.error);
   CHECK(result.ok);

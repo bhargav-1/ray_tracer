@@ -1,6 +1,5 @@
-#include <catch2/catch_test_macros.hpp>
-
 #include <algorithm>
+#include <catch2/catch_test_macros.hpp>
 #include <cmath>
 #include <filesystem>
 #include <fstream>
@@ -8,11 +7,14 @@
 #include <stdexcept>
 #include <string_view>
 #include <system_error>
-#include "app/utilities.h"
-// #include "app/matrix.h"
-#include "app/obj_parser.h"
 #include "app/group.h"
+#include "app/intersection.h"
+#include "app/obj_parser.h"
+#include "app/point.h"
+#include "app/ray.h"
 #include "app/triangle.h"
+#include "app/utilities.h"
+#include "app/vec3.h"
 
 namespace ray_tracer {
 namespace {
@@ -175,17 +177,17 @@ f 1 3 4 # second triangle
   auto parser = ObjParser(file.Path().string());
   const auto& triangles = parser.Triangles();
   REQUIRE(triangles.size() == 2);
-  CHECK(triangles[0].GetVertices()[0] == parser.Vertices()[1]);
-  CHECK(triangles[0].GetVertices()[1] == parser.Vertices()[2]);
-  CHECK(triangles[0].GetVertices()[2] == parser.Vertices()[3]);
-  CHECK(triangles[1].GetVertices()[0] == parser.Vertices()[1]);
-  CHECK(triangles[1].GetVertices()[1] == parser.Vertices()[3]);
-  CHECK(triangles[1].GetVertices()[2] == parser.Vertices()[4]);
+  CHECK(triangles[0]->GetVertices()[0] == parser.Vertices()[1]);
+  CHECK(triangles[0]->GetVertices()[1] == parser.Vertices()[2]);
+  CHECK(triangles[0]->GetVertices()[2] == parser.Vertices()[3]);
+  CHECK(triangles[1]->GetVertices()[0] == parser.Vertices()[1]);
+  CHECK(triangles[1]->GetVertices()[1] == parser.Vertices()[3]);
+  CHECK(triangles[1]->GetVertices()[2] == parser.Vertices()[4]);
   const auto group = parser.Group();
   REQUIRE(group->GetChildren().size() == 2);
   const auto* child = dynamic_cast<const Triangle*>(group->GetChildren()[0].get());
   REQUIRE(child != nullptr);
-  CHECK(child->GetVertices() == triangles[0].GetVertices());
+  CHECK(child->GetVertices() == triangles[0]->GetVertices());
   CHECK(child->GetParentGroup().lock() == group);
 
   CHECK(parser.Vertices().size() == 5);
@@ -267,9 +269,9 @@ f 1 3 4
 }
 
 SCENARIO("15: Converting an OBJ file to a group") {
-        GIVEN("a file triangles.obj, v -1 1 0 v -1 0 0 v 1 0 0 v 1 1 0 g FirstGroup f 1 2 3 g SecondGroup f 1 3 4") {
-        THEN("the parser creates a group containing the triangles") {
-        const auto file = TemporaryObjFile("ray_tracer_obj_triangles.obj", R"(v -1 1 0
+  GIVEN("a file triangles.obj, v -1 1 0 v -1 0 0 v 1 0 0 v 1 1 0 g FirstGroup f 1 2 3 g SecondGroup f 1 3 4") {
+    THEN("the parser creates a group containing the triangles") {
+      const auto file = TemporaryObjFile("ray_tracer_obj_triangles.obj", R"(v -1 1 0
 v -1 0 0
 v 1 0 0
 v 1 1 0
@@ -278,14 +280,133 @@ f 1 2 3
 g SecondGroup
 f 1 3 4
 )");
-        auto parser = ObjParser(file.Path().string());
-        auto group = parser.ObjToGroup();
-        REQUIRE(group->GetChildren().size() == 2);
-        const auto& children = group->GetChildren();
-        CHECK(std::ranges::find(children, parser.NamedGroup("FirstGroup")) != children.end());
-        CHECK(std::ranges::find(children, parser.NamedGroup("SecondGroup")) != children.end());
-        CHECK(parser.NamedGroup("FirstGroup")->GetParentGroup().lock() == group);
-        CHECK(parser.NamedGroup("SecondGroup")->GetParentGroup().lock() == group);
+      auto parser = ObjParser(file.Path().string());
+      auto group = parser.ObjToGroup();
+      REQUIRE(group->GetChildren().size() == 2);
+      const auto& children = group->GetChildren();
+      CHECK(std::ranges::find(children, parser.NamedGroup("FirstGroup")) != children.end());
+      CHECK(std::ranges::find(children, parser.NamedGroup("SecondGroup")) != children.end());
+      CHECK(parser.NamedGroup("FirstGroup")->GetParentGroup().lock() == group);
+      CHECK(parser.NamedGroup("SecondGroup")->GetParentGroup().lock() == group);
+    }
+  }
+}
+
+namespace {
+// NOLINTNEXTLINE(readability-identifier-naming)
+const SmoothTriangle triangle_var{1,
+                                  {Point(0, 1, 0), Point(-1, 0, 0), Point(1, 0, 0)},
+                                  {Vec3(0, 1, 0), Vec3(-1, 0, 0), Vec3(1, 0, 0)}};
+}  // namespace
+
+SCENARIO("15: smooth triangles") {
+  GIVEN(
+      "p1 = point(0,1,0),p2(-1,0,0),p3=(1,0,0),n1=vec(0,1,0),n2=vec(-1,0,0),n3=vec(1,0,0),t = "
+      "smooth_triangle(p1,p2,p3,n1,n2,n3)") {
+    THEN("t.p1 == p1 and t.p2 == p2 and t.p3 == p3 and t.n1 == n1 and t.n2 == n2 and t.n3 == n3") {
+      CHECK(triangle_var.GetVertices()[0] == Point(0, 1, 0));
+      CHECK(triangle_var.GetVertices()[1] == Point(-1, 0, 0));
+      CHECK(triangle_var.GetVertices()[2] == Point(1, 0, 0));
+      CHECK(triangle_var.GetNormals()[0] == Vec3(0, 1, 0));
+      CHECK(triangle_var.GetNormals()[1] == Vec3(-1, 0, 0));
+      CHECK(triangle_var.GetNormals()[2] == Vec3(1, 0, 0));
+    }
+  }
+}
+SCENARIO("15: constructing a smooth triangle") {
+  GIVEN(
+      "p1 = point(0,1,0),p2(-1,0,0),p3=(1,0,0),n1=vec(0,1,0),n2=vec(-1,0,0),n3=vec(1,0,0),t = "
+      "smooth_triangle(p1,p2,p3,n1,n2,n3)") {
+    THEN("t.p1 == p1 and t.p2 == p2 and t.p3 == p3 and t.n1 == n1 and t.n2 == n2 and t.n3 == n3") {
+      CHECK(triangle_var.GetVertices()[0] == Point(0, 1, 0));
+      CHECK(triangle_var.GetVertices()[1] == Point(-1, 0, 0));
+      CHECK(triangle_var.GetVertices()[2] == Point(1, 0, 0));
+      CHECK(triangle_var.GetNormals()[0] == Vec3(0, 1, 0));
+      CHECK(triangle_var.GetNormals()[1] == Vec3(-1, 0, 0));
+      CHECK(triangle_var.GetNormals()[2] == Vec3(1, 0, 0));
+    }
+  }
+}
+SCENARIO("15: An intersection can encapsulate u and v") {
+  GIVEN(
+      "t = smooth_triangle(point(0,1,0),point(-1,0,0),point(1,0,0),vec(0,1,0),vec(-1,0,0),vec(1,0,0)), i = "
+      "intersection(3.5,t,u=0.2,v=0.4)") {
+    THEN("i.u == 0.2 and i.v == 0.4") {
+      auto intersection_var = triangle_var.IntersectionWithUV(3.5, 0.2, 0.4);
+      CHECK(utilities::Equal(intersection_var.GetU(), 0.2));
+      CHECK(utilities::Equal(intersection_var.GetV(), 0.4));
+    }
+  }
+}
+
+SCENARIO("15: An intersection with a smooth triangle stores u/v") {
+  GIVEN(
+      "r=ray(point(-0.2,0.3,-2),vec(0,0,1)), t = "
+      "smooth_triangle(point(0,1,0),point(-1,0,0),point(1,0,0),vec(0,1,0),vec(-1,0,0),vec(1,0,0))") {
+    auto ray_var = Ray(Point(-0.2, 0.3, -2.0), Vec3(0.0, 0.0, 1.0));
+    THEN("xs = intersect(t,r) and xs[0].u == 0.45 and xs[0].v == 0.25") {
+      auto intersections = triangle_var.Intersect(ray_var);
+      REQUIRE(intersections.size() == 1);
+      CHECK(utilities::Equal(intersections[0].GetU(), 0.45));
+      CHECK(utilities::Equal(intersections[0].GetV(), 0.25));
+    }
+  }
+}
+
+SCENARIO("15: A smooth triangle uses u/v to interpolate the normal") {
+  GIVEN(
+      "i = intersection(1, smooth_triangle(point(0,1,0),point(-1,0,0),point(1,0,0),vec(0,1,0),vec(-1,0,0),vec(1,0,0)), "
+      "u=0.45,v=0.25)") {
+    auto intersection_var = triangle_var.IntersectionWithUV(1.0, 0.45, 0.25);
+    THEN("n = i.object.normal_at(point(), i) and n == vec(-0.5547, 0.83205,-0.00000)") {
+      auto point_of_intersection = Point(0.05, 0.25, 0.00000);
+      auto normal_at_point = triangle_var.NormalAt(point_of_intersection,
+                                                   intersection_var);  // Pass the intersection to get the correct u/v
+      CHECK(normal_at_point == Vec3(-0.5547, 0.83205, -0.00000));
+    }
+  }
+}
+
+SCENARIO("15: Vertex normal records") {
+  GIVEN("a file containing: vn 0 0 1 vn 0.707 0 -0.707 vn 1 2 3") {
+    THEN("the parser extracts the vertex normal records with one-based indexing") {
+      const auto file = TemporaryObjFile("ray_tracer_obj_vertex_normals.obj", R"(vn 0 0 1
+vn 0.707 0 -0.707
+vn 1 2 3
+)");
+      auto parsed_lines = ObjParser(file.Path().string());
+      CHECK(parsed_lines.GetNormals()[1] == Vec3(0, 0, 1));
+      CHECK(parsed_lines.GetNormals()[2] == Vec3(0.707, 0, -0.707));
+      CHECK(parsed_lines.GetNormals()[3] == Vec3(1, 2, 3));
+    }
+  }
+}
+
+SCENARIO("15: Faces with normals") {
+  GIVEN("file: v 0 1 0 v -1 0 0 v 1 0 0 vn -1 0 0 vn 1 0 0 vn 0 1 0 f 1//3 2//1 3//2") {
+    THEN("the parser extracts the vertex and normal indices") {
+      const auto file = TemporaryObjFile("ray_tracer_obj_faces_with_normals.obj", R"(v 0 1 0
+v -1 0 0
+v 1 0 0
+vn -1 0 0
+vn 1 0 0
+vn 0 1 0
+f 1//3 2//1 3//2
+f 1/0/3 2/102/1 3/14/2
+)");
+        auto parsed_lines = ObjParser(file.Path().string());
+        const auto& triangles = parsed_lines.Triangles();
+        REQUIRE(triangles.size() == 2);
+        for (const auto& triangle : triangles) {
+          CHECK(triangle->GetVertices()[0] == parsed_lines.Vertices()[1]);
+          CHECK(triangle->GetVertices()[1] == parsed_lines.Vertices()[2]);
+          CHECK(triangle->GetVertices()[2] == parsed_lines.Vertices()[3]);
+          const auto* smooth_triangle_ptr = dynamic_cast<const SmoothTriangle*>(triangle.get());
+          REQUIRE(smooth_triangle_ptr != nullptr);
+          CHECK(smooth_triangle_ptr->GetNormals()[0] == parsed_lines.GetNormals()[3]);
+          CHECK(smooth_triangle_ptr->GetNormals()[1] == parsed_lines.GetNormals()[1]);
+          CHECK(smooth_triangle_ptr->GetNormals()[2] == parsed_lines.GetNormals()[2]);
+        }
     }
   }
 }

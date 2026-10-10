@@ -39,6 +39,10 @@ class Shape {
   }
   [[nodiscard]] virtual auto LocalIntersect(const Ray& ray) const -> std::vector<Intersection> = 0;
   [[nodiscard]] virtual auto LocalNormalAt(const ray_tracer::Point& point) const -> ray_tracer::Vec3 = 0;
+  [[nodiscard]] virtual auto LocalNormalAt(const Point& point, [[maybe_unused]] const Intersection& intersection) const
+      -> Vec3 {
+    return LocalNormalAt(point);
+  }
   [[nodiscard]] auto GetCastShadow() const -> bool { return cast_shadow_; }
   void SetCastShadow(const bool cast_shadow) { cast_shadow_ = cast_shadow; }
   void SetParentGroup(const std::weak_ptr<Shape>& parent_group) noexcept { parent_group_ = parent_group; }
@@ -61,6 +65,11 @@ class Shape {
     const auto local_point = WorldToObject(point);
     auto const local_normal = LocalNormalAt(local_point);
     // https:  //www.scratchapixel.com/lessons/mathematics-physics-for-computer-graphics/geometry/transforming-normals.html
+    return NormalToWorld(local_normal).Normalize();
+  }
+  [[nodiscard]] auto NormalAt(const Point& point, const Intersection& intersection) const -> Vec3 {
+    const auto local_point = WorldToObject(point);
+    const auto local_normal = LocalNormalAt(local_point, intersection);
     return NormalToWorld(local_normal).Normalize();
   }
 

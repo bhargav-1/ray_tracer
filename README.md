@@ -6,7 +6,7 @@ A CPU ray tracer and scene editor based on *The Ray Tracer Challenge*.
 
 - [Building a dodecahedron from triangles](docs/dodecahedron.md): the bowl diagram, vertex coordinates, and face connections.
 - [Triangle solids scene](assets/scenes/triangle_solids.yaml): editable octahedron, triangular and square pyramids, decahedron, and dodecahedron.
-- [OBJ model scene](assets/scenes/obj_model.yaml): an imported teapot with named groups.
+- [Teapot comparison, Chapter 15](assets/scenes/teapot_comparision_chapter15.yaml): identical teapots with flat and smooth shading.
 
 ## OBJ models
 

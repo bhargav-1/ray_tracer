@@ -1,0 +1,50 @@
+# Chapter 15: identical teapot geometry, flat (left) versus smooth (right).
+# teapot_normals.obj adds area-weighted vertex normals to teapot.obj.
+version: 1
+camera:
+  from: [0, 5, -13]
+  to: [0, 1.4, 0]
+  up: [0, 1, 0]
+  fov_deg: 60
+  resolution: [800, 400]
+lights:
+  - visible: true
+    position: [0, 8, -6]
+    color: [1, 1, 1]
+objects:
+  - name: Teapot without vertex normals (flat)
+    type: obj
+    visible: true
+    transform:
+      translate: [-3.6, 0, 0]
+      rotate_deg: [0, 25, 0]
+      scale: [0.85, 0.85, 0.85]
+    source: ../models/teapot.obj
+    cast_shadow: true
+    material:
+      color: [0.2, 0.65, 0.9]
+      ambient: 0.1
+      diffuse: 0.8
+      specular: 0.3
+      shininess: 100
+      reflective: 0
+      transparency: 0
+      refractive_index: 1
+  - name: Teapot with vertex normals (smooth)
+    type: obj
+    visible: true
+    transform:
+      translate: [3.6, 0, 0]
+      rotate_deg: [0, 25, 0]
+      scale: [0.85, 0.85, 0.85]
+    source: ../models/teapot_normals.obj
+    cast_shadow: true
+    material:
+      color: [0.2, 0.65, 0.9]
+      ambient: 0.1
+      diffuse: 0.8
+      specular: 0.3
+      shininess: 100
+      reflective: 0
+      transparency: 0
+      refractive_index: 1

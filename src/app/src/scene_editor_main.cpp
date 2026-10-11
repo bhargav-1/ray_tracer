@@ -35,7 +35,8 @@ auto GlfwErrorCallback(int error, const char* description) -> void {
   std::cerr << "GLFW Error " << error << ": " << description << '\n';
 }
 
-auto DrawMainLayout(SceneEditorApp& app, UiRenderState& render_state, std::array<char, 1024>& path_buffer) -> bool {
+auto DrawMainLayout(SceneEditorApp& app, UiRenderState& render_state, std::array<char, 1024>& path_buffer)
+    -> ray_tracer::scene_editor::ViewportPanelResult {
   bool changed = false;
   constexpr auto kFixedPaneFlags =
       ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse;
@@ -55,9 +56,7 @@ auto DrawMainLayout(SceneEditorApp& app, UiRenderState& render_state, std::array
   ImGui::SetNextWindowPos(ImVec2(435, 0), ImGuiCond_Always);
   ImGui::SetNextWindowSize(ImVec2(970, 900), ImGuiCond_Always);
   const auto viewport_result = DrawViewportPanel(app, render_state);
-  changed |= viewport_result.changed || viewport_result.camera_moved;
-
-  return changed;
+  return {.changed = changed || viewport_result.changed, .camera_moved = viewport_result.camera_moved};
 }
 
 }  // namespace
@@ -113,8 +112,9 @@ auto main(int argc, char** argv) -> int {
     ImGui::NewFrame();
 
     UploadPendingTexture(render_state);
-    if (DrawMainLayout(app, render_state, path_buffer)) {
-      RequestPreviewRender(app, render_state);
+    const auto changes = DrawMainLayout(app, render_state, path_buffer);
+    if (changes.changed || changes.camera_moved) {
+      RequestPreviewRender(render_state, !changes.changed);
     }
     ProcessDeferredRenders(app, render_state);
 

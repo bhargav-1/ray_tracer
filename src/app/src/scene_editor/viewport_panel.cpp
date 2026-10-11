@@ -81,11 +81,11 @@ auto DrawViewportPanel(SceneEditorApp& app, UiRenderState& render_state) -> View
 
     if (scene.camera.has_value() && ImGui::IsMouseHoveringRect(image_min, image_max) && !overlay.block_camera) {
       const ImVec2 drag = ImGui::GetIO().MouseDelta;
-      if (ImGui::IsMouseDragging(ImGuiMouseButton_Left)) {
+      if (ImGui::IsMouseDragging(ImGuiMouseButton_Left) && (drag.x != 0.0F || drag.y != 0.0F)) {
         OrbitCamera(*scene.camera, drag.x, drag.y);
         result.camera_moved = true;
       }
-      if (ImGui::IsMouseDragging(ImGuiMouseButton_Right)) {
+      if (ImGui::IsMouseDragging(ImGuiMouseButton_Right) && (drag.x != 0.0F || drag.y != 0.0F)) {
         PanCamera(*scene.camera, drag.x, drag.y);
         result.camera_moved = true;
       }

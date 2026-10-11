@@ -47,6 +47,7 @@ class Shape {
   void SetCastShadow(const bool cast_shadow) { cast_shadow_ = cast_shadow; }
   void SetParentGroup(const std::weak_ptr<Shape>& parent_group) noexcept { parent_group_ = parent_group; }
   [[nodiscard]] auto GetParentGroup() const -> std::weak_ptr<Shape> { return parent_group_; }
+  [[nodiscard]] virtual auto Includes(const Shape* object) const -> bool { return this == object; }
   auto WorldToObject(Point point) const -> Point {  // NOLINT (misc-no-recursion)
     if (const auto parent = parent_group_.lock()) {
       point = parent->WorldToObject(point);

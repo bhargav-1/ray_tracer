@@ -28,6 +28,11 @@ class Group : public Shape, public std::enable_shared_from_this<Group> {
     InvalidateBounds();
   }
   auto GetChildren() const -> std::vector<std::shared_ptr<Shape>> { return children_; }
+  [[nodiscard]] auto Includes(const Shape* object) const -> bool override {  // NOLINT(misc-no-recursion)
+    return Shape::Includes(object) || std::ranges::any_of(children_, [object](const auto& child) {
+      return child->Includes(object);
+    });
+  }
   auto BoundsOf() const -> BoundingBox override {
     if (cached_bounds_.has_value()) {
       return *cached_bounds_;

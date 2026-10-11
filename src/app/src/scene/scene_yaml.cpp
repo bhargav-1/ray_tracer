@@ -268,7 +268,7 @@ auto ParseObject(const YAML::Node& node, const std::string& label) -> scene::Obj
   }
 
   RequireOnlyKeys(
-      node, {"name", "type", "bounds", "vertices", "source", "visible", "cast_shadow", "transform", "material"}, label);
+      node, {"name", "type", "bounds", "vertices", "normals", "source", "visible", "cast_shadow", "transform", "material"}, label);
   const auto& registration = shape_catalog::Find(type_name);
   scene::ShapeSpec shape;
   shape.type = registration.type;
@@ -281,7 +281,7 @@ auto ParseObject(const YAML::Node& node, const std::string& label) -> scene::Obj
     throw std::runtime_error(label + ".source is only supported for OBJ objects");
   }
   if (const auto vertices = node["vertices"]) {
-    if (shape.type != scene::ObjectType::kTriangle) {
+    if (shape.type != scene::ObjectType::kTriangle && shape.type != scene::ObjectType::kSmoothTriangle) {
       throw std::runtime_error(label + ".vertices is only supported for triangles");
     }
     RequireSequence(vertices, label + ".vertices");
@@ -290,6 +290,18 @@ auto ParseObject(const YAML::Node& node, const std::string& label) -> scene::Obj
     }
     for (std::size_t index = 0; index < shape.vertices.size(); ++index) {
       shape.vertices[index] = ParseVec3(vertices[index], label + ".vertices[" + std::to_string(index) + "]");
+    }
+  }
+  if (const auto normals = node["normals"]) {
+    if (shape.type != scene::ObjectType::kSmoothTriangle) {
+      throw std::runtime_error(label + ".normals is only supported for smooth triangles");
+    }
+    RequireSequence(normals, label + ".normals");
+    if (normals.size() != 3) {
+      throw std::runtime_error(label + ".normals must contain exactly 3 vectors");
+    }
+    for (std::size_t index = 0; index < shape.normals.size(); ++index) {
+      shape.normals[index] = ParseVec3(normals[index], label + ".normals[" + std::to_string(index) + "]");
     }
   }
   if (const auto bounds = node["bounds"]) {
@@ -400,10 +412,17 @@ auto EmitObject(YAML::Emitter& out, const scene::Object& object) -> void {  // N
     if (shape.type == scene::ObjectType::kObj) {
       out << YAML::Key << "source" << YAML::Value << shape.source;
     }
-    if (shape.type == scene::ObjectType::kTriangle) {
+    if (shape.type == scene::ObjectType::kTriangle || shape.type == scene::ObjectType::kSmoothTriangle) {
       out << YAML::Key << "vertices" << YAML::Value << YAML::BeginSeq;
       for (const auto& vertex : shape.vertices) {
         EmitVec3(out, vertex);
+      }
+      out << YAML::EndSeq;
+    }
+    if (shape.type == scene::ObjectType::kSmoothTriangle) {
+      out << YAML::Key << "normals" << YAML::Value << YAML::BeginSeq;
+      for (const auto& normal : shape.normals) {
+        EmitVec3(out, normal);
       }
       out << YAML::EndSeq;
     }

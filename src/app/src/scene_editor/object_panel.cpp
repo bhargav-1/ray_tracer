@@ -203,11 +203,17 @@ auto DrawObjectEditor(scene::Object& object) -> bool {
     changed |= DrawAxialBoundsEditor(shape.axial_bounds);
     ImGui::TreePop();
   }
-  if (shape.type == scene::ObjectType::kTriangle &&
+  if ((shape.type == scene::ObjectType::kTriangle || shape.type == scene::ObjectType::kSmoothTriangle) &&
       ImGui::TreeNodeEx("Geometry", ImGuiTreeNodeFlags_DefaultOpen)) {
     for (std::size_t index = 0; index < shape.vertices.size(); ++index) {
       const auto label = "Vertex " + std::to_string(index + 1);
       changed |= DragF3(label.c_str(), shape.vertices[index], 0.05F, 0.0F, 0.0F);
+    }
+    if (shape.type == scene::ObjectType::kSmoothTriangle) {
+      for (std::size_t index = 0; index < shape.normals.size(); ++index) {
+        const auto label = "Normal " + std::to_string(index + 1);
+        changed |= DragF3(label.c_str(), shape.normals[index], 0.05F, 0.0F, 0.0F);
+      }
     }
     ImGui::TreePop();
   }

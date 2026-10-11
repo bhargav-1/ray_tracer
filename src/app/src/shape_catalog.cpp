@@ -9,6 +9,7 @@
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <type_traits>
 
 #include "app/cone.h"
 #include "app/cube.h"
@@ -40,6 +41,7 @@ auto CreateAxialShape(std::size_t object_id, const scene::ShapeSpec& spec) -> st
   return shape;
 }
 
+template <typename TriangleType>
 auto CreateTriangle(std::size_t object_id, const scene::ShapeSpec& spec)
     -> std::shared_ptr<Shape> {
   std::array<Point, 3> vertices;
@@ -54,7 +56,22 @@ auto CreateTriangle(std::size_t object_id, const scene::ShapeSpec& spec)
   if (normal.Dot(normal) == 0) {
     throw std::invalid_argument("triangle vertices must not be collinear or coincident");
   }
-  return std::make_shared<Triangle>(object_id, vertices);
+  if constexpr (std::is_same_v<TriangleType, SmoothTriangle>) {
+    std::array<Vec3, 3> normals;
+    for (std::size_t index = 0; index < normals.size(); ++index) {
+      const auto& value = spec.normals[index];
+      if (!std::isfinite(value.x) || !std::isfinite(value.y) || !std::isfinite(value.z)) {
+        throw std::invalid_argument("smooth triangle normals must be finite");
+      }
+      normals[index] = Vec3(value.x, value.y, value.z);
+      if (normals[index].Dot(normals[index]) == 0) {
+        throw std::invalid_argument("smooth triangle normals must not be zero");
+      }
+    }
+    return std::make_shared<SmoothTriangle>(object_id, vertices, normals);
+  } else {
+    return std::make_shared<Triangle>(object_id, vertices);
+  }
 }
 
 auto CreateObj(std::size_t object_id, const scene::ShapeSpec& spec) -> std::shared_ptr<Shape> {
@@ -74,7 +91,8 @@ constexpr std::array kShapes{
     ShapeRegistration{scene::ObjectType::kCube, "cube", false, &CreateShape<Cube>},
     ShapeRegistration{scene::ObjectType::kCylinder, "cylinder", true, &CreateAxialShape<Cylinder>},
     ShapeRegistration{scene::ObjectType::kCone, "cone", true, &CreateAxialShape<Cone>},
-    ShapeRegistration{scene::ObjectType::kTriangle, "triangle", false, &CreateTriangle},
+    ShapeRegistration{scene::ObjectType::kTriangle, "triangle", false, &CreateTriangle<Triangle>},
+    ShapeRegistration{scene::ObjectType::kSmoothTriangle, "smooth_triangle", false, &CreateTriangle<SmoothTriangle>},
     ShapeRegistration{scene::ObjectType::kObj, "obj", false, &CreateObj},
 };
 

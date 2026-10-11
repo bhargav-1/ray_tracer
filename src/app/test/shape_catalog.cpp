@@ -9,12 +9,13 @@
 #include "app/scene/scene.h"
 #include "app/shape_catalog.h"
 #include "app/triangle.h"
+#include "app/vec3.h"
 
 namespace ray_tracer {
 
 SCENARIO("shape catalog: describes and creates registered shapes") {
   const auto shapes = shape_catalog::All();
-  REQUIRE(shapes.size() == 7);
+  REQUIRE(shapes.size() == 8);
 
   const auto& cube = shape_catalog::Find(scene::ObjectType::kCube);
   CHECK(cube.serialized_name == "cube");
@@ -54,6 +55,21 @@ SCENARIO("shape catalog: describes and creates registered shapes") {
   CHECK(configured_triangle->GetVertices()[2] == Point(1, 0, 0));
   CHECK(configured_triangle->BoundsOf().GetMin() == Point(-1, 0, 0));
   CHECK(configured_triangle->BoundsOf().GetMax() == Point(1, 1, 0));
+
+  const auto& smooth = shape_catalog::Find(std::string_view{"smooth_triangle"});
+  CHECK(smooth.type == scene::ObjectType::kSmoothTriangle);
+  CHECK_FALSE(smooth.supports_axial_bounds);
+  spec.normals = {scene::Vec3{0, 1, 0}, scene::Vec3{-1, 0, 0}, scene::Vec3{1, 0, 0}};
+  const auto runtime_smooth = smooth.create(45, spec);
+  const auto* configured_smooth = dynamic_cast<const SmoothTriangle*>(runtime_smooth.get());
+  REQUIRE(configured_smooth != nullptr);
+  CHECK(configured_smooth->GetId() == 45);
+  CHECK(configured_smooth->GetVertices() == configured_triangle->GetVertices());
+  CHECK(configured_smooth->GetNormals()[0] == Vec3(0, 1, 0));
+  CHECK(configured_smooth->GetNormals()[1] == Vec3(-1, 0, 0));
+  CHECK(configured_smooth->GetNormals()[2] == Vec3(1, 0, 0));
+  spec.normals[0] = {0, 0, 0};
+  CHECK_THROWS_AS(smooth.create(46, spec), std::invalid_argument);
 
   CHECK_THROWS_AS(shape_catalog::Find(std::string_view{"torus"}), std::invalid_argument);
 }

@@ -169,6 +169,20 @@ SCENARIO("scene yaml: preserves custom triangle vertices and rejects malformed g
   auto unsupported = yaml;
   unsupported.replace(unsupported.find("type: triangle"), std::string{"type: triangle"}.size(), "type: cube");
   CHECK_FALSE(scene_io::ParseSceneYaml(unsupported).ok);
+
+  auto smooth_yaml = yaml;
+  smooth_yaml.replace(smooth_yaml.find("type: triangle"), std::string{"type: triangle"}.size(),
+                      "type: smooth_triangle\n    normals: [[0, 1, 0], [-1, 0, 0], [1, 0, 0]]");
+  const auto smooth = scene_io::ParseSceneYaml(smooth_yaml);
+  REQUIRE(smooth.ok);
+  CHECK(smooth.scene.objects[0].Shape().type == scene::ObjectType::kSmoothTriangle);
+  CHECK(smooth.scene.objects[0].Shape().vertices == parsed.scene.objects[0].Shape().vertices);
+  CHECK(smooth.scene.objects[0].Shape().normals[0] == scene::Vec3{0, 1, 0});
+  CHECK(smooth.scene.objects[0].Shape().normals[1] == scene::Vec3{-1, 0, 0});
+  CHECK(smooth.scene.objects[0].Shape().normals[2] == scene::Vec3{1, 0, 0});
+  const auto smooth_round_trip = scene_io::ParseSceneYaml(scene_io::SerializeSceneYaml(smooth.scene));
+  REQUIRE(smooth_round_trip.ok);
+  CHECK(smooth_round_trip.scene == smooth.scene);
 }
 
 SCENARIO("scene yaml: parses and serializes nested groups") {

@@ -1,9 +1,10 @@
 #pragma once
 
 #include <array>
-#include <optional>
 #include <cstdint>
+#include <optional>
 #include <string>
+#include <utility>
 #include <variant>
 #include <vector>
 
@@ -128,21 +129,60 @@ struct GroupSpec {  // NOLINT(misc-no-recursion)
   auto operator==(const GroupSpec&) const -> bool = default;
 };
 
+enum class CsgOperation : std::uint8_t { kUnion, kIntersection, kDifference };
+
+struct CsgSpec {  // NOLINT(misc-no-recursion)
+  CsgOperation operation{CsgOperation::kUnion};
+  std::vector<Object> children;      // Exactly two operands: left, then right.
+  std::optional<Material> material;  // If unset, retain each operand's material.
+  bool cast_shadow{true};
+
+  // NOLINTNEXTLINE(misc-no-recursion)
+  auto operator==(const CsgSpec&) const -> bool = default;
+};
+
 struct Object {  // NOLINT(misc-no-recursion)
   std::string name;
   Transform transform;
   bool visible{true};
-  std::variant<ShapeSpec, GroupSpec> content;
+  std::variant<ShapeSpec, GroupSpec, CsgSpec> content;
 
   [[nodiscard]] auto IsGroup() const -> bool { return std::holds_alternative<GroupSpec>(content); }
+  [[nodiscard]] auto IsCsg() const -> bool { return std::holds_alternative<CsgSpec>(content); }
+  [[nodiscard]] auto IsContainer() const -> bool { return IsGroup() || IsCsg(); }
   [[nodiscard]] auto Shape() -> ShapeSpec& { return std::get<ShapeSpec>(content); }
   [[nodiscard]] auto Shape() const -> const ShapeSpec& { return std::get<ShapeSpec>(content); }
   [[nodiscard]] auto Group() -> GroupSpec& { return std::get<GroupSpec>(content); }
   [[nodiscard]] auto Group() const -> const GroupSpec& { return std::get<GroupSpec>(content); }
+  [[nodiscard]] auto Csg() -> CsgSpec& { return std::get<CsgSpec>(content); }
+  [[nodiscard]] auto Csg() const -> const CsgSpec& { return std::get<CsgSpec>(content); }
+  [[nodiscard]] auto Children() -> std::vector<Object>& { return IsGroup() ? Group().children : Csg().children; }
+  [[nodiscard]] auto Children() const -> const std::vector<Object>& {
+    return IsGroup() ? Group().children : Csg().children;
+  }
 
   // NOLINTNEXTLINE(misc-no-recursion)
   auto operator==(const Object&) const -> bool = default;
 };
+
+inline auto MakeCsg(Object left = Object{}) -> Object {
+  Object right;
+  right.name = "Right operand";
+  right.Shape().type = ObjectType::kCube;
+  right.transform.translate.x = 0.5F;
+  if (left.name.empty()) {
+    left.name = "Left operand";
+  }
+  Object object;
+  object.name = "CSG";
+  object.visible = left.visible;
+  left.visible = true;
+  object.content = CsgSpec{.operation = CsgOperation::kUnion,
+                           .children = {std::move(left), std::move(right)},
+                           .material = std::nullopt,
+                           .cast_shadow = true};
+  return object;
+}
 
 struct Scene {
   int version{1};

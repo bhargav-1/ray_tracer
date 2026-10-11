@@ -27,10 +27,10 @@ auto FindObject(std::vector<scene::Object>& objects, const std::vector<std::size
     }
     object = &(*current_objects)[index];
     if (depth + 1 < path.size()) {
-      if (!object->IsGroup()) {
+      if (!object->IsContainer()) {
         return nullptr;
       }
-      current_objects = &object->Group().children;
+      current_objects = &object->Children();
     }
   }
   return object;
@@ -83,6 +83,16 @@ auto DrawAddPanel(SceneEditorApp& app, UiRenderState& render_state) -> bool {
     if (app.AddObj(ImGuiFileDialog::Instance()->GetFilePathName(), state.obj_import_parent_path)) {
       return true;  // The scene was replaced; recompute destination pointers on the next frame.
     }
+  }
+  if (ImGui::Button("+ CSG", ImVec2(-1.0F, 40.0F))) {
+    auto object = scene::MakeCsg();
+    object.name += " " + std::to_string(destination->size() + 1);
+    object.transform.translate.y = 1.0F;
+    destination->push_back(std::move(object));
+    auto path = destination_path;
+    path.push_back(destination->size() - 1);
+    state.selection = Selection::ForObject(std::move(path));
+    changed = true;
   }
   if (ImGui::Button("+ Group", ImVec2(-1.0F, 40.0F))) {
     scene::Object group;

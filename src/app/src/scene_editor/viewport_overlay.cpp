@@ -64,10 +64,10 @@ auto FindObject(std::vector<scene::Object>& objects, const ObjectPath& path) -> 
     }
     object = &(*current_objects)[index];
     if (depth + 1 < path.size()) {
-      if (!object->IsGroup()) {
+      if (!object->IsContainer()) {
         return nullptr;
       }
-      current_objects = &object->Group().children;
+      current_objects = &object->Children();
     }
   }
   return object;
@@ -83,10 +83,10 @@ auto FindObject(const std::vector<scene::Object>& objects, const ObjectPath& pat
     }
     object = &(*current_objects)[index];
     if (depth + 1 < path.size()) {
-      if (!object->IsGroup()) {
+      if (!object->IsContainer()) {
         return nullptr;
       }
-      current_objects = &object->Group().children;
+      current_objects = &object->Children();
     }
   }
   return object;
@@ -112,8 +112,8 @@ auto CollectObjects(std::vector<scene::Object>& objects,  // NOLINT(misc-no-recu
     path.push_back(index);
     const auto world_transform = parent_transform * BuildTransformMatrix(object.transform);
     entries.push_back(ObjectEntry{&object, path, world_transform});
-    if (object.IsGroup()) {
-      CollectObjects(object.Group().children, world_transform, path, entries);
+    if (object.IsContainer()) {
+      CollectObjects(object.Children(), world_transform, path, entries);
     }
   }
 }
@@ -301,7 +301,7 @@ auto DrawViewportOverlay(scene::Scene& scene,
   std::vector<ObjectEntry> object_entries;
   CollectObjects(scene.objects, Matrix<4, 4>::IdentityMatrix(), {}, object_entries);
   for (const auto& entry : object_entries) {
-    if (entry.object->IsGroup()) {
+    if (entry.object->IsContainer()) {
       continue;
     }
     const auto center = Point{entry.world_transform * Point(0, 0, 0)};

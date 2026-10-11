@@ -33,6 +33,8 @@ struct UiRenderState {
   bool displayed_is_preview{false};
   bool is_preview{false};
   bool high_res_pending{false};
+  bool preview_pending{false};
+  bool scene_rebuild_pending{false};
   float high_res_delay{2.0F};
   std::chrono::steady_clock::time_point last_interaction;
   GizmoAxis active_axis{GizmoAxis::kNone};

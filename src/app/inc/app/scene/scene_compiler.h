@@ -21,5 +21,6 @@ struct CompileSceneResult {
 };
 
 auto CompileScene(const scene::Scene& scene) -> CompileSceneResult;
+auto CompileCamera(const scene::Camera& camera) -> ray_tracer::Camera;
 
 }  // namespace ray_tracer::scene_runtime

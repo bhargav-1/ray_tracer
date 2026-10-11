@@ -89,6 +89,14 @@ auto SceneEditorApp::RecompileCurrentScene() -> bool {
   return CompileCurrentScene();
 }
 
+auto SceneEditorApp::UpdateCamera() -> bool {
+  if (!compiled_scene_.has_value() || !current_scene_.camera.has_value()) {
+    return RecompileCurrentScene();
+  }
+  compiled_scene_->camera = scene_runtime::CompileCamera(*current_scene_.camera);
+  return true;
+}
+
 auto SceneEditorApp::CompileCurrentScene() -> bool {
   auto compiled = scene_runtime::CompileScene(current_scene_);
   if (!compiled.ok || !compiled.compiled.has_value()) {

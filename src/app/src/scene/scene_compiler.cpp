@@ -201,6 +201,16 @@ auto CompileObject(const scene::Object& object, std::size_t& next_id)  // NOLINT
 
 }  // namespace
 
+auto CompileCamera(const scene::Camera& camera_spec) -> ray_tracer::Camera {
+  ray_tracer::Camera camera{
+      camera_spec.resolution.width,
+      camera_spec.resolution.height,
+      camera_spec.fov_deg * std::numbers::pi / 180.0};
+  camera.SetTransform(ray_tracer::ViewTransform(
+      ToPoint(camera_spec.from), ToPoint(camera_spec.to), ToVec3(camera_spec.up)));
+  return camera;
+}
+
 auto CompileScene(const scene::Scene& scene) -> CompileSceneResult {
   try {
     if (!scene.camera.has_value()) {
@@ -253,13 +263,7 @@ auto CompileScene(const scene::Scene& scene) -> CompileSceneResult {
       (void)object->BoundsOf();
     }
 
-    const auto& camera_spec = *scene.camera;
-    ray_tracer::Camera camera{
-        camera_spec.resolution.width,
-        camera_spec.resolution.height,
-        camera_spec.fov_deg * std::numbers::pi / 180.0};
-    camera.SetTransform(ray_tracer::ViewTransform(
-        ToPoint(camera_spec.from), ToPoint(camera_spec.to), ToVec3(camera_spec.up)));
+    auto camera = CompileCamera(*scene.camera);
     return {.ok = true, .compiled = CompiledScene{.world = std::move(world), .camera = camera}, .error = {}};
   } catch (const std::exception& exception) {
     return {.ok = false, .compiled = std::nullopt, .error = exception.what()};

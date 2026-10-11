@@ -9,9 +9,10 @@ auto StopRender(UiRenderState& render_state) -> void;
 auto StartRender(UiRenderState& render_state,
                  const scene_runtime::CompiledScene& compiled_scene,
                  bool preview) -> void;
-auto ScheduleRender(SceneEditorApp& app, UiRenderState& render_state, bool preview) -> void;
+auto ScheduleRender(SceneEditorApp& app, UiRenderState& render_state,
+                    bool preview, bool camera_only = false) -> void;
 auto UploadPendingTexture(UiRenderState& render_state) -> void;
-auto RequestPreviewRender(SceneEditorApp& app, UiRenderState& render_state) -> void;
+auto RequestPreviewRender(UiRenderState& render_state, bool camera_only) -> void;
 auto ProcessDeferredRenders(SceneEditorApp& app, UiRenderState& render_state) -> void;
 
 }  // namespace ray_tracer::scene_editor

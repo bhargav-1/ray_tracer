@@ -52,8 +52,13 @@ auto StartRender(UiRenderState& render_state,
   });
 }
 
-auto ScheduleRender(SceneEditorApp& app, UiRenderState& render_state, const bool preview) -> void {
-  if (!app.RecompileCurrentScene()) {
+auto ScheduleRender(SceneEditorApp& app, UiRenderState& render_state,
+                    const bool preview, const bool camera_only) -> void {
+  const bool prepared = camera_only ? app.UpdateCamera() : app.RecompileCurrentScene();
+  if (!prepared) {
+    render_state.preview_pending = false;
+    render_state.scene_rebuild_pending = false;
+    render_state.high_res_pending = false;
     return;
   }
   const auto& optional_compiled_scene = app.CompiledScene();
@@ -62,12 +67,9 @@ auto ScheduleRender(SceneEditorApp& app, UiRenderState& render_state, const bool
   }
   const auto& compiled_scene = optional_compiled_scene.value();
   app.ClearRenderRequest();
-  if (preview) {
-    render_state.last_interaction = std::chrono::steady_clock::now();
-    render_state.high_res_pending = true;
-  } else {
-    render_state.high_res_pending = false;
-  }
+  render_state.preview_pending = false;
+  render_state.scene_rebuild_pending = false;
+  render_state.high_res_pending = preview;
   StartRender(render_state, compiled_scene, preview);
 }
 
@@ -98,22 +100,44 @@ auto UploadPendingTexture(UiRenderState& render_state) -> void {
   render_state.displayed_is_preview = is_preview;
 }
 
-auto RequestPreviewRender(SceneEditorApp& app, UiRenderState& render_state) -> void {
+auto RequestPreviewRender(UiRenderState& render_state, const bool camera_only) -> void {
   render_state.last_interaction = std::chrono::steady_clock::now();
   render_state.high_res_pending = true;
-  ScheduleRender(app, render_state, true);
+  render_state.preview_pending = true;
+  render_state.scene_rebuild_pending |= !camera_only;
+  // Keep completed previews flowing while dragging, but interrupt a full render.
+  if (render_state.rendering.load() && !render_state.is_preview) {
+    render_state.cancel.store(true);
+  }
 }
 
 auto ProcessDeferredRenders(SceneEditorApp& app, UiRenderState& render_state) -> void {
-  if (!render_state.rendering.load() && app.State().render_state.render_requested) {
-    ScheduleRender(app, render_state, true);
+  if (app.State().render_state.render_requested) {
+    if (!render_state.preview_pending) {
+      render_state.last_interaction = std::chrono::steady_clock::now();
+    }
+    render_state.preview_pending = true;
+    render_state.scene_rebuild_pending = true;
   }
 
-  if (render_state.high_res_pending && !render_state.rendering.load()) {
+  // Upload the previous frame before starting another, so it cannot be discarded.
+  if (render_state.rendering.load() || render_state.texture_dirty.load(std::memory_order_acquire)) {
+    return;
+  }
+  if (render_state.preview_pending) {
+    ScheduleRender(app, render_state, true, !render_state.scene_rebuild_pending);
+    return;
+  }
+
+  if (render_state.high_res_pending) {
     const auto elapsed = std::chrono::duration<double>(
         std::chrono::steady_clock::now() - render_state.last_interaction).count();
     if (elapsed >= static_cast<double>(render_state.high_res_delay)) {
-      ScheduleRender(app, render_state, false);
+      render_state.high_res_pending = false;
+      const auto& compiled_scene = app.CompiledScene();
+      if (compiled_scene.has_value()) {
+        StartRender(render_state, *compiled_scene, false);
+      }
     }
   }
 }

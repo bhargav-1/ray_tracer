@@ -15,3 +15,4 @@ Use **+ Obj** in the editor's Add panel to choose an `.obj` file. It becomes one
 In YAML, use `type: obj` and `source: ../models/teapot.obj`, alongside the usual `transform`, `material`, and `cast_shadow` fields. Relative sources resolve from the YAML file's folder. Loaded sources are saved as absolute paths so Save As keeps the references valid.
 
 Currently supported: `v` vertices, plain positive `f` indices (including convex polygons), and named `g` groups. Texture coordinates, normals, slash-separated face indices, and OBJ material files are not supported yet.
+- [Rounded CSG dice, Chapter 16](docs/rounded_csg_dice.md): three dice with rounded edges and recessed pips, plus their construction and editor controls.

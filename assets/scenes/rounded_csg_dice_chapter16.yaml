@@ -1,0 +1,921 @@
+# Chapter 16: rounded CSG dice with recessed white pips.
+# Body = union of 3 face boxes, 12 edge cylinders, and 8 corner spheres.
+# Radius 0.16; centers +/-0.84; outer faces +/-1.
+# Die = difference(body, union of 21 pip spheres).
+# Select each rounded-body CSG to change color without recoloring pips.
+version: 1
+camera:
+  from: [6, 4.7, -9]
+  to: [0, 1.65, 0]
+  up: [0, 1, 0]
+  fov_deg: 43
+  resolution: [900, 600]
+lights:
+  - visible: true
+    position: [-3, 7, -6]
+    color: [1, 1, 1]
+  - visible: true
+    position: [5, 5, -2]
+    color: [0.2, 0.2, 0.2]
+objects:
+  - name: Blue die
+    type: csg
+    operation: difference
+    transform:
+      translate: [-1.2, 1, -0.5]
+      rotate_deg: [0, -10, 0]
+      scale: [1, 1, 1]
+    children:
+      - name: Blue die rounded body
+        type: csg
+        operation: union
+        transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+        material: {color: [0.3, 0.24, 0.7], ambient: 0.1, diffuse: 0.72, specular: 0.45, shininess: 100, reflective: 0.025, transparency: 0, refractive_index: 1}
+        children: &rounded_parts
+          - name: Rounded body L
+            type: csg
+            operation: union
+            transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+            children:
+              - name: Rounded body L L
+                type: csg
+                operation: union
+                transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                children:
+                  - name: Rounded body L L L
+                    type: csg
+                    operation: union
+                    transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                    children:
+                      - name: Face box X
+                        type: cube
+                        cast_shadow: true
+                        transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 0.84, 0.84]}
+                        material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                      - name: Face box Y
+                        type: cube
+                        cast_shadow: true
+                        transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [0.84, 1, 0.84]}
+                        material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                  - name: Rounded body L L R
+                    type: csg
+                    operation: union
+                    transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                    children:
+                      - name: Face box Z
+                        type: cube
+                        cast_shadow: true
+                        transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [0.84, 0.84, 1]}
+                        material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                      - name: Rounded body L L R R
+                        type: csg
+                        operation: union
+                        transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                        children:
+                          - name: Rounded X edge -0.84, -0.84
+                            type: cylinder
+                            cast_shadow: true
+                            transform: {translate: [0, -0.84, -0.84], rotate_deg: [0, 0, 90], scale: [0.16, 1, 0.16]}
+                            bounds: {minimum: -0.84, maximum: 0.84, closed: true}
+                            material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                          - name: Rounded X edge -0.84, 0.84
+                            type: cylinder
+                            cast_shadow: true
+                            transform: {translate: [0, -0.84, 0.84], rotate_deg: [0, 0, 90], scale: [0.16, 1, 0.16]}
+                            bounds: {minimum: -0.84, maximum: 0.84, closed: true}
+                            material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+              - name: Rounded body L R
+                type: csg
+                operation: union
+                transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                children:
+                  - name: Rounded body L R L
+                    type: csg
+                    operation: union
+                    transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                    children:
+                      - name: Rounded X edge 0.84, -0.84
+                        type: cylinder
+                        cast_shadow: true
+                        transform: {translate: [0, 0.84, -0.84], rotate_deg: [0, 0, 90], scale: [0.16, 1, 0.16]}
+                        bounds: {minimum: -0.84, maximum: 0.84, closed: true}
+                        material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                      - name: Rounded body L R L R
+                        type: csg
+                        operation: union
+                        transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                        children:
+                          - name: Rounded X edge 0.84, 0.84
+                            type: cylinder
+                            cast_shadow: true
+                            transform: {translate: [0, 0.84, 0.84], rotate_deg: [0, 0, 90], scale: [0.16, 1, 0.16]}
+                            bounds: {minimum: -0.84, maximum: 0.84, closed: true}
+                            material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                          - name: Rounded Y edge -0.84, -0.84
+                            type: cylinder
+                            cast_shadow: true
+                            transform: {translate: [-0.84, 0, -0.84], rotate_deg: [0, 0, 0], scale: [0.16, 1, 0.16]}
+                            bounds: {minimum: -0.84, maximum: 0.84, closed: true}
+                            material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                  - name: Rounded body L R R
+                    type: csg
+                    operation: union
+                    transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                    children:
+                      - name: Rounded Y edge -0.84, 0.84
+                        type: cylinder
+                        cast_shadow: true
+                        transform: {translate: [-0.84, 0, 0.84], rotate_deg: [0, 0, 0], scale: [0.16, 1, 0.16]}
+                        bounds: {minimum: -0.84, maximum: 0.84, closed: true}
+                        material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                      - name: Rounded body L R R R
+                        type: csg
+                        operation: union
+                        transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                        children:
+                          - name: Rounded Y edge 0.84, -0.84
+                            type: cylinder
+                            cast_shadow: true
+                            transform: {translate: [0.84, 0, -0.84], rotate_deg: [0, 0, 0], scale: [0.16, 1, 0.16]}
+                            bounds: {minimum: -0.84, maximum: 0.84, closed: true}
+                            material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                          - name: Rounded Y edge 0.84, 0.84
+                            type: cylinder
+                            cast_shadow: true
+                            transform: {translate: [0.84, 0, 0.84], rotate_deg: [0, 0, 0], scale: [0.16, 1, 0.16]}
+                            bounds: {minimum: -0.84, maximum: 0.84, closed: true}
+                            material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+          - name: Rounded body R
+            type: csg
+            operation: union
+            transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+            children:
+              - name: Rounded body R L
+                type: csg
+                operation: union
+                transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                children:
+                  - name: Rounded body R L L
+                    type: csg
+                    operation: union
+                    transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                    children:
+                      - name: Rounded Z edge -0.84, -0.84
+                        type: cylinder
+                        cast_shadow: true
+                        transform: {translate: [-0.84, -0.84, 0], rotate_deg: [90, 0, 0], scale: [0.16, 1, 0.16]}
+                        bounds: {minimum: -0.84, maximum: 0.84, closed: true}
+                        material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                      - name: Rounded body R L L R
+                        type: csg
+                        operation: union
+                        transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                        children:
+                          - name: Rounded Z edge -0.84, 0.84
+                            type: cylinder
+                            cast_shadow: true
+                            transform: {translate: [-0.84, 0.84, 0], rotate_deg: [90, 0, 0], scale: [0.16, 1, 0.16]}
+                            bounds: {minimum: -0.84, maximum: 0.84, closed: true}
+                            material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                          - name: Rounded Z edge 0.84, -0.84
+                            type: cylinder
+                            cast_shadow: true
+                            transform: {translate: [0.84, -0.84, 0], rotate_deg: [90, 0, 0], scale: [0.16, 1, 0.16]}
+                            bounds: {minimum: -0.84, maximum: 0.84, closed: true}
+                            material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                  - name: Rounded body R L R
+                    type: csg
+                    operation: union
+                    transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                    children:
+                      - name: Rounded Z edge 0.84, 0.84
+                        type: cylinder
+                        cast_shadow: true
+                        transform: {translate: [0.84, 0.84, 0], rotate_deg: [90, 0, 0], scale: [0.16, 1, 0.16]}
+                        bounds: {minimum: -0.84, maximum: 0.84, closed: true}
+                        material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                      - name: Rounded body R L R R
+                        type: csg
+                        operation: union
+                        transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                        children:
+                          - name: Rounded corner -0.84, -0.84, -0.84
+                            type: sphere
+                            cast_shadow: true
+                            transform: {translate: [-0.84, -0.84, -0.84], rotate_deg: [0, 0, 0], scale: [0.16, 0.16, 0.16]}
+                            material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                          - name: Rounded corner -0.84, -0.84, 0.84
+                            type: sphere
+                            cast_shadow: true
+                            transform: {translate: [-0.84, -0.84, 0.84], rotate_deg: [0, 0, 0], scale: [0.16, 0.16, 0.16]}
+                            material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+              - name: Rounded body R R
+                type: csg
+                operation: union
+                transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                children:
+                  - name: Rounded body R R L
+                    type: csg
+                    operation: union
+                    transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                    children:
+                      - name: Rounded corner -0.84, 0.84, -0.84
+                        type: sphere
+                        cast_shadow: true
+                        transform: {translate: [-0.84, 0.84, -0.84], rotate_deg: [0, 0, 0], scale: [0.16, 0.16, 0.16]}
+                        material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                      - name: Rounded body R R L R
+                        type: csg
+                        operation: union
+                        transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                        children:
+                          - name: Rounded corner -0.84, 0.84, 0.84
+                            type: sphere
+                            cast_shadow: true
+                            transform: {translate: [-0.84, 0.84, 0.84], rotate_deg: [0, 0, 0], scale: [0.16, 0.16, 0.16]}
+                            material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                          - name: Rounded corner 0.84, -0.84, -0.84
+                            type: sphere
+                            cast_shadow: true
+                            transform: {translate: [0.84, -0.84, -0.84], rotate_deg: [0, 0, 0], scale: [0.16, 0.16, 0.16]}
+                            material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                  - name: Rounded body R R R
+                    type: csg
+                    operation: union
+                    transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                    children:
+                      - name: Rounded corner 0.84, -0.84, 0.84
+                        type: sphere
+                        cast_shadow: true
+                        transform: {translate: [0.84, -0.84, 0.84], rotate_deg: [0, 0, 0], scale: [0.16, 0.16, 0.16]}
+                        material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                      - name: Rounded body R R R R
+                        type: csg
+                        operation: union
+                        transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                        children:
+                          - name: Rounded corner 0.84, 0.84, -0.84
+                            type: sphere
+                            cast_shadow: true
+                            transform: {translate: [0.84, 0.84, -0.84], rotate_deg: [0, 0, 0], scale: [0.16, 0.16, 0.16]}
+                            material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                          - name: Rounded corner 0.84, 0.84, 0.84
+                            type: sphere
+                            cast_shadow: true
+                            transform: {translate: [0.84, 0.84, 0.84], rotate_deg: [0, 0, 0], scale: [0.16, 0.16, 0.16]}
+                            material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+      - name: Pip cutters
+        type: csg
+        operation: union
+        transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+        material: {color: [0.92, 0.92, 0.92], ambient: 0.06, diffuse: 0.72, specular: 0.18, shininess: 100, reflective: 0, transparency: 0, refractive_index: 1}
+        children:
+          - name: Pip cutters L
+            type: csg
+            operation: union
+            transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+            children:
+              - name: Pip cutters L L
+                type: csg
+                operation: union
+                transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                children:
+                  - name: Pip cutters L L L
+                    type: csg
+                    operation: union
+                    transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                    children:
+                      - name: Front pip 1
+                        type: sphere
+                        cast_shadow: true
+                        transform: {translate: [0, 0, -1.045], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                        material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                      - name: Back pip 2
+                        type: sphere
+                        cast_shadow: true
+                        transform: {translate: [-0.46, -0.46, 1.045], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                        material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                  - name: Pip cutters L L R
+                    type: csg
+                    operation: union
+                    transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                    children:
+                      - name: Back pip 3
+                        type: sphere
+                        cast_shadow: true
+                        transform: {translate: [-0.46, 0, 1.045], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                        material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                      - name: Pip cutters L L R R
+                        type: csg
+                        operation: union
+                        transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                        children:
+                          - name: Back pip 4
+                            type: sphere
+                            cast_shadow: true
+                            transform: {translate: [-0.46, 0.46, 1.045], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                            material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                          - name: Back pip 5
+                            type: sphere
+                            cast_shadow: true
+                            transform: {translate: [0.46, -0.46, 1.045], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                            material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+              - name: Pip cutters L R
+                type: csg
+                operation: union
+                transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                children:
+                  - name: Pip cutters L R L
+                    type: csg
+                    operation: union
+                    transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                    children:
+                      - name: Back pip 6
+                        type: sphere
+                        cast_shadow: true
+                        transform: {translate: [0.46, 0, 1.045], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                        material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                      - name: Back pip 7
+                        type: sphere
+                        cast_shadow: true
+                        transform: {translate: [0.46, 0.46, 1.045], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                        material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                  - name: Pip cutters L R R
+                    type: csg
+                    operation: union
+                    transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                    children:
+                      - name: Right pip 8
+                        type: sphere
+                        cast_shadow: true
+                        transform: {translate: [1.045, -0.46, -0.46], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                        material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                      - name: Pip cutters L R R R
+                        type: csg
+                        operation: union
+                        transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                        children:
+                          - name: Right pip 9
+                            type: sphere
+                            cast_shadow: true
+                            transform: {translate: [1.045, 0.46, -0.46], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                            material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                          - name: Right pip 10
+                            type: sphere
+                            cast_shadow: true
+                            transform: {translate: [1.045, 0, 0], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                            material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+          - name: Pip cutters R
+            type: csg
+            operation: union
+            transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+            children:
+              - name: Pip cutters R L
+                type: csg
+                operation: union
+                transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                children:
+                  - name: Pip cutters R L L
+                    type: csg
+                    operation: union
+                    transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                    children:
+                      - name: Right pip 11
+                        type: sphere
+                        cast_shadow: true
+                        transform: {translate: [1.045, -0.46, 0.46], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                        material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                      - name: Right pip 12
+                        type: sphere
+                        cast_shadow: true
+                        transform: {translate: [1.045, 0.46, 0.46], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                        material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                  - name: Pip cutters R L R
+                    type: csg
+                    operation: union
+                    transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                    children:
+                      - name: Left pip 13
+                        type: sphere
+                        cast_shadow: true
+                        transform: {translate: [-1.045, 0.46, -0.46], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                        material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                      - name: Pip cutters R L R R
+                        type: csg
+                        operation: union
+                        transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                        children:
+                          - name: Left pip 14
+                            type: sphere
+                            cast_shadow: true
+                            transform: {translate: [-1.045, -0.46, 0.46], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                            material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                          - name: Top pip 15
+                            type: sphere
+                            cast_shadow: true
+                            transform: {translate: [-0.46, 1.045, 0.46], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                            material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+              - name: Pip cutters R R
+                type: csg
+                operation: union
+                transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                children:
+                  - name: Pip cutters R R L
+                    type: csg
+                    operation: union
+                    transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                    children:
+                      - name: Top pip 16
+                        type: sphere
+                        cast_shadow: true
+                        transform: {translate: [0, 1.045, 0], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                        material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                      - name: Pip cutters R R L R
+                        type: csg
+                        operation: union
+                        transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                        children:
+                          - name: Top pip 17
+                            type: sphere
+                            cast_shadow: true
+                            transform: {translate: [0.46, 1.045, -0.46], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                            material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                          - name: Bottom pip 18
+                            type: sphere
+                            cast_shadow: true
+                            transform: {translate: [-0.46, -1.045, -0.46], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                            material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                  - name: Pip cutters R R R
+                    type: csg
+                    operation: union
+                    transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                    children:
+                      - name: Bottom pip 19
+                        type: sphere
+                        cast_shadow: true
+                        transform: {translate: [-0.46, -1.045, 0.46], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                        material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                      - name: Pip cutters R R R R
+                        type: csg
+                        operation: union
+                        transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                        children:
+                          - name: Bottom pip 20
+                            type: sphere
+                            cast_shadow: true
+                            transform: {translate: [0.46, -1.045, -0.46], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                            material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                          - name: Bottom pip 21
+                            type: sphere
+                            cast_shadow: true
+                            transform: {translate: [0.46, -1.045, 0.46], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                            material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+  - name: Red die
+    type: csg
+    operation: difference
+    transform: {translate: [1.15, 1, 0.4], rotate_deg: [0, 10, 0], scale: [1, 1, 1]}
+    children:
+      - name: Red die rounded body
+        type: csg
+        operation: union
+        transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+        material: {color: [0.65, 0.25, 0.29], ambient: 0.1, diffuse: 0.72, specular: 0.45, shininess: 100, reflective: 0.025, transparency: 0, refractive_index: 1}
+        children: *rounded_parts
+      - name: Pip cutters
+        type: csg
+        operation: union
+        transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+        material: {color: [0.92, 0.92, 0.92], ambient: 0.06, diffuse: 0.72, specular: 0.18, shininess: 100, reflective: 0, transparency: 0, refractive_index: 1}
+        children:
+          - name: Pip cutters L
+            type: csg
+            operation: union
+            transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+            children:
+              - name: Pip cutters L L
+                type: csg
+                operation: union
+                transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                children:
+                  - name: Pip cutters L L L
+                    type: csg
+                    operation: union
+                    transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                    children:
+                      - name: Front pip 1
+                        type: sphere
+                        cast_shadow: true
+                        transform: {translate: [-0.46, -0.46, -1.045], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                        material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                      - name: Front pip 2
+                        type: sphere
+                        cast_shadow: true
+                        transform: {translate: [-0.46, 0.46, -1.045], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                        material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                  - name: Pip cutters L L R
+                    type: csg
+                    operation: union
+                    transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                    children:
+                      - name: Front pip 3
+                        type: sphere
+                        cast_shadow: true
+                        transform: {translate: [0, 0, -1.045], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                        material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                      - name: Pip cutters L L R R
+                        type: csg
+                        operation: union
+                        transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                        children:
+                          - name: Front pip 4
+                            type: sphere
+                            cast_shadow: true
+                            transform: {translate: [0.46, -0.46, -1.045], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                            material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                          - name: Front pip 5
+                            type: sphere
+                            cast_shadow: true
+                            transform: {translate: [0.46, 0.46, -1.045], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                            material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+              - name: Pip cutters L R
+                type: csg
+                operation: union
+                transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                children:
+                  - name: Pip cutters L R L
+                    type: csg
+                    operation: union
+                    transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                    children:
+                      - name: Back pip 6
+                        type: sphere
+                        cast_shadow: true
+                        transform: {translate: [-0.46, 0.46, 1.045], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                        material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                      - name: Back pip 7
+                        type: sphere
+                        cast_shadow: true
+                        transform: {translate: [0.46, -0.46, 1.045], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                        material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                  - name: Pip cutters L R R
+                    type: csg
+                    operation: union
+                    transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                    children:
+                      - name: Right pip 8
+                        type: sphere
+                        cast_shadow: true
+                        transform: {translate: [1.045, 0, 0], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                        material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                      - name: Pip cutters L R R R
+                        type: csg
+                        operation: union
+                        transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                        children:
+                          - name: Left pip 9
+                            type: sphere
+                            cast_shadow: true
+                            transform: {translate: [-1.045, -0.46, -0.46], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                            material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                          - name: Left pip 10
+                            type: sphere
+                            cast_shadow: true
+                            transform: {translate: [-1.045, 0, -0.46], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                            material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+          - name: Pip cutters R
+            type: csg
+            operation: union
+            transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+            children:
+              - name: Pip cutters R L
+                type: csg
+                operation: union
+                transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                children:
+                  - name: Pip cutters R L L
+                    type: csg
+                    operation: union
+                    transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                    children:
+                      - name: Left pip 11
+                        type: sphere
+                        cast_shadow: true
+                        transform: {translate: [-1.045, 0.46, -0.46], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                        material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                      - name: Left pip 12
+                        type: sphere
+                        cast_shadow: true
+                        transform: {translate: [-1.045, -0.46, 0.46], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                        material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                  - name: Pip cutters R L R
+                    type: csg
+                    operation: union
+                    transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                    children:
+                      - name: Left pip 13
+                        type: sphere
+                        cast_shadow: true
+                        transform: {translate: [-1.045, 0, 0.46], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                        material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                      - name: Pip cutters R L R R
+                        type: csg
+                        operation: union
+                        transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                        children:
+                          - name: Left pip 14
+                            type: sphere
+                            cast_shadow: true
+                            transform: {translate: [-1.045, 0.46, 0.46], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                            material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                          - name: Top pip 15
+                            type: sphere
+                            cast_shadow: true
+                            transform: {translate: [-0.46, 1.045, -0.46], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                            material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+              - name: Pip cutters R R
+                type: csg
+                operation: union
+                transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                children:
+                  - name: Pip cutters R R L
+                    type: csg
+                    operation: union
+                    transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                    children:
+                      - name: Top pip 16
+                        type: sphere
+                        cast_shadow: true
+                        transform: {translate: [-0.46, 1.045, 0.46], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                        material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                      - name: Pip cutters R R L R
+                        type: csg
+                        operation: union
+                        transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                        children:
+                          - name: Top pip 17
+                            type: sphere
+                            cast_shadow: true
+                            transform: {translate: [0.46, 1.045, -0.46], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                            material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                          - name: Top pip 18
+                            type: sphere
+                            cast_shadow: true
+                            transform: {translate: [0.46, 1.045, 0.46], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                            material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                  - name: Pip cutters R R R
+                    type: csg
+                    operation: union
+                    transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                    children:
+                      - name: Bottom pip 19
+                        type: sphere
+                        cast_shadow: true
+                        transform: {translate: [-0.46, -1.045, 0.46], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                        material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                      - name: Pip cutters R R R R
+                        type: csg
+                        operation: union
+                        transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                        children:
+                          - name: Bottom pip 20
+                            type: sphere
+                            cast_shadow: true
+                            transform: {translate: [0, -1.045, 0], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                            material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                          - name: Bottom pip 21
+                            type: sphere
+                            cast_shadow: true
+                            transform: {translate: [0.46, -1.045, -0.46], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                            material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+  - name: Green die
+    type: csg
+    operation: difference
+    transform: {translate: [0, 3, -0.05], rotate_deg: [0, -12, 0], scale: [1, 1, 1]}
+    children:
+      - name: Green die rounded body
+        type: csg
+        operation: union
+        transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+        material: {color: [0.3, 0.65, 0.27], ambient: 0.1, diffuse: 0.72, specular: 0.45, shininess: 100, reflective: 0.025, transparency: 0, refractive_index: 1}
+        children: *rounded_parts
+      - name: Pip cutters
+        type: csg
+        operation: union
+        transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+        material: {color: [0.92, 0.92, 0.92], ambient: 0.06, diffuse: 0.72, specular: 0.18, shininess: 100, reflective: 0, transparency: 0, refractive_index: 1}
+        children:
+          - name: Pip cutters L
+            type: csg
+            operation: union
+            transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+            children:
+              - name: Pip cutters L L
+                type: csg
+                operation: union
+                transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                children:
+                  - name: Pip cutters L L L
+                    type: csg
+                    operation: union
+                    transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                    children:
+                      - name: Front pip 1
+                        type: sphere
+                        cast_shadow: true
+                        transform: {translate: [-0.46, 0.46, -1.045], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                        material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                      - name: Front pip 2
+                        type: sphere
+                        cast_shadow: true
+                        transform: {translate: [0.46, -0.46, -1.045], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                        material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                  - name: Pip cutters L L R
+                    type: csg
+                    operation: union
+                    transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                    children:
+                      - name: Back pip 3
+                        type: sphere
+                        cast_shadow: true
+                        transform: {translate: [-0.46, -0.46, 1.045], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                        material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                      - name: Pip cutters L L R R
+                        type: csg
+                        operation: union
+                        transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                        children:
+                          - name: Back pip 4
+                            type: sphere
+                            cast_shadow: true
+                            transform: {translate: [-0.46, 0.46, 1.045], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                            material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                          - name: Back pip 5
+                            type: sphere
+                            cast_shadow: true
+                            transform: {translate: [0, 0, 1.045], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                            material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+              - name: Pip cutters L R
+                type: csg
+                operation: union
+                transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                children:
+                  - name: Pip cutters L R L
+                    type: csg
+                    operation: union
+                    transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                    children:
+                      - name: Back pip 6
+                        type: sphere
+                        cast_shadow: true
+                        transform: {translate: [0.46, -0.46, 1.045], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                        material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                      - name: Back pip 7
+                        type: sphere
+                        cast_shadow: true
+                        transform: {translate: [0.46, 0.46, 1.045], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                        material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                  - name: Pip cutters L R R
+                    type: csg
+                    operation: union
+                    transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                    children:
+                      - name: Right pip 8
+                        type: sphere
+                        cast_shadow: true
+                        transform: {translate: [1.045, -0.46, -0.46], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                        material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                      - name: Pip cutters L R R R
+                        type: csg
+                        operation: union
+                        transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                        children:
+                          - name: Right pip 9
+                            type: sphere
+                            cast_shadow: true
+                            transform: {translate: [1.045, 0, -0.46], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                            material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                          - name: Right pip 10
+                            type: sphere
+                            cast_shadow: true
+                            transform: {translate: [1.045, 0.46, -0.46], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                            material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+          - name: Pip cutters R
+            type: csg
+            operation: union
+            transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+            children:
+              - name: Pip cutters R L
+                type: csg
+                operation: union
+                transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                children:
+                  - name: Pip cutters R L L
+                    type: csg
+                    operation: union
+                    transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                    children:
+                      - name: Right pip 11
+                        type: sphere
+                        cast_shadow: true
+                        transform: {translate: [1.045, -0.46, 0.46], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                        material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                      - name: Right pip 12
+                        type: sphere
+                        cast_shadow: true
+                        transform: {translate: [1.045, 0, 0.46], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                        material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                  - name: Pip cutters R L R
+                    type: csg
+                    operation: union
+                    transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                    children:
+                      - name: Right pip 13
+                        type: sphere
+                        cast_shadow: true
+                        transform: {translate: [1.045, 0.46, 0.46], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                        material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                      - name: Pip cutters R L R R
+                        type: csg
+                        operation: union
+                        transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                        children:
+                          - name: Left pip 14
+                            type: sphere
+                            cast_shadow: true
+                            transform: {translate: [-1.045, 0, 0], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                            material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                          - name: Top pip 15
+                            type: sphere
+                            cast_shadow: true
+                            transform: {translate: [-0.460000, 1.045000, 0.460000], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                            material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+              - name: Pip cutters R R
+                type: csg
+                operation: union
+                transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                children:
+                  - name: Pip cutters R R L
+                    type: csg
+                    operation: union
+                    transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                    children:
+                      - name: Top pip 16
+                        type: sphere
+                        cast_shadow: true
+                        transform: {translate: [0.000000, 1.045000, 0.000000], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                        material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                      - name: Pip cutters R R L R
+                        type: csg
+                        operation: union
+                        transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                        children:
+                          - name: Top pip 17
+                            type: sphere
+                            cast_shadow: true
+                            transform: {translate: [0.460000, 1.045000, -0.460000], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                            material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                          - name: Bottom pip 18
+                            type: sphere
+                            cast_shadow: true
+                            transform: {translate: [-0.460000, -1.045000, -0.460000], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                            material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                  - name: Pip cutters R R R
+                    type: csg
+                    operation: union
+                    transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                    children:
+                      - name: Bottom pip 19
+                        type: sphere
+                        cast_shadow: true
+                        transform: {translate: [-0.460000, -1.045000, 0.460000], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                        material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                      - name: Pip cutters R R R R
+                        type: csg
+                        operation: union
+                        transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+                        children:
+                          - name: Bottom pip 20
+                            type: sphere
+                            cast_shadow: true
+                            transform: {translate: [0.460000, -1.045000, -0.460000], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                            material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+                          - name: Bottom pip 21
+                            type: sphere
+                            cast_shadow: true
+                            transform: {translate: [0.460000, -1.045000, 0.460000], rotate_deg: [0, 0, 0], scale: [0.18, 0.18, 0.18]}
+                            material: {color: [1, 1, 1], ambient: 0.1, diffuse: 0.9, specular: 0.9, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+  - name: Checker floor
+    type: plane
+    cast_shadow: true
+    transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+    material: {color: [1, 1, 1], ambient: 0.08, diffuse: 0.8, specular: 0, shininess: 20, reflective: 0, transparency: 0, refractive_index: 1, pattern: {type: checkers, transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1.5, 1.5, 1.5]}, children: [{type: solid, color: [0.65, 0.65, 0.65]}, {type: solid, color: [0.9, 0.9, 0.9]}]}}
+  - name: Checker back wall
+    type: plane
+    cast_shadow: true
+    transform: {translate: [0, 0, 5], rotate_deg: [90, 0, 0], scale: [1, 1, 1]}
+    material: {color: [1, 1, 1], ambient: 0.08, diffuse: 0.8, specular: 0, shininess: 20, reflective: 0, transparency: 0, refractive_index: 1, pattern: {type: checkers, transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1.5, 1.5, 1.5]}, children: [{type: solid, color: [0.65, 0.65, 0.65]}, {type: solid, color: [0.9, 0.9, 0.9]}]}}
+  - name: Checker left wall
+    type: plane
+    cast_shadow: true
+    transform: {translate: [-5, 0, 0], rotate_deg: [0, 0, 90], scale: [1, 1, 1]}
+    material: {color: [1, 1, 1], ambient: 0.08, diffuse: 0.8, specular: 0, shininess: 20, reflective: 0, transparency: 0, refractive_index: 1, pattern: {type: checkers, transform: {translate: [0, 0, 0], rotate_deg: [0, 0, 0], scale: [1.5, 1.5, 1.5]}, children: [{type: solid, color: [0.65, 0.65, 0.65]}, {type: solid, color: [0.9, 0.9, 0.9]}]}}

@@ -7,6 +7,7 @@
 #include <filesystem>
 #include <optional>
 #include <string>
+#include <utility>
 
 #include "imgui.h"  // NOLINT
 
@@ -77,7 +78,49 @@ auto DrawAxialBoundsEditor(scene::AxialBounds& bounds) -> bool {
   return changed;
 }
 
+// NOLINTNEXTLINE(misc-no-recursion)
+auto PreserveCsgOverrides(scene::Object& operand, const scene::CsgSpec& csg) -> void {
+  if (operand.IsGroup()) {
+    for (auto& child : operand.Children()) {
+      PreserveCsgOverrides(child, csg);
+    }
+  } else if (operand.IsCsg()) {
+    if (csg.material.has_value()) {
+      operand.Csg().material = csg.material;
+    }
+    operand.Csg().cast_shadow &= csg.cast_shadow;
+  } else {
+    if (csg.material.has_value()) {
+      operand.Shape().material = *csg.material;
+    }
+    operand.Shape().cast_shadow &= csg.cast_shadow;
+  }
+}
+
 }  // namespace
+
+auto UnwrapCsg(scene::Object& object, const std::size_t operand_index) -> bool {
+  if (!object.IsCsg() || object.Csg().children.size() != 2 || operand_index >= 2) {
+    return false;
+  }
+  auto kept = std::move(object.Csg().children[operand_index]);
+  PreserveCsgOverrides(kept, object.Csg());
+  const auto outer_transform = object.transform;
+  const bool visible = object.visible;
+  if (outer_transform == scene::Transform{}) {
+    kept.visible = visible;
+    object = std::move(kept);
+  } else {
+    // Preserve T_parent * T_operand exactly, even when flattening would introduce shear.
+    scene::Object group;
+    group.name = kept.name + " (unwrapped)";
+    group.transform = outer_transform;
+    group.visible = visible;
+    group.content = scene::GroupSpec{.children = {std::move(kept)}};
+    object = std::move(group);
+  }
+  return true;
+}
 
 auto DrawPatternEditor(scene::Pattern& pattern, int depth) -> bool {  // NOLINT(misc-no-recursion)
   bool changed = false;
@@ -149,17 +192,64 @@ auto DrawMaterialEditor(scene::Material& material) -> bool {
   return changed;
 }
 
-auto DrawObjectEditor(scene::Object& object) -> bool {
+auto DrawObjectEditor(scene::Object& object, const bool allow_hide) -> bool {
   bool changed = false;
   if (ImGui::TreeNodeEx("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
     changed |= DragF3("Translate", object.transform.translate, 0.1F, -50.0F, 50.0F);
     changed |= DragF3("Scale", object.transform.scale, 0.01F, 0.01F, 20.0F);
     changed |= DragF3("Rotate (deg)", object.transform.rotate_deg, 1.0F, -360.0F, 360.0F);
+    ImGui::BeginDisabled(!allow_hide);
     changed |= ImGui::Checkbox("Visible", &object.visible);
+    ImGui::EndDisabled();
     ImGui::TreePop();
   }
   if (object.IsGroup()) {
     ImGui::Text("Children: %zu", object.Group().children.size());
+    return changed;
+  }
+
+  if (ImGui::Button("Wrap in CSG")) {
+    const auto name = object.name;
+    object = scene::MakeCsg(std::move(object));
+    object.name = name + " CSG";
+    return true;
+  }
+  if (object.IsCsg()) {
+    if (ImGui::Button("Unwrap")) {
+      ImGui::OpenPopup("UnwrapCsg");
+    }
+    std::optional<std::size_t> keep_operand;
+    if (ImGui::BeginPopup("UnwrapCsg")) {
+      ImGui::TextDisabled("Keep one operand; discard the other");
+      if (ImGui::MenuItem("Keep Left")) {
+        keep_operand = 0;
+      }
+      if (ImGui::MenuItem("Keep Right")) {
+        keep_operand = 1;
+      }
+      ImGui::EndPopup();
+    }
+    if (keep_operand.has_value()) {
+      return UnwrapCsg(object, *keep_operand);
+    }
+    auto& csg = object.Csg();
+    static constexpr std::array kOperations = {"Union", "Intersection", "Difference"};
+    int operation = static_cast<int>(csg.operation);
+    if (ImGui::Combo("Operation", &operation, kOperations.data(), static_cast<int>(kOperations.size()))) {
+      csg.operation = static_cast<scene::CsgOperation>(operation);
+      changed = true;
+    }
+    changed |= ImGui::Checkbox("Cast Shadow", &csg.cast_shadow);
+    ImGui::TextWrapped("Expand this CSG in the object tree to select and edit its left/right operands.");
+    bool override_material = csg.material.has_value();
+    if (ImGui::Checkbox("Override operand materials", &override_material)) {
+      csg.material = override_material ? std::optional{scene::Material{}} : std::nullopt;
+      changed = true;
+    }
+    if (csg.material.has_value() && ImGui::TreeNodeEx("Material", ImGuiTreeNodeFlags_DefaultOpen)) {
+      changed |= DrawMaterialEditor(*csg.material);
+      ImGui::TreePop();
+    }
     return changed;
   }
 

@@ -64,11 +64,11 @@ auto SceneEditorApp::AddObj(const std::filesystem::path& path,
   auto candidate = current_scene_;
   auto* destination = &candidate.objects;
   for (const auto index : parent_path) {
-    if (index >= destination->size() || !(*destination)[index].IsGroup()) {
+    if (index >= destination->size() || !(*destination)[index].IsContainer()) {
       state_.status_message = "OBJ import destination is no longer a group";
       return false;
     }
-    destination = &(*destination)[index].Group().children;
+    destination = &(*destination)[index].Children();
   }
   scene::Object object;
   object.name = path.stem().string();

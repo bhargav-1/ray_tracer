@@ -1,7 +1,7 @@
 #include "app/scene/scene_compiler.h"
 
-#include <cstddef>
 #include <cmath>
+#include <cstddef>
 #include <exception>
 #include <memory>
 #include <numbers>
@@ -13,6 +13,7 @@
 
 #include "app/camera.h"
 #include "app/color.h"
+#include "app/constructive_solid_geometry.h"
 #include "app/group.h"
 #include "app/material.h"
 #include "app/matrix.h"
@@ -28,17 +29,11 @@
 namespace ray_tracer::scene_runtime {
 namespace {
 
-auto ToColor(const scene::ColorRgb& color) -> ray_tracer::Color {
-  return {color.r, color.g, color.b};
-}
+auto ToColor(const scene::ColorRgb& color) -> ray_tracer::Color { return {color.r, color.g, color.b}; }
 
-auto ToPoint(const scene::Vec3& value) -> ray_tracer::Point {
-  return {value.x, value.y, value.z};
-}
+auto ToPoint(const scene::Vec3& value) -> ray_tracer::Point { return {value.x, value.y, value.z}; }
 
-auto ToVec3(const scene::Vec3& value) -> ray_tracer::Vec3 {
-  return {value.x, value.y, value.z};
-}
+auto ToVec3(const scene::Vec3& value) -> ray_tracer::Vec3 { return {value.x, value.y, value.z}; }
 
 auto HasFiniteBounds(const ray_tracer::Shape& shape) -> bool {
   const auto bounds = shape.ParentSpaceBounds();
@@ -49,8 +44,8 @@ auto HasFiniteBounds(const ray_tracer::Shape& shape) -> bool {
 }
 
 auto BuildTransformMatrix(const scene::Transform& transform) -> ray_tracer::Matrix<4, 4> {
-  auto matrix = ray_tracer::Matrix<4, 4>::Translation(
-      transform.translate.x, transform.translate.y, transform.translate.z);
+  auto matrix =
+      ray_tracer::Matrix<4, 4>::Translation(transform.translate.x, transform.translate.y, transform.translate.z);
   constexpr auto kDegToRad = std::numbers::pi / 180.0;
   if (transform.rotate_deg.x != 0.0F) {
     matrix = matrix * ray_tracer::Matrix<4, 4>::RotationX(transform.rotate_deg.x * kDegToRad);
@@ -71,7 +66,9 @@ auto SolidChildColor(const scene::Pattern& pattern, const std::string& label) ->
   return ToColor(pattern.color);
 }
 
-auto CompilePattern(const scene::Pattern& pattern) -> std::shared_ptr<ray_tracer::Pattern> {  // NOLINT(misc-no-recursion)
+// NOLINTNEXTLINE(misc-no-recursion)
+auto CompilePattern(const scene::Pattern& pattern)
+    -> std::shared_ptr<ray_tracer::Pattern> {  // NOLINT(misc-no-recursion)
   std::shared_ptr<ray_tracer::Pattern> compiled;
   switch (pattern.type) {
     case scene::PatternType::kSolid:
@@ -81,29 +78,29 @@ auto CompilePattern(const scene::Pattern& pattern) -> std::shared_ptr<ray_tracer
       if (pattern.children.size() != 2) {
         throw std::runtime_error("stripe pattern requires exactly 2 child patterns");
       }
-      compiled = std::make_shared<ray_tracer::StripePattern>(
-          CompilePattern(pattern.children[0]), CompilePattern(pattern.children[1]));
+      compiled = std::make_shared<ray_tracer::StripePattern>(CompilePattern(pattern.children[0]),
+                                                             CompilePattern(pattern.children[1]));
       break;
     case scene::PatternType::kRing:
       if (pattern.children.size() != 2) {
         throw std::runtime_error("ring pattern requires exactly 2 child patterns");
       }
-      compiled = std::make_shared<ray_tracer::RingPattern>(
-          CompilePattern(pattern.children[0]), CompilePattern(pattern.children[1]));
+      compiled = std::make_shared<ray_tracer::RingPattern>(CompilePattern(pattern.children[0]),
+                                                           CompilePattern(pattern.children[1]));
       break;
     case scene::PatternType::kCheckers:
       if (pattern.children.size() != 2) {
         throw std::runtime_error("checkers pattern requires exactly 2 child patterns");
       }
-      compiled = std::make_shared<ray_tracer::CheckersPattern>(
-          CompilePattern(pattern.children[0]), CompilePattern(pattern.children[1]));
+      compiled = std::make_shared<ray_tracer::CheckersPattern>(CompilePattern(pattern.children[0]),
+                                                               CompilePattern(pattern.children[1]));
       break;
     case scene::PatternType::kBlended:
       if (pattern.children.size() != 2) {
         throw std::runtime_error("blended pattern requires exactly 2 child patterns");
       }
-      compiled = std::make_shared<ray_tracer::BlendedPattern>(
-          CompilePattern(pattern.children[0]), CompilePattern(pattern.children[1]));
+      compiled = std::make_shared<ray_tracer::BlendedPattern>(CompilePattern(pattern.children[0]),
+                                                              CompilePattern(pattern.children[1]));
       break;
     case scene::PatternType::kUvCheckers:
       if (pattern.children.size() != 2) {
@@ -116,23 +113,23 @@ auto CompilePattern(const scene::Pattern& pattern) -> std::shared_ptr<ray_tracer
       if (pattern.children.size() != 1) {
         throw std::runtime_error("perturbed pattern requires exactly 1 source pattern");
       }
-      compiled = std::make_shared<ray_tracer::PerturbedPattern>(
-          CompilePattern(pattern.children[0]), pattern.perturb_scale);
+      compiled =
+          std::make_shared<ray_tracer::PerturbedPattern>(CompilePattern(pattern.children[0]), pattern.perturb_scale);
       break;
     case scene::PatternType::kGradient:
       if (pattern.children.size() != 2) {
         throw std::runtime_error("gradient pattern requires exactly 2 child patterns");
       }
-      compiled = std::make_shared<ray_tracer::GradientPattern>(
-          SolidChildColor(pattern.children[0], "gradient"), SolidChildColor(pattern.children[1], "gradient"));
+      compiled = std::make_shared<ray_tracer::GradientPattern>(SolidChildColor(pattern.children[0], "gradient"),
+                                                               SolidChildColor(pattern.children[1], "gradient"));
       break;
     case scene::PatternType::kRadialGradient:
       if (pattern.children.size() != 2) {
         throw std::runtime_error("radial_gradient pattern requires exactly 2 child patterns");
       }
-      compiled = std::make_shared<ray_tracer::RadialGradientPattern>(
-          SolidChildColor(pattern.children[0], "radial_gradient"),
-          SolidChildColor(pattern.children[1], "radial_gradient"));
+      compiled =
+          std::make_shared<ray_tracer::RadialGradientPattern>(SolidChildColor(pattern.children[0], "radial_gradient"),
+                                                              SolidChildColor(pattern.children[1], "radial_gradient"));
       break;
   }
   compiled->SetPatternTransform(BuildTransformMatrix(pattern.transform));
@@ -140,15 +137,14 @@ auto CompilePattern(const scene::Pattern& pattern) -> std::shared_ptr<ray_tracer
 }
 
 auto CompileMaterial(const scene::Material& material) -> ray_tracer::Material {
-  ray_tracer::Material compiled{
-      ToColor(material.color),
-      material.ambient,
-      material.diffuse,
-      material.specular,
-      material.shininess,
-      material.reflective,
-      material.transparency,
-      material.refractive_index};
+  ray_tracer::Material compiled{ToColor(material.color),
+                                material.ambient,
+                                material.diffuse,
+                                material.specular,
+                                material.shininess,
+                                material.reflective,
+                                material.transparency,
+                                material.refractive_index};
   if (material.pattern.has_value()) {
     compiled.SetPattern(CompilePattern(*material.pattern));
   }
@@ -156,8 +152,10 @@ auto CompileMaterial(const scene::Material& material) -> ray_tracer::Material {
 }
 
 // NOLINTNEXTLINE(misc-no-recursion)
-auto ConfigureObjChildren(ray_tracer::Group& group, const ray_tracer::Material& material,
-                          bool cast_shadow, std::size_t& next_id) -> void {
+auto ConfigureObjChildren(ray_tracer::Group& group,
+                          const ray_tracer::Material& material,
+                          bool cast_shadow,
+                          std::size_t& next_id) -> void {
   for (const auto& child : group.GetChildren()) {
     // The parser assigned consecutive IDs starting at the imported root's ID.
     ++next_id;
@@ -169,29 +167,64 @@ auto ConfigureObjChildren(ray_tracer::Group& group, const ray_tracer::Material& 
   }
 }
 
-auto CompileObject(const scene::Object& object, std::size_t& next_id)  // NOLINT(misc-no-recursion)
+// NOLINTNEXTLINE(misc-no-recursion)
+auto CompileObject(const scene::Object& object,
+                   std::size_t& next_id,
+                   const scene::Material* inherited_material = nullptr)  // NOLINT(misc-no-recursion)
     -> std::shared_ptr<ray_tracer::Shape> {
   if (object.IsGroup()) {
     auto group = std::make_shared<ray_tracer::Group>(next_id++);
     group->SetTransform(BuildTransformMatrix(object.transform));
     for (const auto& child : object.Group().children) {
       if (child.visible) {
-        group->AddChild(CompileObject(child, next_id));
+        group->AddChild(CompileObject(child, next_id, inherited_material));
       }
     }
     return group;
   }
 
+  if (object.IsCsg()) {
+    const auto& spec = object.Csg();
+    if (spec.children.size() != 2 || !spec.children[0].visible || !spec.children[1].visible) {
+      throw std::runtime_error("CSG '" + object.name + "' requires exactly two visible operands");
+    }
+    const auto shape_id = next_id++;
+    const auto* material = inherited_material;
+    if (material == nullptr && spec.material.has_value()) {
+      material = &*spec.material;
+    }
+    auto left = CompileObject(spec.children[0], next_id, material);
+    auto right = CompileObject(spec.children[1], next_id, material);
+    ray_tracer::CSGOperation operation = ray_tracer::CSGOperation::kUnion;
+    switch (spec.operation) {
+      case scene::CsgOperation::kUnion:
+        operation = ray_tracer::CSGOperation::kUnion;
+        break;
+      case scene::CsgOperation::kIntersection:
+        operation = ray_tracer::CSGOperation::kIntersection;
+        break;
+      case scene::CsgOperation::kDifference:
+        operation = ray_tracer::CSGOperation::kDifference;
+        break;
+    }
+    auto csg = ray_tracer::ConstructiveSolidGeometry::CreateCSG(shape_id, std::move(left), std::move(right), operation);
+    csg->SetTransform(BuildTransformMatrix(object.transform));
+    csg->SetCastShadow(spec.cast_shadow);
+    if (material != nullptr) {
+      csg->SetMaterial(CompileMaterial(*material));
+    }
+    return csg;
+  }
+
   const auto& shape_spec = object.Shape();
   const auto& registration = shape_catalog::Find(shape_spec.type);
-  if (registration.supports_axial_bounds &&
-      shape_spec.axial_bounds.minimum >= shape_spec.axial_bounds.maximum) {
+  if (registration.supports_axial_bounds && shape_spec.axial_bounds.minimum >= shape_spec.axial_bounds.maximum) {
     throw std::runtime_error("object '" + object.name + "' requires minimum bounds below maximum bounds");
   }
   auto shape = registration.create(next_id++, shape_spec);
   shape->SetTransform(BuildTransformMatrix(object.transform));
   shape->SetCastShadow(shape_spec.cast_shadow);
-  const auto material = CompileMaterial(shape_spec.material);
+  const auto material = CompileMaterial(inherited_material != nullptr ? *inherited_material : shape_spec.material);
   shape->SetMaterial(material);
   if (shape_spec.type == scene::ObjectType::kObj) {
     ConfigureObjChildren(dynamic_cast<ray_tracer::Group&>(*shape), material, shape_spec.cast_shadow, next_id);
@@ -203,11 +236,9 @@ auto CompileObject(const scene::Object& object, std::size_t& next_id)  // NOLINT
 
 auto CompileCamera(const scene::Camera& camera_spec) -> ray_tracer::Camera {
   ray_tracer::Camera camera{
-      camera_spec.resolution.width,
-      camera_spec.resolution.height,
-      camera_spec.fov_deg * std::numbers::pi / 180.0};
-  camera.SetTransform(ray_tracer::ViewTransform(
-      ToPoint(camera_spec.from), ToPoint(camera_spec.to), ToVec3(camera_spec.up)));
+      camera_spec.resolution.width, camera_spec.resolution.height, camera_spec.fov_deg * std::numbers::pi / 180.0};
+  camera.SetTransform(
+      ray_tracer::ViewTransform(ToPoint(camera_spec.from), ToPoint(camera_spec.to), ToVec3(camera_spec.up)));
   return camera;
 }
 

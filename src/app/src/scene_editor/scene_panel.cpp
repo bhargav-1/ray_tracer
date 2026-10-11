@@ -65,8 +65,8 @@ using ObjectPath = std::vector<std::size_t>;
 auto CountObjects(const std::vector<scene::Object>& objects) -> std::size_t {  // NOLINT(misc-no-recursion)
   std::size_t count = objects.size();
   for (const auto& object : objects) {
-    if (object.IsGroup()) {
-      count += CountObjects(object.Group().children);
+    if (object.IsContainer()) {
+      count += CountObjects(object.Children());
     }
   }
   return count;
@@ -82,10 +82,10 @@ auto FindObject(std::vector<scene::Object>& objects, const ObjectPath& path) -> 
     }
     object = &(*current_objects)[index];
     if (depth + 1 < path.size()) {
-      if (!object->IsGroup()) {
+      if (!object->IsContainer()) {
         return nullptr;
       }
-      current_objects = &object->Group().children;
+      current_objects = &object->Children();
     }
   }
   return object;
@@ -131,6 +131,15 @@ auto AddObjectMenu(std::vector<scene::Object>& objects, const ObjectPath& parent
     }
   }
   ImGui::Separator();
+  if (ImGui::MenuItem("CSG")) {
+    auto object = scene::MakeCsg();
+    object.name += " " + std::to_string(objects.size() + 1);
+    objects.push_back(std::move(object));
+    auto path = parent_path;
+    path.push_back(objects.size() - 1);
+    state.selection = Selection::ForObject(std::move(path));
+    changed = true;
+  }
   if (ImGui::MenuItem("Group")) {
     scene::Object group;
     group.name = "Group " + std::to_string(objects.size() + 1);
@@ -146,7 +155,8 @@ auto AddObjectMenu(std::vector<scene::Object>& objects, const ObjectPath& parent
 
 auto DrawObjectTree(std::vector<scene::Object>& objects,  // NOLINT(misc-no-recursion)
                     const ObjectPath& parent_path,
-                    EditorState& state) -> bool {
+                    EditorState& state,
+                    bool csg_operands = false) -> bool {
   bool changed = false;
   std::optional<std::size_t> delete_index;
   for (std::size_t index = 0; index < objects.size(); ++index) {
@@ -158,6 +168,7 @@ auto DrawObjectTree(std::vector<scene::Object>& objects,  // NOLINT(misc-no-recu
       state.selection = Selection::ForObject(path);
     }
     ImGui::SameLine();
+    ImGui::BeginDisabled(csg_operands);
     if (ImGui::SmallButton(object.visible ? "Hide###visibility" : "Show###visibility")) {
       object.visible = !object.visible;
       changed = true;
@@ -166,6 +177,7 @@ auto DrawObjectTree(std::vector<scene::Object>& objects,  // NOLINT(misc-no-recu
     if (ImGui::SmallButton("Remove###remove")) {
       delete_index = index;
     }
+    ImGui::EndDisabled();
     if (object.IsGroup()) {
       ImGui::SameLine();
       if (ImGui::SmallButton("+ Child")) {
@@ -177,12 +189,18 @@ auto DrawObjectTree(std::vector<scene::Object>& objects,  // NOLINT(misc-no-recu
       }
     }
     ImGui::SameLine();
-    const auto flags = object.IsGroup() ? ImGuiTreeNodeFlags_DefaultOpen
-                                        : ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
-    const auto node_label = object.name + "###object_node";
+    ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+    if (object.IsContainer()) {
+      flags = object.IsGroup() ? ImGuiTreeNodeFlags_DefaultOpen : ImGuiTreeNodeFlags_None;
+    }
+    std::string prefix;
+    if (csg_operands) {
+      prefix = index == 0 ? "Left: " : "Right: ";
+    }
+    const auto node_label = prefix + object.name + "###object_node";
     const bool open = ImGui::TreeNodeEx(node_label.c_str(), flags);
-    if (object.IsGroup() && open) {
-      changed |= DrawObjectTree(object.Group().children, path, state);
+    if (object.IsContainer() && open) {
+      changed |= DrawObjectTree(object.Children(), path, state, object.IsCsg());
       ImGui::TreePop();
     }
     ImGui::PopID();
@@ -303,7 +321,10 @@ auto DrawScenePanel(SceneEditorApp& app, UiRenderState& render_state, std::array
       }
       ImGui::Separator();
       ImGui::Text("Inspector: %s", selected->name.c_str());
-      changed |= DrawObjectEditor(*selected);
+      auto parent_path = editor_state.selection.object_path;
+      parent_path.pop_back();
+      const auto* parent = FindObject(scene.objects, parent_path);
+      changed |= DrawObjectEditor(*selected, parent == nullptr || !parent->IsCsg());
       for (std::size_t depth = 0; depth < editor_state.selection.object_path.size(); ++depth) {
         ImGui::PopID();
       }

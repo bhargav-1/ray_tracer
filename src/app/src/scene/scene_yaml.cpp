@@ -267,6 +267,40 @@ auto ParseObject(const YAML::Node& node, const std::string& label) -> scene::Obj
     return object;
   }
 
+  if (type_name == "csg") {
+    RequireOnlyKeys(node, {"name", "type", "visible", "transform", "operation", "children", "material", "cast_shadow"}, label);
+    scene::CsgSpec csg;
+    const auto operation = Required(node, "operation", label).as<std::string>();
+    if (operation == "union") {
+      csg.operation = scene::CsgOperation::kUnion;
+    } else if (operation == "intersection") {
+      csg.operation = scene::CsgOperation::kIntersection;
+    } else if (operation == "difference") {
+      csg.operation = scene::CsgOperation::kDifference;
+    } else {
+      throw std::runtime_error(label + ".operation must be union, intersection, or difference");
+    }
+    const auto children = Required(node, "children", label);
+    RequireSequence(children, label + ".children");
+    if (children.size() != 2) {
+      throw std::runtime_error(label + ".children must contain exactly two operands");
+    }
+    for (std::size_t index = 0; index < children.size(); ++index) {
+      csg.children.push_back(ParseObject(children[index], label + ".children[" + std::to_string(index) + "]"));
+      if (!csg.children.back().visible) {
+        throw std::runtime_error(label + ".children operands must be visible");
+      }
+    }
+    if (const auto material = node["material"]) {
+      csg.material = ParseMaterial(material, label + ".material");
+    }
+    if (const auto cast_shadow = node["cast_shadow"]) {
+      csg.cast_shadow = cast_shadow.as<bool>();
+    }
+    object.content = std::move(csg);
+    return object;
+  }
+
   RequireOnlyKeys(
       node, {"name", "type", "bounds", "vertices", "normals", "source", "visible", "cast_shadow", "transform", "material"}, label);
   const auto& registration = shape_catalog::Find(type_name);
@@ -394,15 +428,31 @@ auto EmitObject(YAML::Emitter& out, const scene::Object& object) -> void {  // N
   out << YAML::Key << "type" << YAML::Value;
   if (object.IsGroup()) {
     out << "group";
+  } else if (object.IsCsg()) {
+    out << "csg";
   } else {
     out << shape_catalog::Find(object.Shape().type).serialized_name;
   }
   out << YAML::Key << "visible" << YAML::Value << object.visible;
   out << YAML::Key << "transform" << YAML::Value;
   EmitTransform(out, object.transform);
-  if (object.IsGroup()) {
+  if (object.IsContainer()) {
+    if (object.IsCsg()) {
+      const auto& csg = object.Csg();
+      out << YAML::Key << "operation" << YAML::Value;
+      switch (csg.operation) {
+        case scene::CsgOperation::kUnion: out << "union"; break;
+        case scene::CsgOperation::kIntersection: out << "intersection"; break;
+        case scene::CsgOperation::kDifference: out << "difference"; break;
+      }
+      out << YAML::Key << "cast_shadow" << YAML::Value << csg.cast_shadow;
+      if (csg.material.has_value()) {
+        out << YAML::Key << "material" << YAML::Value;
+        EmitMaterial(out, *csg.material);
+      }
+    }
     out << YAML::Key << "children" << YAML::Value << YAML::BeginSeq;
-    for (const auto& child : object.Group().children) {
+    for (const auto& child : object.Children()) {
       EmitObject(out, child);
     }
     out << YAML::EndSeq;
@@ -441,8 +491,8 @@ auto EmitObject(YAML::Emitter& out, const scene::Object& object) -> void {  // N
 auto ResolveObjSources(std::vector<scene::Object>& objects, const std::filesystem::path& directory)
     -> void {
   for (auto& object : objects) {
-    if (object.IsGroup()) {
-      ResolveObjSources(object.Group().children, directory);
+    if (object.IsContainer()) {
+      ResolveObjSources(object.Children(), directory);
     } else if (object.Shape().type == scene::ObjectType::kObj) {
       object.Shape().source = (directory / object.Shape().source).lexically_normal().string();
     }

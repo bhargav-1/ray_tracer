@@ -1,0 +1,50 @@
+# Same bunny geometry: left has face normals, right has interpolated vertex normals.
+# Model: https://github.com/McNopper/OpenGL/blob/main/Binaries/bunny.obj
+version: 1
+camera:
+  from: [0, 2.8, 7]
+  to: [0, 1, 0]
+  up: [0, 1, 0]
+  fov_deg: 45
+  resolution: [800, 400]
+lights:
+  - visible: true
+    position: [0, 6, 5]
+    color: [1, 1, 1]
+objects:
+  - name: Bunny without vertex normals (flat)
+    type: obj
+    source: ../models/bunny_flat.obj
+    visible: true
+    transform:
+      translate: [-1.5, 0.01855, 0]
+      rotate_deg: [0, 0, 0]
+      scale: [1.25, 1.25, 1.25]
+    cast_shadow: true
+    material:
+      color: [0.2, 0.65, 0.9]
+      ambient: 0.1
+      diffuse: 0.8
+      specular: 0.3
+      shininess: 100
+      reflective: 0
+      transparency: 0
+      refractive_index: 1
+  - name: Bunny with vertex normals (smooth)
+    type: obj
+    source: ../models/bunny_normals.obj
+    visible: true
+    transform:
+      translate: [1.5, 0.01855, 0]
+      rotate_deg: [0, 0, 0]
+      scale: [1.25, 1.25, 1.25]
+    cast_shadow: true
+    material:
+      color: [0.2, 0.65, 0.9]
+      ambient: 0.1
+      diffuse: 0.8
+      specular: 0.3
+      shininess: 100
+      reflective: 0
+      transparency: 0
+      refractive_index: 1

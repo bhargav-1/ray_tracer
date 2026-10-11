@@ -253,11 +253,11 @@ SCENARIO("scene yaml: rejects invalid scenes with useful errors") {
 }
 
 SCENARIO("scene yaml: loads relative OBJ sources and preserves them through Save As") {
-  const auto path = std::filesystem::path{RAY_TRACER_ASSET_DIR} / "scenes" / "obj_model.yaml";
+  const auto path = std::filesystem::path{RAY_TRACER_ASSET_DIR} / "scenes" / "teapot_comparision_chapter15.yaml";
   const auto loaded = scene_io::LoadSceneYaml(path);
   INFO(loaded.error);
   REQUIRE(loaded.ok);
-  REQUIRE(loaded.scene.objects.size() == 1);
+  REQUIRE(loaded.scene.objects.size() == 2);
   const auto& shape = loaded.scene.objects[0].Shape();
   CHECK(shape.type == scene::ObjectType::kObj);
   CHECK(std::filesystem::path(shape.source).is_absolute());

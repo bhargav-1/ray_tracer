@@ -63,7 +63,7 @@ SCENARIO("scene renderer: renders fast low resolution previews") {
 
 SCENARIO("scene renderer: renders an OBJ-backed YAML scene") {
   auto loaded = scene_io::LoadSceneYaml(
-      std::filesystem::path{RAY_TRACER_ASSET_DIR} / "scenes" / "obj_model.yaml");
+      std::filesystem::path{RAY_TRACER_ASSET_DIR} / "scenes" / "teapot_comparision_chapter15.yaml");
   REQUIRE(loaded.ok);
   if (!loaded.scene.camera.has_value()) {
     FAIL("expected OBJ scene camera");

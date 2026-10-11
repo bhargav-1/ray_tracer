@@ -71,6 +71,7 @@ class SceneEditorApp {
   auto AddObj(const std::filesystem::path& path, const std::vector<std::size_t>& parent_path = {}) -> bool;
   auto SetCurrentScene(scene::Scene scene) -> bool;
   auto RecompileCurrentScene() -> bool;
+  auto UpdateCamera() -> bool;
   auto ClearRenderRequest() -> void { state_.render_state.render_requested = false; }
 
  private:

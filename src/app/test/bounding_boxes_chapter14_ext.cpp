@@ -20,6 +20,7 @@
 #include "app/shape.h"
 #include "app/sphere.h"
 #include "app/vec3.h"
+#include "app/constructive_solid_geometry.h"
 
 namespace ray_tracer {
 class TestShape : public Shape {
@@ -270,19 +271,19 @@ SCENARIO("14_ext: A group has a bounding box that contains its children") {
   }
 }
 
-// SCENARIO("14_ext: CSG group has a bb that contains its children") {
-//   GIVEN("left= sphere(1),right=sphere(2),right.translation(2,3,4), csg(diff, left, right), bb = csg.bounds()") {
-//     THEN("bb.min == point(-1, -1, -1) and bb.max == point(4, 5, 6)") {
-//       auto left = std::make_shared<Sphere>(1);
-//       auto right = std::make_shared<Sphere>(2);
-//       right->SetTransform(Matrix<4, 4>::Translation(2, 3, 4));
-//       auto csg_var = std::make_shared<CSG>(CSGOperation::Difference, left, right);
-//       auto box = csg_var->BoundsOf();
-//       CHECK(box.GetMin() == Point(-1, -1, -1));
-//       CHECK(box.GetMax() == Point(4, 5, 6));
-//     }
-//   }
-// }
+SCENARIO("14_ext: CSG group has a bb that contains its children") {
+  GIVEN("left= sphere(1),right=sphere(2),right.translation(2,3,4), csg(diff, left, right), bb = csg.bounds()") {
+    THEN("bb.min == point(-1, -1, -1) and bb.max == point(4, 5, 6)") {
+      auto left = std::make_shared<Sphere>(1);
+      auto right = std::make_shared<Sphere>(2);
+      right->SetTransform(Matrix<4, 4>::Translation(2, 3, 4));
+      auto csg_var = ConstructiveSolidGeometry::CreateCSG(1, left, right, CSGOperation::kDifference);
+      auto box = csg_var->BoundsOf();
+      CHECK(box.GetMin() == Point(-1, -1, -1));
+      CHECK(box.GetMax() == Point(3, 4, 5));
+    }
+  }
+}
 SCENARIO("14_ext: Intersecting a ray with bb at the origin") {
   GIVEN("bb = (p(-1,-1,-1),p(1,1,1), dir= normalize(<dir>), r= ray(<origin>, dir)") {
     THEN("bb.intersect(r) == result") {
@@ -374,32 +375,32 @@ SCENARIO("14_ext: Intersecting ray+group does test children if box is hit") {
     }
   }
 }
-// SCENARIO("14_ext: Interseting ray+csg doesnot test children if box is missed") {
-//   GIVEN("left = test_shape(), right = test_shape(), csg = csg(diff, left, right), r=ray(point(0,0,-5),vec(0,1,0))") {
-//     THEN("intersect(r) == 0") {
-//       auto left = std::make_shared<TestShape>(1);
-//       auto right = std::make_shared<TestShape>(2);
-//       auto csg_var = std::make_shared<CSG>(CSGOperation::Difference, left, right);
-//       auto ray_var = Ray(Point(0, 0, -5), Vec3(0, 1, 0));
-//       auto intesect_xs = csg_var->Intersect(ray_var);
-//       CHECK(left->GetSavedRay().has_value() == false);
-//       CHECK(right->GetSavedRay().has_value() == false);
-//     }
-//   }
-// }
-// SCENARIO("14_ext: Intersecting ray+csg does test children if box is hit") {
-//   GIVEN("left = test_shape(), right = test_shape(), csg = csg(diff, left, right), r=ray(point(0,0,-5),vec(0,0,1))") {
-//     THEN("intersect(r) == 0") {
-//       auto left = std::make_shared<TestShape>(1);
-//       auto right = std::make_shared<TestShape>(2);
-//       auto csg_var = std::make_shared<CSG>(CSGOperation::Difference, left, right);
-//       auto ray_var = Ray(Point(0, 0, -5), Vec3(0, 0, 1));
-//       auto intesect_xs = csg_var->Intersect(ray_var);
-//       CHECK(left->GetSavedRay().has_value() == true);
-//       CHECK(right->GetSavedRay().has_value() == true);
-//     }
-//   }
-// }
+SCENARIO("14_ext: Interseting ray+csg doesnot test children if box is missed") {
+  GIVEN("left = test_shape(), right = test_shape(), csg = csg(diff, left, right), r=ray(point(0,0,-5),vec(0,1,0))") {
+    THEN("intersect(r) == 0") {
+      auto left = std::make_shared<TestShape>(1);
+      auto right = std::make_shared<TestShape>(2);
+      auto csg_var = ConstructiveSolidGeometry::CreateCSG(3, left, right, CSGOperation::kDifference);
+      auto ray_var = Ray(Point(0, 0, -5), Vec3(0, 1, 0));
+      auto intesect_xs = csg_var->Intersect(ray_var);
+      CHECK(left->GetSavedRay().has_value() == false);
+      CHECK(right->GetSavedRay().has_value() == false);
+    }
+  }
+}
+SCENARIO("14_ext: Intersecting ray+csg does test children if box is hit") {
+  GIVEN("left = test_shape(), right = test_shape(), csg = csg(diff, left, right), r=ray(point(0,0,-5),vec(0,0,1))") {
+    THEN("intersect(r) == 0") {
+      auto left = std::make_shared<TestShape>(1);
+      auto right = std::make_shared<TestShape>(2);
+      auto csg_var = ConstructiveSolidGeometry::CreateCSG(3, left, right, CSGOperation::kDifference);
+      auto ray_var = Ray(Point(0, 0, -5), Vec3(0, 0, 1));
+      auto intesect_xs = csg_var->Intersect(ray_var);
+      CHECK(left->GetSavedRay().has_value() == true);
+      CHECK(right->GetSavedRay().has_value() == true);
+    }
+  }
+}
 
 SCENARIO("14_ext: Splitting a perfect cube") {
   GIVEN("box = bb((-1,-4,-5), (9,6,5)), left, right = box.split()") {
@@ -578,40 +579,51 @@ SCENARIO("14_ext: subdividing a group with too few children") {
   }
 }
 
-// SCENARIO("14_ext: subdividing a csg shape subdivides its children") {
-//   GIVEN(
-//       "s1=sphere;s1.translate(-1.5,0,0);s2=sphere;s2.translate(1.5,0,0);left= group(s1, "
-//       "s2);s3=sphere;s3.translate(0,0,-1.5);s4=sphere;s4.translate(0,0,1.5);right=group(s3,s4);csg= "
-//       "csg(diff,left,right)") {
-//     THEN("csg_var.divide(1);left(0) = group(s1);left(1)=group(s2);right(0)=group(s3);right(1)=group(s4)") {
-//       auto s1_sphere = std::make_shared<Sphere>(1);
-//       auto s2_sphere = std::make_shared<Sphere>(2);
-//       s1_sphere->SetTransform(Matrix<4, 4>::Translation(-1.5, 0, 0));
-//       s2_sphere->SetTransform(Matrix<4, 4>::Translation(1.5, 0, 0));
-//       auto left_group = std::make_shared<Group>(9);
-//       left_group->AddChild(s1_sphere);
-//       left_group->AddChild(s2_sphere);
-//
-//       auto s3_sphere = std::make_shared<Sphere>(3);
-//       auto s4_sphere = std::make_shared<Sphere>(4);
-//       s3_sphere->SetTransform(Matrix<4, 4>::Translation(0, 0, -1.5));
-//       s4_sphere->SetTransform(Matrix<4, 4>::Translation(0, 0, 1.5));
-//       auto right_group = std::make_shared<Group>(10);
-//       right_group->AddChild(s3_sphere);
-//       right_group->AddChild(s4_sphere);
-//
-//       auto csg_var = std::make_shared<CSG>(CSGOperation::Difference, left_group, right_group);
-//       csg_var->Divide(1);
-//
-//       CHECK(left_group->GetChildren().size() == 2);
-//       CHECK(left_group->GetChildren()[0] == s1_sphere || left_group->GetChildren()[0] == s2_sphere);
-//       CHECK(left_group->GetChildren()[1] == s1_sphere || left_group->GetChildren()[1] == s2_sphere);
-//
-//       CHECK(right_group->GetChildren().size() == 2);
-//       CHECK(right_group->GetChildren()[0] == s3_sphere || right_group->GetChildren()[0] == s4_sphere);
-//       CHECK(right_group->GetChildren()[1] == s3_sphere || right_group->GetChildren()[1] == s4_sphere);
-//     }
-//   }
-// }
+SCENARIO("14_ext: subdividing a csg shape subdivides its children") {
+  GIVEN(
+      "s1=sphere;s1.translate(-1.5,0,0);s2=sphere;s2.translate(1.5,0,0);left= group(s1, "
+      "s2);s3=sphere;s3.translate(0,0,-1.5);s4=sphere;s4.translate(0,0,1.5);right=group(s3,s4);csg= "
+      "csg(diff,left,right)") {
+    THEN("csg_var.divide(1);left(0) = group(s1);left(1)=group(s2);right(0)=group(s3);right(1)=group(s4)") {
+      auto s1_sphere = std::make_shared<Sphere>(1);
+      auto s2_sphere = std::make_shared<Sphere>(2);
+      s1_sphere->SetTransform(Matrix<4, 4>::Translation(-1.5, 0, 0));
+      s2_sphere->SetTransform(Matrix<4, 4>::Translation(1.5, 0, 0));
+      auto left_group = std::make_shared<Group>(9);
+      left_group->AddChild(s1_sphere);
+      left_group->AddChild(s2_sphere);
+
+      auto s3_sphere = std::make_shared<Sphere>(3);
+      auto s4_sphere = std::make_shared<Sphere>(4);
+      s3_sphere->SetTransform(Matrix<4, 4>::Translation(0, 0, -1.5));
+      s4_sphere->SetTransform(Matrix<4, 4>::Translation(0, 0, 1.5));
+      auto right_group = std::make_shared<Group>(10);
+      right_group->AddChild(s3_sphere);
+      right_group->AddChild(s4_sphere);
+
+      auto csg_var = ConstructiveSolidGeometry::CreateCSG(3, left_group, right_group, CSGOperation::kDifference);
+      csg_var->Divide(1);
+
+      const auto left_children = left_group->GetChildren();
+      const auto right_children = right_group->GetChildren();
+      REQUIRE(left_children.size() == 2);
+      REQUIRE(right_children.size() == 2);
+
+      const auto left_first = std::dynamic_pointer_cast<Group>(left_children[0]);
+      const auto left_second = std::dynamic_pointer_cast<Group>(left_children[1]);
+      const auto right_first = std::dynamic_pointer_cast<Group>(right_children[0]);
+      const auto right_second = std::dynamic_pointer_cast<Group>(right_children[1]);
+      REQUIRE(left_first != nullptr);
+      REQUIRE(left_second != nullptr);
+      REQUIRE(right_first != nullptr);
+      REQUIRE(right_second != nullptr);
+
+      CHECK(left_first->GetChildren() == std::vector<std::shared_ptr<Shape>>{s1_sphere});
+      CHECK(left_second->GetChildren() == std::vector<std::shared_ptr<Shape>>{s2_sphere});
+      CHECK(right_first->GetChildren() == std::vector<std::shared_ptr<Shape>>{s3_sphere});
+      CHECK(right_second->GetChildren() == std::vector<std::shared_ptr<Shape>>{s4_sphere});
+    }
+  }
+}
 
 }  // namespace ray_tracer

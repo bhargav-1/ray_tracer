@@ -69,9 +69,14 @@ class BoundingBox {
 
     const auto x_axis = CheckAxis(ray.GetOrigin().GetX(), ray.GetDirection().GetX(), min_.GetX(), max_.GetX());
     const auto y_axis = CheckAxis(ray.GetOrigin().GetY(), ray.GetDirection().GetY(), min_.GetY(), max_.GetY());
+    tmin = std::max(x_axis.first, y_axis.first);
+    tmax = std::min(x_axis.second, y_axis.second);
+    if (tmin > tmax) {
+      return false;  // No X/Y overlap: the Z interval cannot make this a hit.
+    }
     const auto z_axis = CheckAxis(ray.GetOrigin().GetZ(), ray.GetDirection().GetZ(), min_.GetZ(), max_.GetZ());
-    tmin = std::max({x_axis.first, y_axis.first, z_axis.first});
-    tmax = std::min({x_axis.second, y_axis.second, z_axis.second});
+    tmin = std::max(tmin, z_axis.first);
+    tmax = std::min(tmax, z_axis.second);
     return tmin <= tmax;
   }
 

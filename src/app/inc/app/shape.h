@@ -1,5 +1,6 @@
 #pragma once
 #include <algorithm>
+#include <cstddef>
 #include <vector>
 #include "app/bounding_box.h"
 #include "intersection.h"
@@ -26,16 +27,33 @@ class Shape {
     transform_ = transform;
     inverse_transform_ = transform.Inverse();
     transpose_inverse_ = Transpose(inverse_transform_);
+    // Matrix equality elsewhere is approximate; this fast path must be exact.
+    has_identity_transform_ = true;
+    for (std::size_t row = 0; row < 4; ++row) {
+      for (std::size_t column = 0; column < 4; ++column) {
+        const double expected = row == column ? 1.0 : 0.0;
+        if (transform_(row, column) != expected) {
+          has_identity_transform_ = false;
+        }
+      }
+    }
     InvalidateBounds();
   }
   [[nodiscard]] auto GetMaterial() const -> const Material& { return material_; }
   void SetMaterial(const Material& material) { material_ = material; }
   [[nodiscard]] auto Intersect(const Ray& ray) const -> std::vector<Intersection> {
+    if (has_identity_transform_) {
+      return LocalIntersect(ray);
+    }
     const auto local_ray = ray.Transform(inverse_transform_);
     return LocalIntersect(local_ray);
   };
   [[nodiscard]] auto Occludes(const Ray& ray, const double max_distance) const -> bool {
-    return max_distance > utilities::kEpsilon && LocalOccludes(ray.Transform(inverse_transform_), max_distance);
+    if (!(max_distance > utilities::kEpsilon)) {
+      return false;
+    }
+    return has_identity_transform_ ? LocalOccludes(ray, max_distance)
+                                   : LocalOccludes(ray.Transform(inverse_transform_), max_distance);
   }
   [[nodiscard]] virtual auto LocalIntersect(const Ray& ray) const -> std::vector<Intersection> = 0;
   [[nodiscard]] virtual auto LocalNormalAt(const ray_tracer::Point& point) const -> ray_tracer::Vec3 = 0;
@@ -102,6 +120,7 @@ class Shape {
   Matrix<4, 4> transpose_inverse_ = Matrix<4, 4>::IdentityMatrix();
   Material material_;
   bool cast_shadow_ = true;
+  bool has_identity_transform_ = true;
   std::weak_ptr<Shape> parent_group_;
 };
 

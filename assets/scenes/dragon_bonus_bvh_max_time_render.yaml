@@ -1,0 +1,428 @@
+version: 1
+camera:
+  from: [-5.282189, 0.13854992, -2.8376637]
+  to: [0.6954818, 1.1936455, -0.30473524]
+  up: [0, 1, 0]
+  fov_deg: 68.75494
+  resolution: [1000, 800]
+lights:
+  - visible: true
+    position: [-10, 100, -100]
+    color: [1, 1, 1]
+  - visible: true
+    position: [0, 100, 0]
+    color: [0.1, 0.1, 0.1]
+  - visible: true
+    position: [100, 10, -25]
+    color: [0.2, 0.2, 0.2]
+  - visible: true
+    position: [-100, 10, -25]
+    color: [0.2, 0.2, 0.2]
+objects:
+  - name: Center red dragon display
+    type: group
+    visible: true
+    transform:
+      translate: [0, 2, 0]
+      rotate_deg: [0, 0, 0]
+      scale: [1, 1, 1]
+    children:
+      - name: Pedestal
+        type: cylinder
+        visible: true
+        transform:
+          translate: [0, 0, 0]
+          rotate_deg: [0, 0, 0]
+          scale: [1, 1, 1]
+        bounds:
+          minimum: -0.15
+          maximum: 0
+          closed: true
+        cast_shadow: true
+        material:
+          color: [0.2, 0.2, 0.2]
+          ambient: 0
+          diffuse: 0.8
+          specular: 0
+          shininess: 200
+          reflective: 0.2
+          transparency: 0
+          refractive_index: 1
+      - name: Dragon and bounds
+        type: group
+        visible: true
+        transform:
+          translate: [0, 0, 0]
+          rotate_deg: [0, 0, 0]
+          scale: [1, 1, 1]
+        children:
+          - name: Red dragon
+            type: obj
+            visible: true
+            transform:
+              translate: [0, 0.0326156, 0]
+              rotate_deg: [0, 0, 0]
+              scale: [0.268, 0.268, 0.268]
+            source: /home/bob/Ray Tracer Challenge/ray_tracer/assets/models/dragon.obj
+            cast_shadow: true
+            material:
+              color: [1, 0, 0.1]
+              ambient: 0.1
+              diffuse: 0.6
+              specular: 0.3
+              shininess: 15
+              reflective: 0
+              transparency: 0
+              refractive_index: 1
+          - name: Red dragon bounds
+            type: cube
+            visible: true
+            transform:
+              translate: [-0.0677906, 0.692646, 0.1196084]
+              rotate_deg: [0, 0, 0]
+              scale: [1.0005378, 0.692646, 0.4363844]
+            cast_shadow: false
+            material:
+              color: [1, 1, 1]
+              ambient: 0
+              diffuse: 0.4
+              specular: 0
+              shininess: 200
+              reflective: 0
+              transparency: 0.6
+              refractive_index: 1
+  - name: Right orange dragon display
+    type: group
+    visible: true
+    transform:
+      translate: [2, 1, -1]
+      rotate_deg: [0, 0, 0]
+      scale: [1, 1, 1]
+    children:
+      - name: Pedestal
+        type: cylinder
+        visible: true
+        transform:
+          translate: [0, 0, 0]
+          rotate_deg: [0, 0, 0]
+          scale: [1, 1, 1]
+        bounds:
+          minimum: -0.15
+          maximum: 0
+          closed: true
+        cast_shadow: true
+        material:
+          color: [0.2, 0.2, 0.2]
+          ambient: 0
+          diffuse: 0.8
+          specular: 0
+          shininess: 200
+          reflective: 0.2
+          transparency: 0
+          refractive_index: 1
+      - name: Dragon and bounds
+        type: group
+        visible: true
+        transform:
+          translate: [0, 0, 0]
+          rotate_deg: [0, 229.18312, 0]
+          scale: [0.75, 0.75, 0.75]
+        children:
+          - name: Orange dragon
+            type: obj
+            visible: true
+            transform:
+              translate: [0, 0.0326156, 0]
+              rotate_deg: [0, 0, 0]
+              scale: [0.268, 0.268, 0.268]
+            source: /home/bob/Ray Tracer Challenge/ray_tracer/assets/models/dragon.obj
+            cast_shadow: true
+            material:
+              color: [1, 0.5, 0.1]
+              ambient: 0.1
+              diffuse: 0.6
+              specular: 0.3
+              shininess: 15
+              reflective: 0
+              transparency: 0
+              refractive_index: 1
+          - name: Orange dragon bounds
+            type: cube
+            visible: true
+            transform:
+              translate: [-0.0677906, 0.692646, 0.1196084]
+              rotate_deg: [0, 0, 0]
+              scale: [1.0005378, 0.692646, 0.4363844]
+            cast_shadow: false
+            material:
+              color: [1, 1, 1]
+              ambient: 0
+              diffuse: 0.2
+              specular: 0
+              shininess: 200
+              reflective: 0
+              transparency: 0.8
+              refractive_index: 1
+  - name: Left amber dragon display
+    type: group
+    visible: true
+    transform:
+      translate: [-2, 0.75, -1]
+      rotate_deg: [0, 0, 0]
+      scale: [1, 1, 1]
+    children:
+      - name: Pedestal
+        type: cylinder
+        visible: true
+        transform:
+          translate: [0, 0, 0]
+          rotate_deg: [0, 0, 0]
+          scale: [1, 1, 1]
+        bounds:
+          minimum: -0.15
+          maximum: 0
+          closed: true
+        cast_shadow: true
+        material:
+          color: [0.2, 0.2, 0.2]
+          ambient: 0
+          diffuse: 0.8
+          specular: 0
+          shininess: 200
+          reflective: 0.2
+          transparency: 0
+          refractive_index: 1
+      - name: Dragon and bounds
+        type: group
+        visible: true
+        transform:
+          translate: [0, 0, 0]
+          rotate_deg: [0, -22.918312, 0]
+          scale: [0.75, 0.75, 0.75]
+        children:
+          - name: Amber dragon
+            type: obj
+            visible: true
+            transform:
+              translate: [0, 0.0326156, 0]
+              rotate_deg: [0, 0, 0]
+              scale: [0.268, 0.268, 0.268]
+            source: /home/bob/Ray Tracer Challenge/ray_tracer/assets/models/dragon.obj
+            cast_shadow: true
+            material:
+              color: [0.9, 0.5, 0.1]
+              ambient: 0.1
+              diffuse: 0.6
+              specular: 0.3
+              shininess: 15
+              reflective: 0
+              transparency: 0
+              refractive_index: 1
+          - name: Amber dragon bounds
+            type: cube
+            visible: true
+            transform:
+              translate: [-0.0677906, 0.692646, 0.1196084]
+              rotate_deg: [0, 0, 0]
+              scale: [1.0005378, 0.692646, 0.4363844]
+            cast_shadow: false
+            material:
+              color: [1, 1, 1]
+              ambient: 0
+              diffuse: 0.2
+              specular: 0
+              shininess: 200
+              reflective: 0
+              transparency: 0.8
+              refractive_index: 1
+  - name: Far left yellow dragon display
+    type: group
+    visible: true
+    transform:
+      translate: [-4, 0, -2]
+      rotate_deg: [0, 0, 0]
+      scale: [1, 1, 1]
+    children:
+      - name: Pedestal
+        type: cylinder
+        visible: true
+        transform:
+          translate: [0, 0, 0]
+          rotate_deg: [0, 0, 0]
+          scale: [1, 1, 1]
+        bounds:
+          minimum: -0.15
+          maximum: 0
+          closed: true
+        cast_shadow: true
+        material:
+          color: [1, 1, 1]
+          ambient: 0
+          diffuse: 0
+          specular: 0
+          shininess: 200
+          reflective: 1
+          transparency: 0
+          refractive_index: 1
+      - name: Dragon and bounds
+        type: group
+        visible: true
+        transform:
+          translate: [0, 0, 0]
+          rotate_deg: [0, -11.459156, 0]
+          scale: [0.5, 0.5, 0.5]
+        children:
+          - name: Yellow dragon
+            type: obj
+            visible: true
+            transform:
+              translate: [0, 0.0326156, 0]
+              rotate_deg: [0, 0, 0]
+              scale: [0.268, 0.268, 0.268]
+            source: /home/bob/Ray Tracer Challenge/ray_tracer/assets/models/dragon.obj
+            cast_shadow: true
+            material:
+              color: [1, 0.9, 0.1]
+              ambient: 0.1
+              diffuse: 0.6
+              specular: 0.3
+              shininess: 15
+              reflective: 0
+              transparency: 0
+              refractive_index: 1
+          - name: Yellow dragon bounds
+            type: cube
+            visible: true
+            transform:
+              translate: [-0.0677906, 0.692646, 0.1196084]
+              rotate_deg: [0, 0, 0]
+              scale: [1.0005378, 0.692646, 0.4363844]
+            cast_shadow: false
+            material:
+              color: [1, 1, 1]
+              ambient: 0
+              diffuse: 0.1
+              specular: 0
+              shininess: 200
+              reflective: 0
+              transparency: 0.9
+              refractive_index: 1
+  - name: Far right lime dragon display
+    type: group
+    visible: true
+    transform:
+      translate: [4, 0, -2]
+      rotate_deg: [0, 0, 0]
+      scale: [1, 1, 1]
+    children:
+      - name: Pedestal
+        type: cylinder
+        visible: true
+        transform:
+          translate: [0, 0, 0]
+          rotate_deg: [0, 0, 0]
+          scale: [1, 1, 1]
+        bounds:
+          minimum: -0.15
+          maximum: 0
+          closed: true
+        cast_shadow: true
+        material:
+          color: [0.2, 0.2, 0.2]
+          ambient: 0
+          diffuse: 0.8
+          specular: 0
+          shininess: 200
+          reflective: 0.2
+          transparency: 0
+          refractive_index: 1
+      - name: Dragon and bounds
+        type: group
+        visible: true
+        transform:
+          translate: [0, 0, 0]
+          rotate_deg: [0, 189.07607, 0]
+          scale: [0.5, 0.5, 0.5]
+        children:
+          - name: Lime dragon
+            type: obj
+            visible: true
+            transform:
+              translate: [0, 0.0326156, 0]
+              rotate_deg: [0, 0, 0]
+              scale: [0.268, 0.268, 0.268]
+            source: /home/bob/Ray Tracer Challenge/ray_tracer/assets/models/dragon.obj
+            cast_shadow: true
+            material:
+              color: [0.9, 1, 0.1]
+              ambient: 0.1
+              diffuse: 0.6
+              specular: 0.3
+              shininess: 15
+              reflective: 0
+              transparency: 0
+              refractive_index: 1
+          - name: Lime dragon bounds
+            type: cube
+            visible: true
+            transform:
+              translate: [-0.0677906, 0.692646, 0.1196084]
+              rotate_deg: [0, 0, 0]
+              scale: [1.0005378, 0.692646, 0.4363844]
+            cast_shadow: false
+            material:
+              color: [1, 1, 1]
+              ambient: 0
+              diffuse: 0.1
+              specular: 0
+              shininess: 200
+              reflective: 0
+              transparency: 0.9
+              refractive_index: 1
+  - name: Rear white dragon display
+    type: group
+    visible: true
+    transform:
+      translate: [0, 0.5, -4]
+      rotate_deg: [0, 0, 0]
+      scale: [1, 1, 1]
+    children:
+      - name: Pedestal
+        type: cylinder
+        visible: true
+        transform:
+          translate: [0, 0, 0]
+          rotate_deg: [0, 0, 0]
+          scale: [1, 1, 1]
+        bounds:
+          minimum: -0.15
+          maximum: 0
+          closed: true
+        cast_shadow: true
+        material:
+          color: [0.2, 0.2, 0.2]
+          ambient: 0
+          diffuse: 0.8
+          specular: 0
+          shininess: 200
+          reflective: 0.2
+          transparency: 0
+          refractive_index: 1
+      - name: White dragon
+        type: obj
+        visible: true
+        transform:
+          translate: [0, 0.0326156, 0]
+          rotate_deg: [0, 179.99469, 0]
+          scale: [0.268, 0.268, 0.268]
+        source: /home/bob/Ray Tracer Challenge/ray_tracer/assets/models/dragon.obj
+        cast_shadow: true
+        material:
+          color: [1, 1, 1]
+          ambient: 0.1
+          diffuse: 0.6
+          specular: 0.3
+          shininess: 15
+          reflective: 0
+          transparency: 0
+          refractive_index: 1

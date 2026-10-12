@@ -113,6 +113,9 @@ auto main(int argc, char** argv) -> int {
 
     UploadPendingTexture(render_state);
     const auto changes = DrawMainLayout(app, render_state, path_buffer);
+    render_state.interaction_active = (ImGui::IsAnyItemActive() && ImGui::IsMouseDown(ImGuiMouseButton_Left)) ||
+                                      ImGui::IsMouseDragging(ImGuiMouseButton_Left) ||
+                                      ImGui::IsMouseDragging(ImGuiMouseButton_Right);
     if (changes.changed || changes.camera_moved) {
       RequestPreviewRender(render_state, !changes.changed);
     }

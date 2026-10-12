@@ -3,6 +3,7 @@
 #include <atomic>
 #include <chrono>
 #include <mutex>
+#include <ratio>
 #include <thread>
 #include <utility>
 
@@ -39,13 +40,20 @@ auto StartRender(UiRenderState& render_state,
   render_state.rendering.store(true);
   render_state.is_preview = preview;
   render_state.active_render_id = render_id;
-  render_state.worker = std::thread([&render_state, compiled_scene, preview, render_id]() {
+  const auto started = std::chrono::steady_clock::now();
+  render_state.render_started = started;
+  render_state.worker = std::thread([&render_state, compiled_scene, preview, render_id, started]() {
     auto image = SceneRenderer::Render(compiled_scene, preview, &render_state.cancel, &render_state.progress);
+    const auto elapsed_ms = std::chrono::duration<double, std::milli>(
+        std::chrono::steady_clock::now() - started).count();
     if (!render_state.cancel.load() && !image.pixels.empty()) {
       const std::lock_guard lock{render_state.image_mutex};
       render_state.pending_image = std::move(image);
       render_state.pending_render_id = render_id;
       render_state.pending_is_preview = preview;
+      if (!preview) {
+        render_state.last_full_render_ms.store(elapsed_ms);
+      }
       render_state.texture_dirty.store(true, std::memory_order_release);
     }
     render_state.rendering.store(false);
@@ -129,7 +137,7 @@ auto ProcessDeferredRenders(SceneEditorApp& app, UiRenderState& render_state) ->
     return;
   }
 
-  if (render_state.high_res_pending) {
+  if (render_state.high_res_pending && !render_state.interaction_active) {
     const auto elapsed = std::chrono::duration<double>(
         std::chrono::steady_clock::now() - render_state.last_interaction).count();
     if (elapsed >= static_cast<double>(render_state.high_res_delay)) {

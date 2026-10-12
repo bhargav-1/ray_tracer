@@ -22,6 +22,9 @@ class Triangle : public Shape {
     edge1_ = vertices_[1] - vertices_[0];
     edge2_ = vertices_[2] - vertices_[0];
     normal_ = edge2_.Cross(edge1_).Normalize();
+    for (const auto& vertex : vertices_) {
+      bounds_.AddPoint(vertex);
+    }
   }
   ~Triangle() override = default;
   [[nodiscard]] auto GetVertices() const -> std::array<Point, 3> { return vertices_; }
@@ -35,35 +38,61 @@ class Triangle : public Shape {
     return {time, *this, u, v};
   }
 
+ protected:
+  [[nodiscard]] auto LocalOccludes(const Ray& ray, double max_distance) const -> bool override;
+
  private:
+  [[nodiscard]] auto IntersectTriangle(const Ray& ray, double& time, double& u_value, double& v_value) const -> bool;
   std::array<Point, 3> vertices_;
   Vec3 edge1_;
   Vec3 edge2_;
   Vec3 normal_;
+  BoundingBox bounds_;
 };
 
 inline auto operator==(const Triangle& lhs, const Triangle& rhs) -> bool { return lhs.GetId() == rhs.GetId(); }
 inline auto Triangle::LocalIntersect(const Ray& transformed_ray) const -> std::vector<Intersection> {
-  if (!BoundsOf().Intersects(transformed_ray)) {
+  double time = 0;
+  double u_value = 0;
+  double v_value = 0;
+  if (!IntersectTriangle(transformed_ray, time, u_value, v_value)) {
     return {};
+  }
+  return {IntersectionWithUV(time, u_value, v_value)};
+}
+
+inline auto Triangle::LocalOccludes(const Ray& ray, const double max_distance) const -> bool {
+  if (!GetCastShadow()) {
+    return false;
+  }
+  double time = 0;
+  double u_value = 0;
+  double v_value = 0;
+  return IntersectTriangle(ray, time, u_value, v_value) && time > utilities::kEpsilon && time < max_distance;
+}
+
+inline auto Triangle::IntersectTriangle(const Ray& transformed_ray, double& time,
+                                       double& u_value, double& v_value) const -> bool {
+  if (!bounds_.Intersects(transformed_ray)) {
+    return false;
   }
   auto determinant = transformed_ray.GetDirection().Cross(edge2_).Dot(edge1_);
   if (std::abs(determinant) < utilities::kEpsilon) {
-    return {};
+    return false;
   }
   auto f_value = 1.0/determinant;
   auto p1_to_origin = Vec3(transformed_ray.GetOrigin() - vertices_[0]);
-  const auto u_value = f_value * transformed_ray.GetDirection().Cross(edge2_).Dot(p1_to_origin);
+  u_value = f_value * transformed_ray.GetDirection().Cross(edge2_).Dot(p1_to_origin);
   if (u_value < 0.0 || u_value > 1.0) {
-    return {};
+    return false;
   }
   auto origin_cross_e1 = p1_to_origin.Cross(edge1_);
-  const auto v_value = f_value * transformed_ray.GetDirection().Dot(origin_cross_e1);
+  v_value = f_value * transformed_ray.GetDirection().Dot(origin_cross_e1);
   if (v_value < 0.0 || (u_value + v_value) > 1.0) {
-    return {};
+    return false;
   }
-  auto time = f_value * edge2_.Dot(origin_cross_e1);
-  return {IntersectionWithUV(time, u_value, v_value)};
+  time = f_value * edge2_.Dot(origin_cross_e1);
+  return true;
 }
 
 inline auto Triangle::LocalNormalAt(const ray_tracer::Point& point) const -> ray_tracer::Vec3 {
@@ -71,11 +100,7 @@ inline auto Triangle::LocalNormalAt(const ray_tracer::Point& point) const -> ray
   return normal_;
 }
 inline auto Triangle::BoundsOf() const -> BoundingBox {
-  BoundingBox bounds;
-  for (const auto& vertex : vertices_) {
-    bounds.AddPoint(vertex);
-  }
-  return bounds;
+  return bounds_;
 }
 class SmoothTriangle : public Triangle {
  public:

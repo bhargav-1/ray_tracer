@@ -3,8 +3,10 @@
 #include <algorithm>
 #include <array>
 #include <cstddef>
+#include <chrono>
 #include <filesystem>
 #include <optional>
+#include <ratio>
 #include <string>
 #include <utility>
 #include <vector>
@@ -232,8 +234,10 @@ auto DrawScenePanel(SceneEditorApp& app, UiRenderState& render_state, std::array
   ImGui::PopID();
   ImGui::Separator();
   if (render_state.rendering.load()) {
-    ImGui::TextColored(ImVec4(1.0F, 1.0F, 0.0F, 1.0F), "Rendering... %d%%%s",
-                       render_state.progress.load(), render_state.is_preview ? " (preview)" : "");
+    const auto elapsed_ms = std::chrono::duration<double, std::milli>(
+        std::chrono::steady_clock::now() - render_state.render_started).count();
+    ImGui::TextColored(ImVec4(1.0F, 1.0F, 0.0F, 1.0F), "Rendering... %d%%%s - %.1f ms",
+                       render_state.progress.load(), render_state.is_preview ? " (preview)" : "", elapsed_ms);
   } else if (ImGui::Button("Render", ImVec2(-1.0F, 30.0F))) {
     ScheduleRender(app, render_state, false);
   }

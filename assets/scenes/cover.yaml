@@ -1,0 +1,117 @@
+# The Ray Tracer Challenge, Appendix 1: Rendering the Cover Image.
+# Converted from the book's add/define format to the scene editor schema.
+# field-of-view 0.785 radians = 44.977187 degrees.
+# standard-transform = translate(1,-1,1), then scale(0.5).
+# Presets: small scale 1, medium 1.5, large 1.75, with translation [s,-s,s].
+# Each object's final placement is added after that preset translation.
+version: 1
+camera:
+  from: [-6, 6, -10]
+  to: [6, 0, 6]
+  up: [-0.45, 1, 0]
+  fov_deg: 44.977187
+  resolution: [100, 100]
+lights:
+  - visible: true
+    position: [50, 100, -50]
+    color: [1, 1, 1]
+  # Optional fill light: set visible to false to use only the main light.
+  - visible: true
+    position: [-400, 50, -10]
+    color: [0.2, 0.2, 0.2]
+objects:
+  - name: White backdrop
+    type: plane
+    cast_shadow: true
+    transform: {translate: [0, 0, 500], rotate_deg: [90, 0, 0], scale: [1, 1, 1]}
+    material: {color: [1, 1, 1], ambient: 1, diffuse: 0, specular: 0, shininess: 200, reflective: 0, transparency: 0, refractive_index: 1}
+  - name: Reflective glass sphere
+    type: sphere
+    cast_shadow: true
+    transform: {translate: [1.75, -1.75, 1.75], rotate_deg: [0, 0, 0], scale: [1.75, 1.75, 1.75]}
+    material: {color: [0.373, 0.404, 0.55], ambient: 0, diffuse: 0.2, specular: 1, shininess: 200, reflective: 0.7, transparency: 0.7, refractive_index: 1.5}
+  - name: White medium cube 1
+    type: cube
+    cast_shadow: true
+    transform: {translate: [5.5, -1.5, 1.5], rotate_deg: [0, 0, 0], scale: [1.5, 1.5, 1.5]}
+    material: &white_material {color: [1, 1, 1], ambient: 0.1, diffuse: 0.7, specular: 0, shininess: 200, reflective: 0.1, transparency: 0, refractive_index: 1}
+  - name: Blue large cube 1
+    type: cube
+    cast_shadow: true
+    transform: {translate: [10.25, -0.25, 1.25], rotate_deg: [0, 0, 0], scale: [1.75, 1.75, 1.75]}
+    material: &blue_material {color: [0.537, 0.831, 0.914], ambient: 0.1, diffuse: 0.7, specular: 0, shininess: 200, reflective: 0.1, transparency: 0, refractive_index: 1}
+  - name: Red large cube 1
+    type: cube
+    cast_shadow: true
+    transform: {translate: [1.75, -1.75, 5.75], rotate_deg: [0, 0, 0], scale: [1.75, 1.75, 1.75]}
+    material: &red_material {color: [0.941, 0.322, 0.388], ambient: 0.1, diffuse: 0.7, specular: 0, shininess: 200, reflective: 0.1, transparency: 0, refractive_index: 1}
+  - name: White small cube 1
+    type: cube
+    cast_shadow: true
+    transform: {translate: [5, -1, 5], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+    material: *white_material
+  - name: Purple medium cube
+    type: cube
+    cast_shadow: true
+    transform: {translate: [9, -1, 5.5], rotate_deg: [0, 0, 0], scale: [1.5, 1.5, 1.5]}
+    material: &purple_material {color: [0.373, 0.404, 0.55], ambient: 0.1, diffuse: 0.7, specular: 0, shininess: 200, reflective: 0.1, transparency: 0, refractive_index: 1}
+  - name: White medium cube 2
+    type: cube
+    cast_shadow: true
+    transform: {translate: [1.25, -1.25, 9.5], rotate_deg: [0, 0, 0], scale: [1.5, 1.5, 1.5]}
+    material: *white_material
+  - name: Blue large cube 2
+    type: cube
+    cast_shadow: true
+    transform: {translate: [5.75, -0.75, 9.25], rotate_deg: [0, 0, 0], scale: [1.75, 1.75, 1.75]}
+    material: *blue_material
+  - name: Red medium cube
+    type: cube
+    cast_shadow: true
+    transform: {translate: [11.5, 0.5, 9], rotate_deg: [0, 0, 0], scale: [1.5, 1.5, 1.5]}
+    material: *red_material
+  - name: White small cube 2
+    type: cube
+    cast_shadow: true
+    transform: {translate: [9, 1, 13], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+    material: *white_material
+  - name: White small cube 3
+    type: cube
+    cast_shadow: true
+    transform: {translate: [21, 0, 10], rotate_deg: [0, 0, 0], scale: [1, 1, 1]}
+    material: *white_material
+  - name: Blue large cube 3
+    type: cube
+    cast_shadow: true
+    transform: {translate: [1.25, -6.75, 2], rotate_deg: [0, 0, 0], scale: [1.75, 1.75, 1.75]}
+    material: *blue_material
+  - name: Red large cube 2
+    type: cube
+    cast_shadow: true
+    transform: {translate: [5.75, -5.75, 1.75], rotate_deg: [0, 0, 0], scale: [1.75, 1.75, 1.75]}
+    material: *red_material
+  - name: White large cube 1
+    type: cube
+    cast_shadow: true
+    transform: {translate: [10.25, -5.75, 1.75], rotate_deg: [0, 0, 0], scale: [1.75, 1.75, 1.75]}
+    material: *white_material
+  - name: White large cube 2
+    type: cube
+    cast_shadow: true
+    transform: {translate: [1.75, -5.75, 5.75], rotate_deg: [0, 0, 0], scale: [1.75, 1.75, 1.75]}
+    material: *white_material
+  - name: Purple large cube
+    type: cube
+    cast_shadow: true
+    transform: {translate: [1.25, -6.25, 9.75], rotate_deg: [0, 0, 0], scale: [1.75, 1.75, 1.75]}
+    material: *purple_material
+  - name: White large cube 3
+    type: cube
+    cast_shadow: true
+    transform: {translate: [1.75, -9.75, 5.75], rotate_deg: [0, 0, 0], scale: [1.75, 1.75, 1.75]}
+    material: *white_material
+  - name: White large cube 4
+    type: cube
+    cast_shadow: true
+    transform: {translate: [1.25, -10.25, 9.75], rotate_deg: [0, 0, 0], scale: [1.75, 1.75, 1.75]}
+    material: *white_material

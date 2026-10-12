@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <chrono>
 #include <cstdint>
+#include <ratio>
 
 #include "imgui.h"  // NOLINT
 
@@ -51,7 +52,9 @@ auto DrawViewportPanel(SceneEditorApp& app, UiRenderState& render_state) -> View
   ImGui::Separator();
 
   if (render_state.texture.Valid() && render_state.displayed_width > 0 && render_state.displayed_height > 0) {
-    const ImVec2 avail = ImGui::GetContentRegionAvail();
+    ImVec2 avail = ImGui::GetContentRegionAvail();
+    // Reserve room below the image for render timing/status, even for square images.
+    avail.y = std::max(1.0F, avail.y - 2.0F * ImGui::GetTextLineHeightWithSpacing());
     const auto image_width = static_cast<float>(render_state.displayed_width);
     const auto image_height = static_cast<float>(render_state.displayed_height);
     float scale = std::min(avail.x / image_width, avail.y / image_height);
@@ -99,10 +102,18 @@ auto DrawViewportPanel(SceneEditorApp& app, UiRenderState& render_state) -> View
     ImGui::Text("No render yet");
   }
 
-  if (render_state.is_preview && !render_state.rendering.load()) {
-    const auto elapsed = std::chrono::duration<double>(
-        std::chrono::steady_clock::now() - render_state.last_interaction).count();
-    ImGui::TextDisabled("Full render in %.1fs", std::max(0.0, static_cast<double>(render_state.high_res_delay) - elapsed));
+  if (render_state.rendering.load() && !render_state.is_preview) {
+    const auto elapsed_ms = std::chrono::duration<double, std::milli>(
+        std::chrono::steady_clock::now() - render_state.render_started).count();
+    ImGui::TextDisabled("Full render: %.1f ms elapsed", elapsed_ms);
+  } else {
+    if (render_state.high_res_pending) {
+      ImGui::TextDisabled("Preview: full render starts after interaction stops");
+    }
+    const double full_render_ms = render_state.last_full_render_ms.load();
+    if (full_render_ms >= 0.0) {
+      ImGui::TextDisabled("Last completed full render: %.1f ms", full_render_ms);
+    }
   }
   ImGui::End();
 

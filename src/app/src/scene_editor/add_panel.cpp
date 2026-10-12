@@ -105,7 +105,11 @@ auto DrawAddPanel(SceneEditorApp& app, UiRenderState& render_state) -> bool {
     changed = true;
   }
   ImGui::Separator();
-  ImGui::SliderFloat("Full-res delay", &render_state.high_res_delay, 0.5F, 10.0F, "%.1fs");
+  ImGui::TextWrapped("Preview idle delay");
+  ImGui::SliderFloat("##full_res_idle_delay", &render_state.high_res_delay, 0.0F, 10.0F, "%.1fs");
+  if (ImGui::IsItemHovered()) {
+    ImGui::SetTooltip("Extra wait after interaction stops. 0 starts the full render as soon as the latest preview finishes.");
+  }
   return changed;
 }
 

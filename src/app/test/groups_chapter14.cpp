@@ -1,13 +1,13 @@
 #include <catch2/catch_test_macros.hpp>
 
-// #include "app/cylinder.h"
+// #include "app/shapes/cylinder.h"
 #include <cmath>
 #include <memory>
 #include <numbers>
-#include "app/group.h"
-#include "app/matrix.h"
-#include "app/shape.h"
-#include "app/sphere.h"
+#include "app/shapes/group.h"
+#include "app/primitives/matrix.h"
+#include "app/shapes/shape.h"
+#include "app/shapes/sphere.h"
 
 namespace ray_tracer {
 SCENARIO("14: Creating a new group") {

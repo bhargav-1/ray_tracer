@@ -10,14 +10,14 @@
 
 #include "imgui.h"  // NOLINT
 
-#include "app/matrix.h"
-#include "app/point.h"
+#include "app/primitives/matrix.h"
+#include "app/primitives/point.h"
 #include "app/scene/scene.h"
 #include "app/scene_editor/render_state.h"
 #include "app/scene_editor/scene_editor_app.h"
-#include "app/shape_catalog.h"
-#include "app/transformations.h"
-#include "app/vec3.h"
+#include "app/scene/shape_catalog.h"
+#include "app/primitives/transformations.h"
+#include "app/primitives/vec3.h"
 
 namespace ray_tracer::scene_editor {
 namespace {

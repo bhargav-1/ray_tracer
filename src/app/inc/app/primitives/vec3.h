@@ -1,6 +1,6 @@
 #pragma once
 #include <cmath>
-#include "tuple.h"
+#include "app/primitives/tuple.h"
 
 namespace ray_tracer {
 class Vec3 : public Tuple {

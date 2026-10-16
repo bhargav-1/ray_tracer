@@ -7,8 +7,8 @@
 #include <vector>
 #include <utility>
 
-#include "app/ray_tracing_engine.h"
-#include "app/render_rows.h"
+#include "app/rendering/ray_tracing_engine.h"
+#include "app/rendering/render_rows.h"
 #include "app/scene/scene_compiler.h"
 
 namespace ray_tracer::scene_editor {

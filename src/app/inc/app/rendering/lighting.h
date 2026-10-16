@@ -1,10 +1,10 @@
 #pragma once
-#include "material.h"
-#include "pattern.h"
-#include "point.h"
-#include "point_light.h"
-#include "shape.h"
-#include "vec3.h"
+#include "app/materials/material.h"
+#include "app/materials/pattern.h"
+#include "app/primitives/point.h"
+#include "app/rendering/point_light.h"
+#include "app/shapes/shape.h"
+#include "app/primitives/vec3.h"
 
 namespace ray_tracer {
 

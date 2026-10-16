@@ -5,10 +5,10 @@
 #include <utility>
 #include <vector>
 
-#include "app/matrix.h"
-#include "app/point.h"
-#include "app/ray.h"
-#include "app/utilities.h"
+#include "app/primitives/matrix.h"
+#include "app/primitives/point.h"
+#include "app/rendering/ray.h"
+#include "app/primitives/utilities.h"
 
 namespace ray_tracer {
 class BoundingBox {

@@ -1,9 +1,9 @@
 #include <catch2/catch_test_macros.hpp>
 
-#include "app/cube.h"
-#include "app/point.h"
-#include "app/ray.h"
-#include "app/vec3.h"
+#include "app/shapes/cube.h"
+#include "app/primitives/point.h"
+#include "app/rendering/ray.h"
+#include "app/primitives/vec3.h"
 namespace ray_tracer {
 
 SCENARIO("12: A ray intersects a cube") {

@@ -1,10 +1,10 @@
 #pragma once
 #include <utility>
 
-#include "color.h"
-#include "point.h"
-#include "tuple.h"
-#include "vec3.h"
+#include "app/materials/color.h"
+#include "app/primitives/point.h"
+#include "app/primitives/tuple.h"
+#include "app/primitives/vec3.h"
 
 namespace ray_tracer {
 class PointLight {

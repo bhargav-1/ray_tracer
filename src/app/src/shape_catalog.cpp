@@ -1,4 +1,4 @@
-#include "app/shape_catalog.h"
+#include "app/scene/shape_catalog.h"
 
 #include <array>
 #include <cctype>
@@ -11,17 +11,17 @@
 #include <string_view>
 #include <type_traits>
 
-#include "app/cone.h"
-#include "app/cube.h"
-#include "app/cylinder.h"
-#include "app/plane.h"
-#include "app/obj_parser.h"
-#include "app/point.h"
+#include "app/shapes/cone.h"
+#include "app/shapes/cube.h"
+#include "app/shapes/cylinder.h"
+#include "app/shapes/plane.h"
+#include "app/io/obj_parser.h"
+#include "app/primitives/point.h"
 #include "app/scene/scene.h"
-#include "app/shape.h"
-#include "app/sphere.h"
-#include "app/triangle.h"
-#include "app/tuple.h"
+#include "app/shapes/shape.h"
+#include "app/shapes/sphere.h"
+#include "app/shapes/triangle.h"
+#include "app/primitives/tuple.h"
 
 namespace ray_tracer::shape_catalog {
 namespace {

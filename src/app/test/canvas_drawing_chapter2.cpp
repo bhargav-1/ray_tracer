@@ -1,7 +1,7 @@
-#include <app/canvas.h>  // for Canvas
-#include <app/color.h>   // for color
-#include <app/tuple.h>   // for tuple
-#include <app/utilities.h>
+#include <app/rendering/canvas.h>  // for Canvas
+#include <app/materials/color.h>   // for color
+#include <app/primitives/tuple.h>   // for tuple
+#include <app/primitives/utilities.h>
 #include <catch2/catch_test_macros.hpp>  // for operator""_catch_sr, Section
 #include <fstream>
 #include <string>

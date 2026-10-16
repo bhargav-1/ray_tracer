@@ -8,7 +8,7 @@
 #include <utility>
 #include <vector>
 
-#include "app/color.h"
+#include "app/materials/color.h"
 #include "app/scene/scene.h"
 #include "app/scene/scene_compiler.h"
 

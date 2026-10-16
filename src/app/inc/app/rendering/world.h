@@ -1,9 +1,9 @@
 #pragma once
 #include <vector>
-#include "color.h"
-#include "sphere.h"
-#include "shape.h"
-#include "point_light.h"
+#include "app/materials/color.h"
+#include "app/shapes/sphere.h"
+#include "app/shapes/shape.h"
+#include "app/rendering/point_light.h"
 #include <memory>
 
 namespace ray_tracer {

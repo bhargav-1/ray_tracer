@@ -1,10 +1,10 @@
-#include <app/camera.h>
-#include <app/intersection.h>
-#include <app/ray_tracing_engine.h>
-#include <app/matrix.h>
-#include <app/sphere.h>
-#include <app/transformations.h>
-#include <app/utilities.h>
+#include <app/rendering/camera.h>
+#include <app/rendering/intersection.h>
+#include <app/rendering/ray_tracing_engine.h>
+#include <app/primitives/matrix.h>
+#include <app/shapes/sphere.h>
+#include <app/primitives/transformations.h>
+#include <app/primitives/utilities.h>
 #include <catch2/catch_test_macros.hpp>  // for operator""_catch_sr, Section
 #include <cmath>
 #include <numbers>

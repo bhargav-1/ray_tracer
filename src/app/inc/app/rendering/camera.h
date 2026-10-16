@@ -1,9 +1,9 @@
 #pragma once
 #include <numbers>
-#include "matrix.h"
-#include "point.h"
-#include "vec3.h"
-#include "ray.h"
+#include "app/primitives/matrix.h"
+#include "app/primitives/point.h"
+#include "app/primitives/vec3.h"
+#include "app/rendering/ray.h"
 namespace ray_tracer {
 
 class Camera {

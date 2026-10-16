@@ -1,5 +1,5 @@
 #pragma once
-#include "tuple.h"
+#include "app/primitives/tuple.h"
 
 namespace ray_tracer {
 class Color : public Tuple {

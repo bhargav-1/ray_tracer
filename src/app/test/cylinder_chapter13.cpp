@@ -1,14 +1,14 @@
 #include <catch2/catch_test_macros.hpp>
 
-// #include "app/cylinder.h"
+// #include "app/shapes/cylinder.h"
 #include <cmath>
 #include <limits>
-#include "app/cone.h"
-#include "app/cylinder.h"
-#include "app/point.h"
-#include "app/ray.h"
-#include "app/utilities.h"
-#include "app/vec3.h"
+#include "app/shapes/cone.h"
+#include "app/shapes/cylinder.h"
+#include "app/primitives/point.h"
+#include "app/rendering/ray.h"
+#include "app/primitives/utilities.h"
+#include "app/primitives/vec3.h"
 
 namespace ray_tracer {
 SCENARIO("13: A ray misses a cylinder") {

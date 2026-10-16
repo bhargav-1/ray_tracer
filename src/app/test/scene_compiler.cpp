@@ -1,6 +1,6 @@
 #include <app/scene/scene_yaml.h>
 #include <app/scene/scene_compiler.h>
-#include <app/utilities.h>
+#include <app/primitives/utilities.h>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/catch_message.hpp>
 
@@ -9,17 +9,17 @@
 #include <numbers>
 #include <string>
 
-#include "app/cube.h"
-#include "app/color.h"
-#include "app/material.h"
-#include "app/group.h"
-#include "app/matrix.h"
-#include "app/point.h"
-#include "app/ray.h"
+#include "app/shapes/cube.h"
+#include "app/materials/color.h"
+#include "app/materials/material.h"
+#include "app/shapes/group.h"
+#include "app/primitives/matrix.h"
+#include "app/primitives/point.h"
+#include "app/rendering/ray.h"
 #include "app/scene/scene.h"
-#include "app/triangle.h"
-#include "app/shape.h"
-#include "app/tuple.h"
+#include "app/shapes/triangle.h"
+#include "app/shapes/shape.h"
+#include "app/primitives/tuple.h"
 
 namespace ray_tracer {
 namespace {

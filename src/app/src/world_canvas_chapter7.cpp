@@ -2,16 +2,16 @@
 
 #include <numbers>
 #include <memory>
-#include "app/camera.h"
-#include "app/matrix.h"
-#include "app/sphere.h"
-#include "app/transformations.h"
-#include "app/world.h"
-// #include "app/canvas.h"
+#include "app/rendering/camera.h"
+#include "app/primitives/matrix.h"
+#include "app/shapes/sphere.h"
+#include "app/primitives/transformations.h"
+#include "app/rendering/world.h"
+// #include "app/rendering/canvas.h"
 #include <chrono>
 
-#include "app/intersection.h"
-#include "app/ray_tracing_engine.h"
+#include "app/rendering/intersection.h"
+#include "app/rendering/ray_tracing_engine.h"
 
 using namespace ray_tracer;    // NOLINT
 auto main() noexcept -> int {  // NOLINT

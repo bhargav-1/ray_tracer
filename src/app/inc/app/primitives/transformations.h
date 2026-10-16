@@ -1,7 +1,7 @@
 #pragma once
-#include "matrix.h"
-#include "point.h"
-#include "vec3.h"
+#include "app/primitives/matrix.h"
+#include "app/primitives/point.h"
+#include "app/primitives/vec3.h"
 
 namespace ray_tracer {
 constexpr auto ViewTransform(const Point& from_point, const Point& to_point, const Vec3& up_vec) -> Matrix<4, 4> {

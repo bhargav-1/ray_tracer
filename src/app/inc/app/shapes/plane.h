@@ -2,13 +2,13 @@
 #include <cmath>
 #include <limits>
 #include <vector>
-#include "material.h"
-#include "matrix.h"
-#include "point.h"
-#include "ray.h"
-#include "shape.h"
-#include "tuple.h"
-#include "utilities.h"
+#include "app/materials/material.h"
+#include "app/primitives/matrix.h"
+#include "app/primitives/point.h"
+#include "app/rendering/ray.h"
+#include "app/shapes/shape.h"
+#include "app/primitives/tuple.h"
+#include "app/primitives/utilities.h"
 
 namespace ray_tracer {
 class Intersection;

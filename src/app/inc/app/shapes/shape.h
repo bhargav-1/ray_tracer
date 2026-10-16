@@ -2,14 +2,14 @@
 #include <algorithm>
 #include <cstddef>
 #include <vector>
-#include "app/bounding_box.h"
-#include "intersection.h"
-#include "material.h"
-#include "matrix.h"
-#include "point.h"
-#include "ray.h"
-#include "tuple.h"
-#include "utilities.h"
+#include "app/rendering/bounding_box.h"
+#include "app/rendering/intersection.h"
+#include "app/materials/material.h"
+#include "app/primitives/matrix.h"
+#include "app/primitives/point.h"
+#include "app/rendering/ray.h"
+#include "app/primitives/tuple.h"
+#include "app/primitives/utilities.h"
 
 namespace ray_tracer {
 class Group;

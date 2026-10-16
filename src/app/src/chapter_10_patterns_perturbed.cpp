@@ -21,16 +21,16 @@
 #include <GLFW/glfw3.h>  // Will drag system OpenGL headers
 #include <chrono>
 #include <numbers>
-#include "app/camera.h"
-#include "app/color.h"
-#include "app/intersection.h"
-#include "app/matrix.h"
-#include "app/sphere.h"
-#include "app/plane.h"
-#include "app/pattern.h"
-#include "app/transformations.h"
-#include "app/ray_tracing_engine.h"
-#include "app/world.h"
+#include "app/rendering/camera.h"
+#include "app/materials/color.h"
+#include "app/rendering/intersection.h"
+#include "app/primitives/matrix.h"
+#include "app/shapes/sphere.h"
+#include "app/shapes/plane.h"
+#include "app/materials/pattern.h"
+#include "app/primitives/transformations.h"
+#include "app/rendering/ray_tracing_engine.h"
+#include "app/rendering/world.h"
 
 static void GlfwErrorCallback(int error, const char* description) {
   fprintf(stderr, "GLFW Error %d: %s\n", error, description);

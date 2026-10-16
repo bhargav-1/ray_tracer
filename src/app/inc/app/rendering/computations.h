@@ -2,9 +2,9 @@
 
 #include <utility>
 
-#include "point.h"
-#include "shape.h"
-#include "vec3.h"
+#include "app/primitives/point.h"
+#include "app/shapes/shape.h"
+#include "app/primitives/vec3.h"
 
 namespace ray_tracer {
 

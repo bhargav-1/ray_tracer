@@ -56,7 +56,7 @@ source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/inc/app/scene_editor" PREFIX "Hea
 add_executable(projectile_canvas)
 target_sources(projectile_canvas
         PRIVATE
-        src/main.cpp
+        src/chapter_02_projectile_ppm.cpp
 )
 target_link_libraries(projectile_canvas
         PRIVATE
@@ -65,7 +65,7 @@ target_link_libraries(projectile_canvas
 add_executable(clock_canvas)
 target_sources(clock_canvas
         PRIVATE
-        src/clock_canvas.cpp
+        src/chapter_04_clock_ppm.cpp
 )
 target_link_libraries(clock_canvas
         PRIVATE
@@ -89,9 +89,9 @@ target_link_libraries(imgui_lib
 add_executable(imgui_example)
 target_sources(imgui_example
         PRIVATE
-        src/imgui_test.cpp
+        src/imgui_demo.cpp
 )
-set_source_files_properties(src/imgui_test.cpp PROPERTIES
+set_source_files_properties(src/imgui_demo.cpp PROPERTIES
         SKIP_LINTING ON
 )
 target_link_libraries(imgui_example
@@ -102,7 +102,7 @@ target_link_libraries(imgui_example
 add_executable(imgui_clock)
 target_sources(imgui_clock
         PRIVATE
-        src/imgui_clock.cpp
+        src/chapter_04_clock_imgui.cpp
 )
 target_link_libraries(imgui_clock
         PRIVATE
@@ -113,9 +113,9 @@ target_link_libraries(imgui_clock
 add_executable(ray_sphere_casting_chapter5)
 target_sources(ray_sphere_casting_chapter5
         PRIVATE
-        src/ray_sphere_casting_chapter5_app.cpp
+        src/chapter_05_ray_sphere_imgui.cpp
 )
-set_source_files_properties(src/ray_sphere_casting_chapter5_app.cpp PROPERTIES
+set_source_files_properties(src/chapter_05_ray_sphere_imgui.cpp PROPERTIES
         SKIP_LINTING ON
 )
 
@@ -128,9 +128,9 @@ target_link_libraries(ray_sphere_casting_chapter5
 add_executable(light_and_shading_chapter6)
 target_sources(light_and_shading_chapter6
         PRIVATE
-        src/light_and_shading_chapter6_app.cpp
+        src/chapter_06_lighting_imgui.cpp
 )
-set_source_files_properties(src/light_and_shading_chapter6_app.cpp PROPERTIES
+set_source_files_properties(src/chapter_06_lighting_imgui.cpp PROPERTIES
         SKIP_LINTING ON
 )
 
@@ -143,9 +143,9 @@ target_link_libraries(light_and_shading_chapter6
 add_executable(making_a_scene_chapter7)
 target_sources(making_a_scene_chapter7
         PRIVATE
-        src/world_canvas_chapter7.cpp
+        src/chapter_07_scene_ppm.cpp
 )
-set_source_files_properties(src/world_canvas_chapter7.cpp PROPERTIES
+set_source_files_properties(src/chapter_07_scene_ppm.cpp PROPERTIES
         SKIP_LINTING ON
 )
 
@@ -157,9 +157,9 @@ target_link_libraries(making_a_scene_chapter7
 add_executable(making_a_scene_chapter7_imgui)
 target_sources(making_a_scene_chapter7_imgui
         PRIVATE
-        src/world_imgui_chapter7.cpp
+        src/chapter_07_scene_imgui.cpp
 )
-set_source_files_properties(src/world_imgui_chapter7.cpp inc/app/rendering/canvas.h PROPERTIES
+set_source_files_properties(src/chapter_07_scene_imgui.cpp inc/app/rendering/canvas.h PROPERTIES
         SKIP_LINTING ON
 )
 
@@ -171,9 +171,9 @@ target_link_libraries(making_a_scene_chapter7_imgui
 add_executable(eclipse_chapter8)
 target_sources(eclipse_chapter8
         PRIVATE
-        src/shadows_eclipse_chapter_8.cpp
+        src/chapter_08_shadows_imgui.cpp
 )
-set_source_files_properties(src/shadows_eclipse_chapter_8.cpp PROPERTIES
+set_source_files_properties(src/chapter_08_shadows_imgui.cpp PROPERTIES
         SKIP_LINTING ON
 )
 
@@ -185,9 +185,9 @@ target_link_libraries(eclipse_chapter8
 add_executable(plane_chapter9)
 target_sources(plane_chapter9
         PRIVATE
-        src/plane_imgui_chapter9.cpp
+        src/chapter_09_planes_imgui.cpp
 )
-set_source_files_properties(src/plane_imgui_chapter9.cpp PROPERTIES
+set_source_files_properties(src/chapter_09_planes_imgui.cpp PROPERTIES
         SKIP_LINTING ON
 )
 target_link_libraries(plane_chapter9
@@ -198,9 +198,9 @@ target_link_libraries(plane_chapter9
 add_executable(patterns_chapter10)
 target_sources(patterns_chapter10
         PRIVATE
-        src/chapter_10_patterns.cpp
+        src/chapter_10_patterns_imgui.cpp
 )
-set_source_files_properties(src/chapter_10_patterns.cpp PROPERTIES
+set_source_files_properties(src/chapter_10_patterns_imgui.cpp PROPERTIES
         SKIP_LINTING ON
 )
 target_link_libraries(patterns_chapter10
@@ -212,9 +212,9 @@ target_link_libraries(patterns_chapter10
 add_executable(patterns_chapter10_perturbed)
 target_sources(patterns_chapter10_perturbed
         PRIVATE
-        src/chapter_10_patterns_perturbed.cpp
+        src/chapter_10_patterns_perturbed_imgui.cpp
 )
-set_source_files_properties(src/chapter_10_patterns_perturbed.cpp PROPERTIES
+set_source_files_properties(src/chapter_10_patterns_perturbed_imgui.cpp PROPERTIES
         SKIP_LINTING ON
 )
 target_link_libraries(patterns_chapter10_perturbed

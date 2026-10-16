@@ -8,7 +8,27 @@
 #include <vector>
 
 namespace ray_tracer {
+namespace render_detail {
 
+inline auto IsCancelled(const std::atomic<bool>* cancel) -> bool {
+  return cancel != nullptr && cancel->load();
+}
+
+inline void UpdateRenderProgress(const int completed_rows, const int height, std::atomic<int>* progress) {
+  if (progress == nullptr) {
+    return;
+  }
+
+  const int percent = (completed_rows * 100) / height;
+  int previous = progress->load(std::memory_order_relaxed);
+  // Workers may report out of order; never let the displayed progress go backwards.
+  while (previous < percent &&
+         !progress->compare_exchange_weak(previous, percent, std::memory_order_relaxed)) {}
+}
+
+}  // namespace render_detail
+
+// render_row(row) returns true when the row finishes, or false to abort rendering.
 template <typename RenderRow>
 auto ParallelRenderRows(const int height,
                         const RenderRow& render_row,
@@ -17,7 +37,7 @@ auto ParallelRenderRows(const int height,
   if (progress != nullptr) {
     progress->store(0);
   }
-  if (cancel != nullptr && cancel->load()) {
+  if (render_detail::IsCancelled(cancel)) {
     return false;
   }
   if (height <= 0) {
@@ -28,51 +48,52 @@ auto ParallelRenderRows(const int height,
   std::atomic<int> next_row{0};
   std::atomic<int> completed_rows{0};
   std::atomic<bool> aborted{false};
-  std::exception_ptr error;
-  std::mutex error_mutex;
-  const auto worker = [&]() {
-    try {
-      while (!aborted.load(std::memory_order_relaxed)) {
-        if (cancel != nullptr && cancel->load()) {
-          return;
-        }
-        const int row = next_row.fetch_add(1, std::memory_order_relaxed);
-        if (row >= height) {
-          return;
-        }
-        if (!render_row(row)) {
-          aborted.store(true, std::memory_order_relaxed);
-          return;
-        }
-        const int completed = completed_rows.fetch_add(1, std::memory_order_relaxed) + 1;
-        if (progress != nullptr) {
-          const int percent = (completed * 100) / height;
-          int previous = progress->load(std::memory_order_relaxed);
-          while (previous < percent &&
-                 !progress->compare_exchange_weak(previous, percent, std::memory_order_relaxed)) {}
-        }
+  std::exception_ptr first_exception;
+  std::mutex exception_mutex;
+
+  const auto render_available_rows = [&] -> auto {
+    while (!aborted.load(std::memory_order_relaxed) && !render_detail::IsCancelled(cancel)) {
+      // Claim a unique row. This counter does not synchronize pixel writes.
+      const int row = next_row.fetch_add(1, std::memory_order_relaxed);
+      if (row >= height) {
+        return;
       }
+      if (!render_row(row)) {
+        aborted.store(true, std::memory_order_relaxed);
+        return;
+      }
+
+      const int completed = completed_rows.fetch_add(1, std::memory_order_relaxed) + 1;
+      render_detail::UpdateRenderProgress(completed, height, progress);
+    }
+  };
+
+  // Exceptions must be caught inside each worker, then rethrown after all workers join.
+  const auto run_worker = [&]() {
+    try {
+      render_available_rows();
     } catch (...) {
-      const std::lock_guard lock{error_mutex};
-      if (!error) {
-        error = std::current_exception();
+      const std::lock_guard lock{exception_mutex};
+      if (!first_exception) {
+        first_exception = std::current_exception();
       }
       aborted.store(true, std::memory_order_relaxed);
     }
   };
+
   {
     std::vector<std::jthread> workers;
     workers.reserve(worker_count - 1);
     for (unsigned int index = 1; index < worker_count; ++index) {
-      workers.emplace_back(worker);
+      workers.emplace_back(run_worker);
     }
-    worker();
-    // jthread joins every worker before the image can be returned or an error rethrown.
+    run_worker();  // The calling thread also renders rows.
+    // Leaving this scope joins every jthread, making its pixel writes visible.
   }
-  if (error) {
-    std::rethrow_exception(error);
+  if (first_exception) {
+    std::rethrow_exception(first_exception);
   }
-  return completed_rows.load() == height && !aborted.load() && (cancel == nullptr || !cancel->load());
+  return completed_rows.load() == height && !aborted.load() && !render_detail::IsCancelled(cancel);
 }
 
 }  // namespace ray_tracer

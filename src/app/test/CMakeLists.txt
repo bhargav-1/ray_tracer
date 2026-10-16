@@ -5,23 +5,23 @@ add_executable(app_lib_tests)
 
 target_sources(app_lib_tests
         PRIVATE
-        tuple_point_vector_chapter_1.cpp
-        canvas_drawing_chapter2.cpp
-        matrices_chapter_3.cpp
-        matrix_transformations_chapter4.cpp
-        ray_sphere_intersections_chapter5.cpp
-        light_and_shading_chapter6.cpp
-        making_a_scene_chapter7.cpp
-        shadows_chapter8.cpp
-        planes_chapter9.cpp
-        patterns_chapter10.cpp
-        reflection_refraction_chapter11.cpp
-        cubes_chapter12.cpp
-        cylinder_chapter13.cpp
-        groups_chapter14.cpp
-        bounding_boxes_chapter14_ext.cpp
-        triangles_chapter15.cpp
-        csg_chapter16.cpp
+        chapter_01_tuples.cpp
+        chapter_02_canvas.cpp
+        chapter_03_matrices.cpp
+        chapter_04_transformations.cpp
+        chapter_05_ray_sphere_intersections.cpp
+        chapter_06_lighting.cpp
+        chapter_07_scene.cpp
+        chapter_08_shadows.cpp
+        chapter_09_planes.cpp
+        chapter_10_patterns.cpp
+        chapter_11_reflection_refraction.cpp
+        chapter_12_cubes.cpp
+        chapter_13_cylinders.cpp
+        chapter_14_groups.cpp
+        bonus_bounding_boxes.cpp
+        chapter_15_triangles.cpp
+        chapter_16_csg.cpp
         shape_catalog.cpp
         scene_model.cpp
         scene_yaml_io.cpp

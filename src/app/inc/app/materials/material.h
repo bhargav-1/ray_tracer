@@ -1,7 +1,7 @@
 #pragma once
 #include <utility>
-#include "color.h"
-#include "pattern.h"
+#include "app/materials/color.h"
+#include "app/materials/pattern.h"
 #include <memory>
 
 namespace ray_tracer {

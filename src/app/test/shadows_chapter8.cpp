@@ -1,17 +1,17 @@
-#include <app/color.h>
-#include <app/world.h>
-#include <app/intersection.h>
-#include <app/ray_tracing_engine.h>
-#include <app/lighting.h>
-#include <app/sphere.h>
-#include <app/matrix.h>
-#include <app/utilities.h>
-#include <app/ray.h>
-#include <app/material.h>
-#include <app/point.h>                   // for tuple
-#include <app/point_light.h>             // for point_light
-#include <app/tuple.h>                   // for tuple
-#include <app/vec3.h>                    // for vector
+#include <app/materials/color.h>
+#include <app/rendering/world.h>
+#include <app/rendering/intersection.h>
+#include <app/rendering/ray_tracing_engine.h>
+#include <app/rendering/lighting.h>
+#include <app/shapes/sphere.h>
+#include <app/primitives/matrix.h>
+#include <app/primitives/utilities.h>
+#include <app/rendering/ray.h>
+#include <app/materials/material.h>
+#include <app/primitives/point.h>                   // for tuple
+#include <app/rendering/point_light.h>             // for point_light
+#include <app/primitives/tuple.h>                   // for tuple
+#include <app/primitives/vec3.h>                    // for vector
 #include <catch2/catch_test_macros.hpp>  // for operator""_catch_sr, Section
 #include <cmath>
 #include <memory>

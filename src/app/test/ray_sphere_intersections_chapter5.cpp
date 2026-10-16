@@ -1,11 +1,11 @@
-#include <app/intersection.h>            // for Intersection
-#include <app/ray_tracing_engine.h>     // for Intersect, Hit
-#include <app/matrix.h>                  // for matrix
-#include <app/point.h>                   // for tuple
-#include <app/ray.h>                     // for Ray
-#include <app/sphere.h>                  // for Sphere
-#include <app/tuple.h>                   // for tuple
-#include <app/vec3.h>                    // for vector
+#include <app/rendering/intersection.h>            // for Intersection
+#include <app/rendering/ray_tracing_engine.h>     // for Intersect, Hit
+#include <app/primitives/matrix.h>                  // for matrix
+#include <app/primitives/point.h>                   // for tuple
+#include <app/rendering/ray.h>                     // for Ray
+#include <app/shapes/sphere.h>                  // for Sphere
+#include <app/primitives/tuple.h>                   // for tuple
+#include <app/primitives/vec3.h>                    // for vector
 #include <vector>
 #include <catch2/catch_test_macros.hpp>  // for operator""_catch_sr, Section
 

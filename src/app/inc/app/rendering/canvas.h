@@ -2,8 +2,8 @@
 #include <fstream>
 #include <algorithm>
 #include <vector>
-#include "color.h"
-#include "point.h"
+#include "app/materials/color.h"
+#include "app/primitives/point.h"
 
 namespace ray_tracer {
 struct Pixel {

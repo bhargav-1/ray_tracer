@@ -7,17 +7,17 @@
 #include <numbers>
 #include <utility>
 #include <vector>
-#include "app/color.h"
-#include "app/material.h"
-#include "app/matrix.h"
-#include "app/pattern.h"
-#include "app/plane.h"
-#include "app/point.h"
-#include "app/ray_tracing_engine.h"
-#include "app/sphere.h"
-#include "app/utilities.h"
-#include "app/vec3.h"
-#include "app/world.h"
+#include "app/materials/color.h"
+#include "app/materials/material.h"
+#include "app/primitives/matrix.h"
+#include "app/materials/pattern.h"
+#include "app/shapes/plane.h"
+#include "app/primitives/point.h"
+#include "app/rendering/ray_tracing_engine.h"
+#include "app/shapes/sphere.h"
+#include "app/primitives/utilities.h"
+#include "app/primitives/vec3.h"
+#include "app/rendering/world.h"
 namespace ray_tracer {
 class TestPattern : public Pattern {
 public:

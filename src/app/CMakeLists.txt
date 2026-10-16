@@ -35,9 +35,8 @@ target_compile_definitions(app_lib
 )
 
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/inc/app/scene" PREFIX "Header Files\\scene"
-        FILES inc/app/scene/scene.h inc/app/scene/scene_yaml.h inc/app/scene/scene_compiler.h)
-source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/inc/app" PREFIX "Header Files"
-        FILES inc/app/shape_catalog.h)
+        FILES inc/app/scene/scene.h inc/app/scene/scene_yaml.h inc/app/scene/scene_compiler.h
+        inc/app/scene/shape_catalog.h)
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/inc/app/scene_editor" PREFIX "Header Files\\scene_editor"
         FILES
         inc/app/scene_editor/add_panel.h
@@ -160,7 +159,7 @@ target_sources(making_a_scene_chapter7_imgui
         PRIVATE
         src/world_imgui_chapter7.cpp
 )
-set_source_files_properties(src/world_imgui_chapter7.cpp inc/app/canvas.h PROPERTIES
+set_source_files_properties(src/world_imgui_chapter7.cpp inc/app/rendering/canvas.h PROPERTIES
         SKIP_LINTING ON
 )
 

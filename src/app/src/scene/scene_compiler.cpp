@@ -11,20 +11,20 @@
 #include <utility>
 #include <vector>
 
-#include "app/camera.h"
-#include "app/color.h"
-#include "app/constructive_solid_geometry.h"
-#include "app/group.h"
-#include "app/material.h"
-#include "app/matrix.h"
-#include "app/pattern.h"
-#include "app/point.h"
-#include "app/point_light.h"
+#include "app/rendering/camera.h"
+#include "app/materials/color.h"
+#include "app/shapes/constructive_solid_geometry.h"
+#include "app/shapes/group.h"
+#include "app/materials/material.h"
+#include "app/primitives/matrix.h"
+#include "app/materials/pattern.h"
+#include "app/primitives/point.h"
+#include "app/rendering/point_light.h"
 #include "app/scene/scene.h"
-#include "app/shape_catalog.h"
-#include "app/transformations.h"
-#include "app/vec3.h"
-#include "app/world.h"
+#include "app/scene/shape_catalog.h"
+#include "app/primitives/transformations.h"
+#include "app/primitives/vec3.h"
+#include "app/rendering/world.h"
 
 namespace ray_tracer::scene_runtime {
 namespace {

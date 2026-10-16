@@ -4,9 +4,9 @@
 #include "imgui_impl_opengl3.h"  // NOLINT
 #define GL_SILENCE_DEPRECATION
 #include <GLFW/glfw3.h>  // Will drag system OpenGL headers
-#include <app/intersection.h>
-#include <app/ray_tracing_engine.h>
-#include <app/sphere.h>
+#include <app/rendering/intersection.h>
+#include <app/rendering/ray_tracing_engine.h>
+#include <app/shapes/sphere.h>
 #include <fmt/base.h>
 #include <algorithm>
 #include <array>
@@ -14,14 +14,14 @@
 #include <mutex>
 #include <thread>
 
-#include "app/canvas.h"
-#include "app/color.h"
-#include "app/lighting.h"
-#include "app/material.h"
-#include "app/matrix.h"
-#include "app/point.h"
-#include "app/point_light.h"
-#include "app/tuple.h"
+#include "app/rendering/canvas.h"
+#include "app/materials/color.h"
+#include "app/rendering/lighting.h"
+#include "app/materials/material.h"
+#include "app/primitives/matrix.h"
+#include "app/primitives/point.h"
+#include "app/rendering/point_light.h"
+#include "app/primitives/tuple.h"
 
 static void GlfwErrorCallback(int error, const char* description) {
   fprintf(stderr, "GLFW Error %d: %s\n", error, description);

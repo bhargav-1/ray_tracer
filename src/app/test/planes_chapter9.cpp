@@ -2,15 +2,15 @@
 #include <cstddef>
 #include <optional>
 #include <vector>
-#include "app/point.h"
-#include "app/vec3.h"
-#include "app/plane.h"
-#include "app/intersection.h"
-#include "app/material.h"
-#include "app/matrix.h"
-#include "app/ray.h"
-#include "app/shape.h"
-#include "app/bounding_box.h"
+#include "app/primitives/point.h"
+#include "app/primitives/vec3.h"
+#include "app/shapes/plane.h"
+#include "app/rendering/intersection.h"
+#include "app/materials/material.h"
+#include "app/primitives/matrix.h"
+#include "app/rendering/ray.h"
+#include "app/shapes/shape.h"
+#include "app/rendering/bounding_box.h"
 #include <numbers>
 
 namespace ray_tracer {

@@ -6,13 +6,13 @@
 #include "imgui_impl_opengl3.h"  // NOLINT
 #define GL_SILENCE_DEPRECATION
 #include <GLFW/glfw3.h>  // Will drag system OpenGL headers
-#include <src/app/inc/app/color.h>
+#include <app/materials/color.h>
 
 #include <algorithm>
 #include <numbers>
-#include "app/matrix.h"
-#include "app/point.h"
-#include "app/tuple.h"
+#include "app/primitives/matrix.h"
+#include "app/primitives/point.h"
+#include "app/primitives/tuple.h"
 
 static auto GlfwErrorCallback(int error, const char* description) -> void {  // NOLINT
   fprintf(stderr, "GLFW Error %d: %s\n", error, description);                // NOLINT

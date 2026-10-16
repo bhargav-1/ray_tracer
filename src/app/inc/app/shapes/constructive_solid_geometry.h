@@ -1,7 +1,7 @@
 #pragma once
 
 #include <memory>
-#include "app/shape.h"
+#include "app/shapes/shape.h"
 namespace ray_tracer {
 
 enum class CSGOperation : std::uint8_t { kUnion, kIntersection, kDifference };

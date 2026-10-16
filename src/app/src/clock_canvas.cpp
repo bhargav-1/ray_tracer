@@ -1,9 +1,9 @@
 #include <iostream>
 #include <numbers>
-#include "app/canvas.h"
-#include "app/matrix.h"
-#include "app/point.h"
-#include "app/tuple.h"
+#include "app/rendering/canvas.h"
+#include "app/primitives/matrix.h"
+#include "app/primitives/point.h"
+#include "app/primitives/tuple.h"
 
 auto main() noexcept -> int {  // NOLINT
   ray_tracer::Canvas canvas{1200, 1200};

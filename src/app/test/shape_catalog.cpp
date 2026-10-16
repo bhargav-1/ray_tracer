@@ -3,13 +3,13 @@
 #include <stdexcept>
 #include <string_view>
 
-#include "app/cone.h"
-#include "app/cube.h"
-#include "app/point.h"
+#include "app/shapes/cone.h"
+#include "app/shapes/cube.h"
+#include "app/primitives/point.h"
 #include "app/scene/scene.h"
-#include "app/shape_catalog.h"
-#include "app/triangle.h"
-#include "app/vec3.h"
+#include "app/scene/shape_catalog.h"
+#include "app/shapes/triangle.h"
+#include "app/primitives/vec3.h"
 
 namespace ray_tracer {
 

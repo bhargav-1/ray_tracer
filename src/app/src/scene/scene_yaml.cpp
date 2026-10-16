@@ -13,7 +13,7 @@
 #include <vector>
 
 #include "app/scene/scene.h"
-#include "app/shape_catalog.h"
+#include "app/scene/shape_catalog.h"
 
 #include <yaml-cpp/emittermanip.h>
 #include <yaml-cpp/yaml.h>

@@ -5,11 +5,11 @@
 #include <numbers>
 #include <utility>
 
-#include "color.h"
-#include "matrix.h"
-#include "perlin.h"
-#include "point.h"
-#include "utilities.h"
+#include "app/materials/color.h"
+#include "app/primitives/matrix.h"
+#include "app/materials/perlin.h"
+#include "app/primitives/point.h"
+#include "app/primitives/utilities.h"
 
 namespace ray_tracer {
 

@@ -1,5 +1,5 @@
 #pragma once
-#include <app/utilities.h>
+#include <app/primitives/utilities.h>
 #include <iostream>  // for operator<<, basic_ostream, basic_ostream<>::__os...
 
 namespace ray_tracer {

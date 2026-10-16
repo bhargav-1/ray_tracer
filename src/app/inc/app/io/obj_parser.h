@@ -12,10 +12,10 @@
 #include <unordered_map>
 #include <vector>
 
-#include "group.h"
-#include "point.h"
-#include "triangle.h"
-#include "vec3.h"
+#include "app/shapes/group.h"
+#include "app/primitives/point.h"
+#include "app/shapes/triangle.h"
+#include "app/primitives/vec3.h"
 
 namespace ray_tracer {
 class ObjParser {

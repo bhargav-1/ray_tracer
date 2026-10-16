@@ -1,6 +1,6 @@
-#include <app/tuple.h>                  // for Tuple
-#include <app/matrix.h>                  // for point
-#include <app/utilities.h>
+#include <app/primitives/tuple.h>                  // for Tuple
+#include <app/primitives/matrix.h>                  // for point
+#include <app/primitives/utilities.h>
 #include <catch2/catch_test_macros.hpp>  // for operator""_catch_sr, Section
 
 // Behavior Driven Development Style Testing

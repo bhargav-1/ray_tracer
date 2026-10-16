@@ -1,15 +1,15 @@
 #include <catch2/catch_test_macros.hpp>
 #include <memory>
-#include "app/color.h"
-#include "app/group.h"
-#include "app/lighting.h"
-#include "app/material.h"
-#include "app/matrix.h"
-#include "app/pattern.h"
-#include "app/point.h"
-#include "app/point_light.h"
-#include "app/sphere.h"
-#include "app/vec3.h"
+#include "app/materials/color.h"
+#include "app/shapes/group.h"
+#include "app/rendering/lighting.h"
+#include "app/materials/material.h"
+#include "app/primitives/matrix.h"
+#include "app/materials/pattern.h"
+#include "app/primitives/point.h"
+#include "app/rendering/point_light.h"
+#include "app/shapes/sphere.h"
+#include "app/primitives/vec3.h"
 
 namespace ray_tracer {
 constexpr ray_tracer::Color kWhite{1, 1, 1};

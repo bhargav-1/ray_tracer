@@ -1,6 +1,6 @@
-#include <app/point.h>                   // for point
-#include <app/tuple.h>                   // for tuple
-#include <app/vec3.h>                    // for point
+#include <app/primitives/point.h>                   // for point
+#include <app/primitives/tuple.h>                   // for tuple
+#include <app/primitives/vec3.h>                    // for point
 #include <cmath>
 #include <numbers>
 #include <catch2/catch_test_macros.hpp>  // for operator""_catch_sr, Section

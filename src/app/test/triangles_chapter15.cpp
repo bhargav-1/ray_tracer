@@ -7,14 +7,14 @@
 #include <stdexcept>
 #include <string_view>
 #include <system_error>
-#include "app/group.h"
-#include "app/intersection.h"
-#include "app/obj_parser.h"
-#include "app/point.h"
-#include "app/ray.h"
-#include "app/triangle.h"
-#include "app/utilities.h"
-#include "app/vec3.h"
+#include "app/shapes/group.h"
+#include "app/rendering/intersection.h"
+#include "app/io/obj_parser.h"
+#include "app/primitives/point.h"
+#include "app/rendering/ray.h"
+#include "app/shapes/triangle.h"
+#include "app/primitives/utilities.h"
+#include "app/primitives/vec3.h"
 
 namespace ray_tracer {
 namespace {

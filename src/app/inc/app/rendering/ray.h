@@ -1,8 +1,8 @@
 #pragma once
-#include "matrix.h"
-#include "point.h"
-#include "tuple.h"
-#include "vec3.h"
+#include "app/primitives/matrix.h"
+#include "app/primitives/point.h"
+#include "app/primitives/tuple.h"
+#include "app/primitives/vec3.h"
 
 namespace ray_tracer {
 class Ray {

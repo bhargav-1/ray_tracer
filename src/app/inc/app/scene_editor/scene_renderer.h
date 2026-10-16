@@ -3,7 +3,7 @@
 #include <atomic>
 #include <vector>
 
-#include "app/color.h"
+#include "app/materials/color.h"
 #include "app/scene/scene_compiler.h"
 
 namespace ray_tracer::scene_editor {

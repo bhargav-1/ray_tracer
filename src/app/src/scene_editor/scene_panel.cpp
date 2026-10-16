@@ -20,7 +20,7 @@
 #include "app/scene_editor/render_controller.h"
 #include "app/scene_editor/render_state.h"
 #include "app/scene_editor/scene_editor_app.h"
-#include "app/shape_catalog.h"
+#include "app/scene/shape_catalog.h"
 
 namespace ray_tracer::scene_editor {
 namespace {

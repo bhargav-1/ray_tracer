@@ -9,21 +9,21 @@
 #include <optional>
 #include <vector>
 
-#include "camera.h"
-#include "canvas.h"
-#include "color.h"
-#include "computations.h"
-#include "intersection.h"
-#include "lighting.h"
-#include "point.h"
-#include "point_light.h"
-#include "ray.h"
-#include "render_rows.h"
-#include "shape.h"
-#include "sphere.h"
-#include "utilities.h"
-#include "vec3.h"
-#include "world.h"
+#include "app/rendering/camera.h"
+#include "app/rendering/canvas.h"
+#include "app/materials/color.h"
+#include "app/rendering/computations.h"
+#include "app/rendering/intersection.h"
+#include "app/rendering/lighting.h"
+#include "app/primitives/point.h"
+#include "app/rendering/point_light.h"
+#include "app/rendering/ray.h"
+#include "app/rendering/render_rows.h"
+#include "app/shapes/shape.h"
+#include "app/shapes/sphere.h"
+#include "app/primitives/utilities.h"
+#include "app/primitives/vec3.h"
+#include "app/rendering/world.h"
 
 namespace ray_tracer {
 

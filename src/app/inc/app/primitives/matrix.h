@@ -2,8 +2,8 @@
 #include <array>
 #include <cmath>
 #include <iostream>
-#include "tuple.h"
-#include "utilities.h"
+#include "app/primitives/tuple.h"
+#include "app/primitives/utilities.h"
 
 namespace ray_tracer {
 

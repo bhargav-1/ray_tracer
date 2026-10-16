@@ -1,13 +1,13 @@
-#include <app/color.h>
-// #include <app/intersection.h>  // for Intersection
-#include <app/lighting.h>
-#include <app/material.h>
-#include <app/matrix.h>                  // for matrix
-#include <app/point.h>                   // for tuple
-#include <app/point_light.h>             // for point_light
-#include <app/sphere.h>                  // for Sphere
-#include <app/tuple.h>                   // for tuple
-#include <app/vec3.h>                    // for vector
+#include <app/materials/color.h>
+// #include <app/rendering/intersection.h>  // for Intersection
+#include <app/rendering/lighting.h>
+#include <app/materials/material.h>
+#include <app/primitives/matrix.h>                  // for matrix
+#include <app/primitives/point.h>                   // for tuple
+#include <app/rendering/point_light.h>             // for point_light
+#include <app/shapes/sphere.h>                  // for Sphere
+#include <app/primitives/tuple.h>                   // for tuple
+#include <app/primitives/vec3.h>                    // for vector
 #include <catch2/catch_test_macros.hpp>  // for operator""_catch_sr, Section
 #include <cmath>
 #include <numbers>

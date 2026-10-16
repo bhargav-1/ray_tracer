@@ -7,20 +7,20 @@
 #include <numbers>
 #include <optional>
 #include <vector>
-#include "app/bounding_box.h"
-#include "app/cone.h"
-#include "app/cube.h"
-#include "app/cylinder.h"
-#include "app/group.h"
-#include "app/intersection.h"
-#include "app/matrix.h"
-#include "app/plane.h"
-#include "app/point.h"
-#include "app/ray.h"
-#include "app/shape.h"
-#include "app/sphere.h"
-#include "app/vec3.h"
-#include "app/constructive_solid_geometry.h"
+#include "app/rendering/bounding_box.h"
+#include "app/shapes/cone.h"
+#include "app/shapes/cube.h"
+#include "app/shapes/cylinder.h"
+#include "app/shapes/group.h"
+#include "app/rendering/intersection.h"
+#include "app/primitives/matrix.h"
+#include "app/shapes/plane.h"
+#include "app/primitives/point.h"
+#include "app/rendering/ray.h"
+#include "app/shapes/shape.h"
+#include "app/shapes/sphere.h"
+#include "app/primitives/vec3.h"
+#include "app/shapes/constructive_solid_geometry.h"
 
 namespace ray_tracer {
 class TestShape : public Shape {

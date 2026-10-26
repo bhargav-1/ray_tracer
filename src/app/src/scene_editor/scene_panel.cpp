@@ -2,8 +2,8 @@
 
 #include <algorithm>
 #include <array>
-#include <cstddef>
 #include <chrono>
+#include <cstddef>
 #include <filesystem>
 #include <optional>
 #include <ratio>
@@ -14,13 +14,13 @@
 #include "imgui.h"  // NOLINT
 
 #include "app/scene/scene.h"
+#include "app/scene/shape_catalog.h"
 #include "app/scene_editor/imgui_file_dialog.h"
-#include "app/scene_editor/widget_helpers.h"
 #include "app/scene_editor/object_panel.h"
 #include "app/scene_editor/render_controller.h"
 #include "app/scene_editor/render_state.h"
 #include "app/scene_editor/scene_editor_app.h"
-#include "app/scene/shape_catalog.h"
+#include "app/scene_editor/widget_helpers.h"
 
 namespace ray_tracer::scene_editor {
 namespace {
@@ -234,10 +234,14 @@ auto DrawScenePanel(SceneEditorApp& app, UiRenderState& render_state, std::array
   ImGui::PopID();
   ImGui::Separator();
   if (render_state.rendering.load()) {
-    const auto elapsed_ms = std::chrono::duration<double, std::milli>(
-        std::chrono::steady_clock::now() - render_state.render_started).count();
-    ImGui::TextColored(ImVec4(1.0F, 1.0F, 0.0F, 1.0F), "Rendering... %d%%%s - %.1f ms",
-                       render_state.progress.load(), render_state.is_preview ? " (preview)" : "", elapsed_ms);
+    const auto elapsed_ms =
+        std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - render_state.render_started)
+            .count();
+    ImGui::TextColored(ImVec4(1.0F, 1.0F, 0.0F, 1.0F),
+                       "Rendering... %d%%%s - %.1f ms",
+                       render_state.progress.load(),
+                       render_state.is_preview ? " (preview)" : "",
+                       elapsed_ms);
   } else if (ImGui::Button("Render", ImVec2(-1.0F, 30.0F))) {
     ScheduleRender(app, render_state, false);
   }
@@ -248,7 +252,8 @@ auto DrawScenePanel(SceneEditorApp& app, UiRenderState& render_state, std::array
   }
   ImGui::PushID("Camera");
   if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen)) {
-    if (ImGui::SmallButton(editor_state.selection.target == SelectionTarget::kCamera ? "Selected###select" : "Select###select")) {
+    if (ImGui::SmallButton(editor_state.selection.target == SelectionTarget::kCamera ? "Selected###select"
+                                                                                     : "Select###select")) {
       editor_state.selection = Selection::ForCamera();
     }
     changed |= DragF3("From", scene.camera->from, 0.1F, -50.0F, 50.0F);
@@ -270,7 +275,8 @@ auto DrawScenePanel(SceneEditorApp& app, UiRenderState& render_state, std::array
     for (std::size_t i = 0; i < scene.lights.size(); ++i) {
       ImGui::PushID(static_cast<int>(i));
       const std::string label = "Light " + std::to_string(i + 1);
-      if (ImGui::SmallButton(editor_state.selection.target == SelectionTarget::kLight && editor_state.selection.index == i
+      if (ImGui::SmallButton(editor_state.selection.target == SelectionTarget::kLight &&
+                                     editor_state.selection.index == i
                                  ? "Selected###select"
                                  : "Select###select")) {
         editor_state.selection = Selection::ForLight(i);

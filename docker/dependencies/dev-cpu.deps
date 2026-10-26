@@ -2,8 +2,8 @@ build-essential
 catch2
 libimgui-dev
 clang
-clang-format
-clang-tidy
+clang-format-18
+clang-tidy-18
 cppcheck
 curl
 file

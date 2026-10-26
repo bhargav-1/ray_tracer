@@ -9,21 +9,21 @@
 #include <optional>
 #include <vector>
 
+#include "app/materials/color.h"
+#include "app/primitives/point.h"
+#include "app/primitives/utilities.h"
+#include "app/primitives/vec3.h"
 #include "app/rendering/camera.h"
 #include "app/rendering/canvas.h"
-#include "app/materials/color.h"
 #include "app/rendering/computations.h"
 #include "app/rendering/intersection.h"
 #include "app/rendering/lighting.h"
-#include "app/primitives/point.h"
 #include "app/rendering/point_light.h"
 #include "app/rendering/ray.h"
 #include "app/rendering/render_rows.h"
+#include "app/rendering/world.h"
 #include "app/shapes/shape.h"
 #include "app/shapes/sphere.h"
-#include "app/primitives/utilities.h"
-#include "app/primitives/vec3.h"
-#include "app/rendering/world.h"
 
 namespace ray_tracer {
 
@@ -127,8 +127,9 @@ auto GetReflectedColor(const World& world, const Computations& computations, int
 auto GetRefractedColor(const World& world, const Computations& computations, int remaining = 5) -> Color;
 inline auto Schlick(const Computations& computations) -> double;
 // NOLINTNEXTLINE(misc-no-recursion)
-inline auto ShadeHit(const World& world, const Computations& computations, const int remaining = 5)
-    -> Color {  // NOLINT(misc-no-recursion)
+inline auto ShadeHit(const World& world,
+                     const Computations& computations,
+                     const int remaining = 5) -> Color {  // NOLINT(misc-no-recursion)
   Color color{0, 0, 0};
   Color reflected_color{0, 0, 0};
   Color refracted_color{0, 0, 0};
@@ -149,15 +150,16 @@ inline auto ShadeHit(const World& world, const Computations& computations, const
       material.GetReflective() > 0 && material.GetTransparency() > 0) {
     auto reflectance = Schlick(computations);
     color = color + reflected_color * reflectance + refracted_color * (1 - reflectance);
-      } else {
-        color = color + reflected_color + refracted_color;
-      }
+  } else {
+    color = color + reflected_color + refracted_color;
+  }
   return color;
 }
 
 // NOLINTNEXTLINE(misc-no-recursion)
-inline auto ColorAt(const World& world, const Ray& ray, const int remaining = 5)
-    -> Color {  // NOLINT(misc-no-recursion)
+inline auto ColorAt(const World& world,
+                    const Ray& ray,
+                    const int remaining = 5) -> Color {  // NOLINT(misc-no-recursion)
   auto intersections = Intersect(ray, world);
   auto hit = Hit(intersections);
   if (!hit.has_value()) {
@@ -167,8 +169,9 @@ inline auto ColorAt(const World& world, const Ray& ray, const int remaining = 5)
 }
 
 // NOLINTNEXTLINE(misc-no-recursion)
-inline auto GetReflectedColor(const World& world, const Computations& computations, const int remaining)
-    -> Color {  // NOLINT(misc-no-recursion)
+inline auto GetReflectedColor(const World& world,
+                              const Computations& computations,
+                              const int remaining) -> Color {  // NOLINT(misc-no-recursion)
   if (computations.GetObject()->GetMaterial().GetReflective() == 0) {
     return Color{0, 0, 0};
   }
@@ -181,8 +184,9 @@ inline auto GetReflectedColor(const World& world, const Computations& computatio
 }
 
 // NOLINTNEXTLINE(misc-no-recursion)
-inline auto GetRefractedColor(const World& world, const Computations& computations, int remaining)
-    -> Color {                                                           // NOLINT(misc-no-recursion)
+inline auto GetRefractedColor(const World& world,
+                              const Computations& computations,
+                              int remaining) -> Color {                  // NOLINT(misc-no-recursion)
   if (computations.GetObject()->GetMaterial().GetTransparency() == 0) {  // NOLINT
     return Color{0, 0, 0};
   }
@@ -217,10 +221,10 @@ inline auto Schlick(const Computations& computations) -> double {
     auto cos_t = std::sqrt(1 - sin2_t);
     cos = cos_t;
   }
-  const auto reflectance_at_normal = std::pow(
-      (computations.GetRefractiveIndexN1() - computations.GetRefractiveIndexN2()) /
-          (computations.GetRefractiveIndexN1() + computations.GetRefractiveIndexN2()),
-      2);
+  const auto reflectance_at_normal =
+      std::pow((computations.GetRefractiveIndexN1() - computations.GetRefractiveIndexN2()) /
+                   (computations.GetRefractiveIndexN1() + computations.GetRefractiveIndexN2()),
+               2);
   //https://graphics.stanford.edu/courses/cs148-10-summer/docs/2006--degreve--reflection_refraction.pdf
   // https://www.flipcode.com/archives/reflection_transmission.pdf
   return reflectance_at_normal + (1 - reflectance_at_normal) * std::pow(1 - cos, 5);

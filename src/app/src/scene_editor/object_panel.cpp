@@ -12,16 +12,14 @@
 #include "imgui.h"  // NOLINT
 
 #include "app/scene/scene.h"
-#include "app/scene_editor/widget_helpers.h"
-#include "app/scene_editor/imgui_file_dialog.h"
 #include "app/scene/shape_catalog.h"
+#include "app/scene_editor/imgui_file_dialog.h"
+#include "app/scene_editor/widget_helpers.h"
 
 namespace ray_tracer::scene_editor {
 namespace {
 
-auto PatternTypeIndex(scene::PatternType type) -> int {
-  return static_cast<int>(type);
-}
+auto PatternTypeIndex(scene::PatternType type) -> int { return static_cast<int>(type); }
 
 auto PatternTypeFromIndex(int index) -> scene::PatternType {
   using scene::PatternType;
@@ -154,7 +152,8 @@ auto DrawPatternEditor(scene::Pattern& pattern, int depth) -> bool {  // NOLINT(
 
     EnsurePatternChildren(pattern);
     for (std::size_t i = 0; i < pattern.children.size(); ++i) {
-      const std::string label = pattern.type == scene::PatternType::kPerturbed ? "Source" : "Child " + std::to_string(i + 1);
+      const std::string label =
+          pattern.type == scene::PatternType::kPerturbed ? "Source" : "Child " + std::to_string(i + 1);
       if (ImGui::TreeNodeEx(label.c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
         changed |= DrawPatternEditor(pattern.children[i], depth + 1 + static_cast<int>(i));
         ImGui::TreePop();
@@ -256,17 +255,18 @@ auto DrawObjectEditor(scene::Object& object, const bool allow_hide) -> bool {
   auto& shape = object.Shape();
   if (shape.type == scene::ObjectType::kObj) {
     std::array<char, 1024> source_buffer{};
-    std::memcpy(source_buffer.data(), shape.source.data(),
-                std::min(shape.source.size(), source_buffer.size() - 1));
+    std::memcpy(source_buffer.data(), shape.source.data(), std::min(shape.source.size(), source_buffer.size() - 1));
     if (ImGui::InputText("OBJ source", source_buffer.data(), source_buffer.size())) {
       shape.source = source_buffer.data();
     }
     changed |= ImGui::IsItemDeactivatedAfterEdit();
     const auto dialog_key = "ObjSourceDialog" + std::to_string(ImGui::GetID("OBJ source"));
     if (ImGui::Button("Browse OBJ")) {
-      ImGuiFileDialog::Instance()->OpenDialog(dialog_key, "Select OBJ Model", ".obj",
-                                             shape.source.empty() ? std::filesystem::path{RAY_TRACER_ASSET_DIR}
-                                                                  : std::filesystem::path{shape.source});
+      ImGuiFileDialog::Instance()->OpenDialog(
+          dialog_key,
+          "Select OBJ Model",
+          ".obj",
+          shape.source.empty() ? std::filesystem::path{RAY_TRACER_ASSET_DIR} : std::filesystem::path{shape.source});
     }
     if (ImGuiFileDialog::Instance()->Display(dialog_key) && ImGuiFileDialog::Instance()->IsOk()) {
       shape.source = ImGuiFileDialog::Instance()->GetFilePathName();

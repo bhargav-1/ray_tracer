@@ -7,14 +7,14 @@
 #include <stdexcept>
 #include <string_view>
 #include <system_error>
-#include "app/shapes/group.h"
-#include "app/rendering/intersection.h"
 #include "app/io/obj_parser.h"
 #include "app/primitives/point.h"
-#include "app/rendering/ray.h"
-#include "app/shapes/triangle.h"
 #include "app/primitives/utilities.h"
 #include "app/primitives/vec3.h"
+#include "app/rendering/intersection.h"
+#include "app/rendering/ray.h"
+#include "app/shapes/group.h"
+#include "app/shapes/triangle.h"
 
 namespace ray_tracer {
 namespace {
@@ -218,17 +218,17 @@ f 1 2 3 4 5
       auto parser = ObjParser(file.Path().string());
       auto group = parser.Group();
       auto triangle_1 = std::dynamic_pointer_cast<Triangle>(group->GetChildren()[0]);
-        auto triangle_2 = std::dynamic_pointer_cast<Triangle>(group->GetChildren()[1]);
-        auto triangle_3 = std::dynamic_pointer_cast<Triangle>(group->GetChildren()[2]);
+      auto triangle_2 = std::dynamic_pointer_cast<Triangle>(group->GetChildren()[1]);
+      auto triangle_3 = std::dynamic_pointer_cast<Triangle>(group->GetChildren()[2]);
       CHECK(triangle_1->GetVertices()[0] == parser.Vertices()[1]);
-        CHECK(triangle_1->GetVertices()[1] == parser.Vertices()[2]);
-        CHECK(triangle_1->GetVertices()[2] == parser.Vertices()[3]);
-        CHECK(triangle_2->GetVertices()[0] == parser.Vertices()[1]);
-        CHECK(triangle_2->GetVertices()[1] == parser.Vertices()[3]);
-        CHECK(triangle_2->GetVertices()[2] == parser.Vertices()[4]);
-        CHECK(triangle_3->GetVertices()[0] == parser.Vertices()[1]);
-        CHECK(triangle_3->GetVertices()[1] == parser.Vertices()[4]);
-        CHECK(triangle_3->GetVertices()[2] == parser.Vertices()[5]);
+      CHECK(triangle_1->GetVertices()[1] == parser.Vertices()[2]);
+      CHECK(triangle_1->GetVertices()[2] == parser.Vertices()[3]);
+      CHECK(triangle_2->GetVertices()[0] == parser.Vertices()[1]);
+      CHECK(triangle_2->GetVertices()[1] == parser.Vertices()[3]);
+      CHECK(triangle_2->GetVertices()[2] == parser.Vertices()[4]);
+      CHECK(triangle_3->GetVertices()[0] == parser.Vertices()[1]);
+      CHECK(triangle_3->GetVertices()[1] == parser.Vertices()[4]);
+      CHECK(triangle_3->GetVertices()[2] == parser.Vertices()[5]);
     }
   }
 }
@@ -245,25 +245,25 @@ f 1 2 3
 g SecondGroup
 f 1 3 4
 )");
-        auto parser = ObjParser(file.Path().string());
-        auto group = parser.Group();
-        REQUIRE(group->GetChildren().size() == 2);
-        auto first_group = std::dynamic_pointer_cast<Group>(group->GetChildren()[0]);
-        auto second_group = std::dynamic_pointer_cast<Group>(group->GetChildren()[1]);
-        REQUIRE(first_group != nullptr);
-        REQUIRE(second_group != nullptr);
-        CHECK(first_group->GetChildren().size() == 1);
-        CHECK(second_group->GetChildren().size() == 1);
-        auto triangle_1 = std::dynamic_pointer_cast<Triangle>(first_group->GetChildren()[0]);
-        auto triangle_2 = std::dynamic_pointer_cast<Triangle>(second_group->GetChildren()[0]);
-        REQUIRE(triangle_1 != nullptr);
-        REQUIRE(triangle_2 != nullptr);
-        CHECK(triangle_1->GetVertices()[0] == parser.Vertices()[1]);
-        CHECK(triangle_1->GetVertices()[1] == parser.Vertices()[2]);
-        CHECK(triangle_1->GetVertices()[2] == parser.Vertices()[3]);
-        CHECK(triangle_2->GetVertices()[0] == parser.Vertices()[1]);
-        CHECK(triangle_2->GetVertices()[1] == parser.Vertices()[3]);
-        CHECK(triangle_2->GetVertices()[2] == parser.Vertices()[4]);
+      auto parser = ObjParser(file.Path().string());
+      auto group = parser.Group();
+      REQUIRE(group->GetChildren().size() == 2);
+      auto first_group = std::dynamic_pointer_cast<Group>(group->GetChildren()[0]);
+      auto second_group = std::dynamic_pointer_cast<Group>(group->GetChildren()[1]);
+      REQUIRE(first_group != nullptr);
+      REQUIRE(second_group != nullptr);
+      CHECK(first_group->GetChildren().size() == 1);
+      CHECK(second_group->GetChildren().size() == 1);
+      auto triangle_1 = std::dynamic_pointer_cast<Triangle>(first_group->GetChildren()[0]);
+      auto triangle_2 = std::dynamic_pointer_cast<Triangle>(second_group->GetChildren()[0]);
+      REQUIRE(triangle_1 != nullptr);
+      REQUIRE(triangle_2 != nullptr);
+      CHECK(triangle_1->GetVertices()[0] == parser.Vertices()[1]);
+      CHECK(triangle_1->GetVertices()[1] == parser.Vertices()[2]);
+      CHECK(triangle_1->GetVertices()[2] == parser.Vertices()[3]);
+      CHECK(triangle_2->GetVertices()[0] == parser.Vertices()[1]);
+      CHECK(triangle_2->GetVertices()[1] == parser.Vertices()[3]);
+      CHECK(triangle_2->GetVertices()[2] == parser.Vertices()[4]);
     }
   }
 }
@@ -294,9 +294,8 @@ f 1 3 4
 
 namespace {
 // NOLINTNEXTLINE(readability-identifier-naming)
-const SmoothTriangle triangle_var{1,
-                                  {Point(0, 1, 0), Point(-1, 0, 0), Point(1, 0, 0)},
-                                  {Vec3(0, 1, 0), Vec3(-1, 0, 0), Vec3(1, 0, 0)}};
+const SmoothTriangle triangle_var{
+    1, {Point(0, 1, 0), Point(-1, 0, 0), Point(1, 0, 0)}, {Vec3(0, 1, 0), Vec3(-1, 0, 0), Vec3(1, 0, 0)}};
 }  // namespace
 
 SCENARIO("15: smooth triangles") {
@@ -394,19 +393,19 @@ vn 0 1 0
 f 1//3 2//1 3//2
 f 1/0/3 2/102/1 3/14/2
 )");
-        auto parsed_lines = ObjParser(file.Path().string());
-        const auto& triangles = parsed_lines.Triangles();
-        REQUIRE(triangles.size() == 2);
-        for (const auto& triangle : triangles) {
-          CHECK(triangle->GetVertices()[0] == parsed_lines.Vertices()[1]);
-          CHECK(triangle->GetVertices()[1] == parsed_lines.Vertices()[2]);
-          CHECK(triangle->GetVertices()[2] == parsed_lines.Vertices()[3]);
-          const auto* smooth_triangle_ptr = dynamic_cast<const SmoothTriangle*>(triangle.get());
-          REQUIRE(smooth_triangle_ptr != nullptr);
-          CHECK(smooth_triangle_ptr->GetNormals()[0] == parsed_lines.GetNormals()[3]);
-          CHECK(smooth_triangle_ptr->GetNormals()[1] == parsed_lines.GetNormals()[1]);
-          CHECK(smooth_triangle_ptr->GetNormals()[2] == parsed_lines.GetNormals()[2]);
-        }
+      auto parsed_lines = ObjParser(file.Path().string());
+      const auto& triangles = parsed_lines.Triangles();
+      REQUIRE(triangles.size() == 2);
+      for (const auto& triangle : triangles) {
+        CHECK(triangle->GetVertices()[0] == parsed_lines.Vertices()[1]);
+        CHECK(triangle->GetVertices()[1] == parsed_lines.Vertices()[2]);
+        CHECK(triangle->GetVertices()[2] == parsed_lines.Vertices()[3]);
+        const auto* smooth_triangle_ptr = dynamic_cast<const SmoothTriangle*>(triangle.get());
+        REQUIRE(smooth_triangle_ptr != nullptr);
+        CHECK(smooth_triangle_ptr->GetNormals()[0] == parsed_lines.GetNormals()[3]);
+        CHECK(smooth_triangle_ptr->GetNormals()[1] == parsed_lines.GetNormals()[1]);
+        CHECK(smooth_triangle_ptr->GetNormals()[2] == parsed_lines.GetNormals()[2]);
+      }
     }
   }
 }

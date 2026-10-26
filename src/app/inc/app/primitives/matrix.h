@@ -93,22 +93,26 @@ class Matrix {
   [[nodiscard]] constexpr auto Invertible() const -> bool;
   [[nodiscard]] constexpr auto Inverse() const -> Matrix<Rows, Cols>;
 
-  static constexpr auto Translation(const double& x_dir, const double& y_dir, const double& z_dir)
-      -> ray_tracer::Matrix<4, 4>;
+  static constexpr auto Translation(const double& x_dir,
+                                    const double& y_dir,
+                                    const double& z_dir) -> ray_tracer::Matrix<4, 4>;
   static constexpr auto Translation(const Tuple& tuple) -> ray_tracer::Matrix<4, 4>;
   // need to add dummy R/C for enable_if, it doesn't compile otherwise
   template <size_t R = Rows, size_t C = Cols>
-  constexpr auto Translate(const double& x_dir, const double& y_dir, const double& z_dir)
-      -> std::enable_if_t<R == 4 && C == 4, Matrix<4, 4>&>;
+  constexpr auto Translate(const double& x_dir,
+                           const double& y_dir,
+                           const double& z_dir) -> std::enable_if_t<R == 4 && C == 4, Matrix<4, 4>&>;
   template <size_t R = Rows, size_t C = Cols>
   constexpr auto Translate(const Tuple& tuple) -> std::enable_if_t<R == 4 && C == 4, Matrix<4, 4>&>;
 
-  static constexpr auto Scaling(const double& x_dir, const double& y_dir, const double& z_dir)
-      -> ray_tracer::Matrix<4, 4>;
+  static constexpr auto Scaling(const double& x_dir,
+                                const double& y_dir,
+                                const double& z_dir) -> ray_tracer::Matrix<4, 4>;
   static constexpr auto Scaling(const Tuple& tuple) -> ray_tracer::Matrix<4, 4>;
   template <size_t R = Rows, size_t C = Cols>
-  constexpr auto Scale(const double& x_dir, const double& y_dir, const double& z_dir)
-      -> std::enable_if_t<R == 4 && C == 4, Matrix<4, 4>&>;
+  constexpr auto Scale(const double& x_dir,
+                       const double& y_dir,
+                       const double& z_dir) -> std::enable_if_t<R == 4 && C == 4, Matrix<4, 4>&>;
   template <size_t R = Rows, size_t C = Cols>
   constexpr auto Scale(const Tuple& tuple) -> std::enable_if_t<R == 4 && C == 4, Matrix<4, 4>&>;
   static constexpr auto RotationX(const double& radians) -> ray_tracer::Matrix<4, 4>;
@@ -125,8 +129,9 @@ class Matrix {
                                  const shear::ShearY& xz_shear,
                                  const shear::ShearZ& xy_shear) -> ray_tracer::Matrix<4, 4>;
   template <size_t R = Rows, size_t C = Cols>
-  constexpr auto Shear(const shear::ShearX& yz_shear, const shear::ShearY& xz_shear, const shear::ShearZ& xy_shear)
-      -> std::enable_if_t<R == 4 && C == 4, Matrix<4, 4>&>;
+  constexpr auto Shear(const shear::ShearX& yz_shear,
+                       const shear::ShearY& xz_shear,
+                       const shear::ShearZ& xy_shear) -> std::enable_if_t<R == 4 && C == 4, Matrix<4, 4>&>;
 
  private:
   std::array<std::array<double, Cols>, Rows> matrix_;
@@ -210,7 +215,7 @@ constexpr auto Matrix<Rows, Cols>::Cofactor(const size_t& row, const size_t& col
   static_assert(Rows == Cols, "Determinant matrix must be square");
 
   // if (row >= Rows || col >= Cols) {
-    // throw std::invalid_argument("Row or column out of bounds");
+  // throw std::invalid_argument("Row or column out of bounds");
   // }
 
   if constexpr (Rows <= 2) {
@@ -221,7 +226,8 @@ constexpr auto Matrix<Rows, Cols>::Cofactor(const size_t& row, const size_t& col
 }
 
 template <size_t Rows, size_t Cols>
-constexpr auto Matrix<Rows, Cols>::SpotSubMatrix(const size_t& row, const size_t& col) const -> Matrix<Rows - 1, Cols - 1> {
+constexpr auto Matrix<Rows, Cols>::SpotSubMatrix(const size_t& row,
+                                                 const size_t& col) const -> Matrix<Rows - 1, Cols - 1> {
   static_assert(Rows == Cols, "Determinant matrix must be square");
   // following doesn't actually let template know they cannot be 1 or 0;it doesnt compile for 1/0
   static_assert(Rows <= 1000 && Cols <= 1000, "Cannot create a submatrix for matrices smaller than 2x2.");
@@ -274,8 +280,9 @@ constexpr auto Matrix<Rows, Cols>::Inverse() const -> Matrix<Rows, Cols> {
 }
 
 template <size_t Rows, size_t Cols>
-constexpr auto Matrix<Rows, Cols>::Translation(const double& x_dir, const double& y_dir, const double& z_dir)
-    -> ray_tracer::Matrix<4, 4> {
+constexpr auto Matrix<Rows, Cols>::Translation(const double& x_dir,
+                                               const double& y_dir,
+                                               const double& z_dir) -> ray_tracer::Matrix<4, 4> {
   auto result = ray_tracer::Matrix<4, 4>::IdentityMatrix();
   result.matrix_[0][3] = x_dir;
   result.matrix_[1][3] = y_dir;
@@ -289,8 +296,9 @@ constexpr auto Matrix<Rows, Cols>::Translation(const Tuple& tuple) -> ray_tracer
 }
 template <size_t Rows, size_t Cols>
 template <size_t R, size_t C>
-constexpr auto Matrix<Rows, Cols>::Translate(const double& x_dir, const double& y_dir, const double& z_dir)
-    -> std::enable_if_t<R == 4 && C == 4, Matrix<4, 4>&> {
+constexpr auto Matrix<Rows, Cols>::Translate(const double& x_dir,
+                                             const double& y_dir,
+                                             const double& z_dir) -> std::enable_if_t<R == 4 && C == 4, Matrix<4, 4>&> {
   auto translation = Matrix<4, 4>::IdentityMatrix();
   translation.matrix_[0][3] = x_dir;
   translation.matrix_[1][3] = y_dir;
@@ -398,8 +406,9 @@ constexpr auto Matrix<Rows, Cols>::Shear(const shear::ShearX& yz_shear,
 }
 
 template <size_t Rows, size_t Cols>
-constexpr auto Matrix<Rows, Cols>::Scaling(const double& x_dir, const double& y_dir, const double& z_dir)
-    -> ray_tracer::Matrix<4, 4> {
+constexpr auto Matrix<Rows, Cols>::Scaling(const double& x_dir,
+                                           const double& y_dir,
+                                           const double& z_dir) -> ray_tracer::Matrix<4, 4> {
   auto result = ray_tracer::Matrix<4, 4>::IdentityMatrix();
   result.matrix_[0][0] = x_dir;
   result.matrix_[1][1] = y_dir;
@@ -408,8 +417,9 @@ constexpr auto Matrix<Rows, Cols>::Scaling(const double& x_dir, const double& y_
 }
 template <size_t Rows, size_t Cols>
 template <size_t R, size_t C>
-constexpr auto Matrix<Rows, Cols>::Scale(const double& x_dir, const double& y_dir, const double& z_dir)
-    -> std::enable_if_t<R == 4 && C == 4, Matrix<4, 4>&> {
+constexpr auto Matrix<Rows, Cols>::Scale(const double& x_dir,
+                                         const double& y_dir,
+                                         const double& z_dir) -> std::enable_if_t<R == 4 && C == 4, Matrix<4, 4>&> {
   auto result = ray_tracer::Matrix<4, 4>::IdentityMatrix();
   result.matrix_[0][0] = x_dir;
   result.matrix_[1][1] = y_dir;
@@ -446,11 +456,14 @@ auto constexpr operator*(const Matrix<R, C>& lhs, const Matrix<R2, C2>& rhs) -> 
 template <size_t R, size_t C>
 auto constexpr operator*(const Matrix<R, C>& lhs, const Tuple& tuple) -> Tuple {
   static_assert(C == 4, "Matrix must be 4x4 for multiplication with Tuple");
-  return Tuple(
-      lhs.matrix_[0][0] * tuple.GetX() + lhs.matrix_[0][1] * tuple.GetY() + lhs.matrix_[0][2] * tuple.GetZ() + lhs.matrix_[0][3] * tuple.GetW(),
-      lhs.matrix_[1][0] * tuple.GetX() + lhs.matrix_[1][1] * tuple.GetY() + lhs.matrix_[1][2] * tuple.GetZ() + lhs.matrix_[1][3] * tuple.GetW(),
-      lhs.matrix_[2][0] * tuple.GetX() + lhs.matrix_[2][1] * tuple.GetY() + lhs.matrix_[2][2] * tuple.GetZ() + lhs.matrix_[2][3] * tuple.GetW(),
-      lhs.matrix_[3][0] * tuple.GetX() + lhs.matrix_[3][1] * tuple.GetY() + lhs.matrix_[3][2] * tuple.GetZ() + lhs.matrix_[3][3] * tuple.GetW());
+  return Tuple(lhs.matrix_[0][0] * tuple.GetX() + lhs.matrix_[0][1] * tuple.GetY() + lhs.matrix_[0][2] * tuple.GetZ() +
+                   lhs.matrix_[0][3] * tuple.GetW(),
+               lhs.matrix_[1][0] * tuple.GetX() + lhs.matrix_[1][1] * tuple.GetY() + lhs.matrix_[1][2] * tuple.GetZ() +
+                   lhs.matrix_[1][3] * tuple.GetW(),
+               lhs.matrix_[2][0] * tuple.GetX() + lhs.matrix_[2][1] * tuple.GetY() + lhs.matrix_[2][2] * tuple.GetZ() +
+                   lhs.matrix_[2][3] * tuple.GetW(),
+               lhs.matrix_[3][0] * tuple.GetX() + lhs.matrix_[3][1] * tuple.GetY() + lhs.matrix_[3][2] * tuple.GetZ() +
+                   lhs.matrix_[3][3] * tuple.GetW());
 }
 
 template <size_t R, size_t C, size_t R2, size_t C2>

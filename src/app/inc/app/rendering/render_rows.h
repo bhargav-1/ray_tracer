@@ -10,9 +10,7 @@
 namespace ray_tracer {
 namespace render_detail {
 
-inline auto IsCancelled(const std::atomic<bool>* cancel) -> bool {
-  return cancel != nullptr && cancel->load();
-}
+inline auto IsCancelled(const std::atomic<bool>* cancel) -> bool { return cancel != nullptr && cancel->load(); }
 
 inline void UpdateRenderProgress(const int completed_rows, const int height, std::atomic<int>* progress) {
   if (progress == nullptr) {
@@ -22,8 +20,8 @@ inline void UpdateRenderProgress(const int completed_rows, const int height, std
   const int percent = (completed_rows * 100) / height;
   int previous = progress->load(std::memory_order_relaxed);
   // Workers may report out of order; never let the displayed progress go backwards.
-  while (previous < percent &&
-         !progress->compare_exchange_weak(previous, percent, std::memory_order_relaxed)) {}
+  while (previous < percent && !progress->compare_exchange_weak(previous, percent, std::memory_order_relaxed)) {
+  }
 }
 
 }  // namespace render_detail
@@ -43,8 +41,8 @@ auto ParallelRenderRows(const int height,
   if (height <= 0) {
     return true;
   }
-  const auto worker_count = std::min(static_cast<unsigned int>(height),
-                                    std::max(1U, std::thread::hardware_concurrency()));
+  const auto worker_count =
+      std::min(static_cast<unsigned int>(height), std::max(1U, std::thread::hardware_concurrency()));
   std::atomic<int> next_row{0};
   std::atomic<int> completed_rows{0};
   std::atomic<bool> aborted{false};

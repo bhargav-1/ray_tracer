@@ -4,8 +4,8 @@
 #include <string>
 
 #include "app/rendering/camera.h"
-#include "app/scene/scene.h"
 #include "app/rendering/world.h"
+#include "app/scene/scene.h"
 
 namespace ray_tracer::scene_runtime {
 

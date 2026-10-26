@@ -1,6 +1,6 @@
 #include <chrono>
-#include <thread>
 #include <cstdio>
+#include <thread>
 #include "imgui.h"               // NOLINT
 #include "imgui_impl_glfw.h"     // NOLINT
 #include "imgui_impl_opengl3.h"  // NOLINT
@@ -19,7 +19,7 @@ static auto GlfwErrorCallback(int error, const char* description) -> void {  // 
 }
 
 // Main code
-auto main(int /*unused*/, char* * /*unused*/) -> int {  // NOLINT
+auto main(int /*unused*/, char** /*unused*/) -> int {  // NOLINT
   glfwSetErrorCallback(GlfwErrorCallback);
   if (!glfwInit()) {
     return 1;

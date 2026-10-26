@@ -5,8 +5,8 @@
 #include "imgui.h"  // NOLINT
 
 #include "app/scene/scene.h"
-#include "app/scene_editor/scene_editor_app.h"
 #include "app/scene_editor/render_state.h"
+#include "app/scene_editor/scene_editor_app.h"
 
 namespace ray_tracer::scene_editor {
 

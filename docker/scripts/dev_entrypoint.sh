@@ -60,4 +60,4 @@ if [ -z "${STARTUP_SLEEP}" ]; then
 else
   sleep "${STARTUP_SLEEP}"
 fi
-eval "$@"
+exec "$@"

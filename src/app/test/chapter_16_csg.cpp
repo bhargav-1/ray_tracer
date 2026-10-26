@@ -1,11 +1,11 @@
 #include <catch2/catch_test_macros.hpp>
 #include <memory>
 #include <vector>
+#include "app/primitives/matrix.h"
+#include "app/primitives/utilities.h"
 #include "app/shapes/constructive_solid_geometry.h"
 #include "app/shapes/cube.h"
-#include "app/primitives/matrix.h"
 #include "app/shapes/sphere.h"
-#include "app/primitives/utilities.h"
 
 namespace ray_tracer {
 SCENARIO("16: CSG is created with an operation and two shapes") {

@@ -9,7 +9,6 @@
 #include <app/rendering/intersection.h>
 #include <app/rendering/ray_tracing_engine.h>
 #include <app/shapes/sphere.h>
-#include <fmt/base.h>
 #include <app/materials/color.h>
 
 #include "app/rendering/canvas.h"

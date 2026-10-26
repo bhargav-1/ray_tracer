@@ -26,8 +26,8 @@ target_include_directories(app_lib
 )
 target_link_libraries(app_lib
         PUBLIC
-        fmt::fmt
         yaml-cpp::yaml-cpp
+        imgui::imgui
 )
 target_compile_definitions(app_lib
         PUBLIC
@@ -72,17 +72,15 @@ target_link_libraries(clock_canvas
         app_lib
 )
 
-add_library(imgui_lib)
-target_sources(imgui_lib
-        PRIVATE)
+add_library(imgui_lib INTERFACE)
 target_include_directories(imgui_lib
-        PUBLIC
+        INTERFACE
         ${CMAKE_SOURCE_DIR}/
 )
 target_link_libraries(imgui_lib
-        PUBLIC
+        INTERFACE
         glfw
-        OpenGL
+        OpenGL::GL
         imgui::imgui
 )
 

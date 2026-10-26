@@ -80,6 +80,7 @@ SCENARIO("scene yaml: parses minimal valid scene YAML") {
   REQUIRE(result.ok);
   if (!result.scene.camera.has_value()) {
     FAIL("expected parsed scene camera");
+    return;
   }
   CHECK(result.scene.camera->resolution == scene::Resolution{320, 200});
   CHECK(result.scene.lights.empty());
@@ -106,6 +107,7 @@ SCENARIO("scene yaml: parses camera, resolution, light, object, material, transf
   CHECK(shape.material.color == scene::ColorRgb{0.8F, 0.7F, 0.6F});
   if (!shape.material.pattern.has_value()) {
     FAIL("expected parsed object pattern");
+    return;
   }
   const auto& pattern = *shape.material.pattern;
   CHECK(pattern.type == scene::PatternType::kPerturbed);

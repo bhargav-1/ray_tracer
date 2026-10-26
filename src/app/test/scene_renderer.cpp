@@ -53,6 +53,7 @@ SCENARIO("scene renderer: renders fast low resolution previews") {
   REQUIRE(compiled.ok);
   if (!compiled.compiled.has_value()) {
     FAIL("expected compiled scene");
+    return;
   }
 
   const auto preview = scene_editor::SceneRenderer::Render(*compiled.compiled, true, nullptr, nullptr);
@@ -67,12 +68,14 @@ SCENARIO("scene renderer: renders an OBJ-backed YAML scene") {
   REQUIRE(loaded.ok);
   if (!loaded.scene.camera.has_value()) {
     FAIL("expected OBJ scene camera");
+    return;
   }
   loaded.scene.camera->resolution = {80, 40};
   const auto compiled = scene_runtime::CompileScene(loaded.scene);
   REQUIRE(compiled.ok);
   if (!compiled.compiled.has_value()) {
     FAIL("expected compiled OBJ scene");
+    return;
   }
   const auto image = scene_editor::SceneRenderer::Render(*compiled.compiled, false, nullptr, nullptr);
   REQUIRE(image.pixels.size() == 3200);

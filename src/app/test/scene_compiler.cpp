@@ -104,6 +104,7 @@ SCENARIO("scene compiler: compiles a transformed triangle") {
   REQUIRE(result.ok);
   if (!result.compiled.has_value()) {
     FAIL("expected compiled scene");
+    return;
   }
   const auto& objects = result.compiled->world.Objects();
   REQUIRE(objects.size() == 1);
@@ -149,6 +150,7 @@ SCENARIO("scene compiler: compiles camera, lights, objects, transforms, material
   REQUIRE(result.ok);
   if (!result.compiled.has_value()) {
     FAIL("expected compiled scene");
+    return;
   }
   const auto& compiled = *result.compiled;
   CHECK(compiled.camera.GetHorizontalSize() == 320);
@@ -210,6 +212,7 @@ SCENARIO("scene compiler: compiles recursive groups") {
   REQUIRE(compiled.ok);
   if (!compiled.compiled.has_value()) {
     FAIL("expected compiled scene");
+    return;
   }
   const auto& runtime = *compiled.compiled;
   REQUIRE(runtime.world.Objects().size() == 1);

@@ -3,6 +3,8 @@
 #include <catch2/catch_message.hpp>
 
 #include <filesystem>
+#include <fstream>
+#include <sstream>
 #include <string>
 
 #include "app/scene/scene.h"
@@ -271,10 +273,40 @@ SCENARIO("scene yaml: loads relative OBJ sources and preserves them through Save
 
   const auto saved_path = std::filesystem::temp_directory_path() / "ray_tracer_obj_save_as.yaml";
   REQUIRE(scene_io::SaveSceneYaml(loaded.scene, saved_path).ok);
+  const std::ifstream saved_input{saved_path};
+  std::ostringstream saved_yaml;
+  saved_yaml << saved_input.rdbuf();
+  const auto saved_scene = scene_io::ParseSceneYaml(saved_yaml.str());
   const auto reloaded = scene_io::LoadSceneYaml(saved_path);
   std::filesystem::remove(saved_path);
+  REQUIRE(saved_scene.ok);
+  REQUIRE(saved_scene.scene.objects.size() == 2);
+  const auto saved_source = std::filesystem::path{saved_scene.scene.objects[0].Shape().source};
+  CHECK(saved_source.is_relative());
+  CHECK((saved_path.parent_path() / saved_source).lexically_normal() == shape.source);
   REQUIRE(reloaded.ok);
   CHECK(reloaded.scene == loaded.scene);
+}
+
+SCENARIO("scene yaml: saves nested OBJ sources relative to the destination") {
+  const auto path = std::filesystem::path{RAY_TRACER_ASSET_DIR} / "scenes" / "dragon_bonus_bvh_max_time_render.yaml";
+  const auto loaded = scene_io::LoadSceneYaml(path);
+  INFO(loaded.error);
+  REQUIRE(loaded.ok);
+  const auto original_scene = loaded.scene;
+  const auto saved_path = std::filesystem::temp_directory_path() / "ray_tracer_nested_obj_save_as.yaml";
+  REQUIRE(scene_io::SaveSceneYaml(loaded.scene, saved_path).ok);
+  const std::ifstream saved_input{saved_path};
+  std::ostringstream saved_yaml;
+  saved_yaml << saved_input.rdbuf();
+  const auto saved_scene = scene_io::ParseSceneYaml(saved_yaml.str());
+  const auto reloaded = scene_io::LoadSceneYaml(saved_path);
+  std::filesystem::remove(saved_path);
+  REQUIRE(saved_scene.ok);
+  CHECK(saved_yaml.str().find("source: /") == std::string::npos);
+  REQUIRE(reloaded.ok);
+  CHECK(reloaded.scene == original_scene);
+  CHECK(loaded.scene == original_scene);
 }
 
 SCENARIO("scene yaml: serializes and round trips scenes") {

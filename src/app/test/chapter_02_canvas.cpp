@@ -1,7 +1,7 @@
-#include <app/rendering/canvas.h>  // for Canvas
 #include <app/materials/color.h>   // for color
-#include <app/primitives/tuple.h>   // for tuple
+#include <app/primitives/tuple.h>  // for tuple
 #include <app/primitives/utilities.h>
+#include <app/rendering/canvas.h>        // for Canvas
 #include <catch2/catch_test_macros.hpp>  // for operator""_catch_sr, Section
 #include <fstream>
 #include <string>
@@ -131,7 +131,7 @@ SCENARIO("last line is new line character") {
       const std::string filename = "/tmp/canvas.ppm";
       canvas.CanvasToPPM(filename);
       std::ifstream file_to_open(filename);
-      file_to_open.seekg(-1, std::ios_base::end); // NOLINT
+      file_to_open.seekg(-1, std::ios_base::end);  // NOLINT
       char last_char;
       file_to_open.get(last_char);
       CHECK(last_char == '\n');

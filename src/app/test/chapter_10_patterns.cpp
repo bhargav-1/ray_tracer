@@ -1,22 +1,22 @@
 #include <catch2/catch_test_macros.hpp>
 #include <memory>
 #include "app/materials/color.h"
-#include "app/shapes/group.h"
-#include "app/rendering/lighting.h"
 #include "app/materials/material.h"
-#include "app/primitives/matrix.h"
 #include "app/materials/pattern.h"
+#include "app/primitives/matrix.h"
 #include "app/primitives/point.h"
-#include "app/rendering/point_light.h"
-#include "app/shapes/sphere.h"
 #include "app/primitives/vec3.h"
+#include "app/rendering/lighting.h"
+#include "app/rendering/point_light.h"
+#include "app/shapes/group.h"
+#include "app/shapes/sphere.h"
 
 namespace ray_tracer {
 constexpr ray_tracer::Color kWhite{1, 1, 1};
 constexpr ray_tracer::Color kBlack{0, 0, 0};
 
 class TestPattern : public Pattern {
-public:
+ public:
   [[nodiscard]] auto LocalColorAt(const Point& point) const -> Color override {
     return {point.GetX(), point.GetY(), point.GetZ()};
   }
@@ -34,9 +34,7 @@ SCENARIO("10: A stripe pattern is constant in y") {
   GIVEN("pattern = stripe_pattern(white, black)") {
     THEN("stripe_at(pattern, point(0,0,0) = white, same with point(0,1/2,0)") {
       const ray_tracer::StripePattern pattern(kWhite, kBlack);
-      THEN("stripe_at(pattern, point(0,0,0) = white") {
-        CHECK(pattern.ColorAt(ray_tracer::Point(0, 0, 0)) == kWhite);
-      }
+      THEN("stripe_at(pattern, point(0,0,0) = white") { CHECK(pattern.ColorAt(ray_tracer::Point(0, 0, 0)) == kWhite); }
       THEN("stripe_at(pattern, point(0,1/2,0) = white") {
         CHECK(pattern.ColorAt(ray_tracer::Point(0, 1, 0)) == kWhite);
         CHECK(pattern.ColorAt(ray_tracer::Point(0, 2, 0)) == kWhite);
@@ -48,9 +46,7 @@ SCENARIO("10: A stripe pattern is constant in z") {
   GIVEN("pattern = stripe_pattern(white, black)") {
     THEN("stripe_at(pattern, point(0,0,0) = white, same with point(0,0,1/2)") {
       const ray_tracer::StripePattern pattern(kWhite, kBlack);
-      THEN("stripe_at(pattern, point(0,0,0) = white") {
-        CHECK(pattern.ColorAt(ray_tracer::Point(0, 0, 0)) == kWhite);
-      }
+      THEN("stripe_at(pattern, point(0,0,0) = white") { CHECK(pattern.ColorAt(ray_tracer::Point(0, 0, 0)) == kWhite); }
       THEN("stripe_at(pattern, point(0,0,1/2) = white") {
         CHECK(pattern.ColorAt(ray_tracer::Point(0, 0, 1)) == kWhite);
       }
@@ -61,21 +57,15 @@ SCENARIO("10: A stripe pattern is constant in z") {
 SCENARIO("10: A stripe pattern alternates in x") {
   GIVEN("Pattern = stripe_pattern(white, black)") {
     const ray_tracer::StripePattern pattern(kWhite, kBlack);
-    THEN("stripe_at(pattern, point(0,0,0) = white") {
-      CHECK(pattern.ColorAt(ray_tracer::Point(0, 0, 0)) == kWhite);
-    }
+    THEN("stripe_at(pattern, point(0,0,0) = white") { CHECK(pattern.ColorAt(ray_tracer::Point(0, 0, 0)) == kWhite); }
     THEN("stripe_at(pattern, point(0.9,0,0) = white") {
       CHECK(pattern.ColorAt(ray_tracer::Point(0.9, 0, 0)) == kWhite);
     }
-    THEN("stripe_at(pattern, point(1,0,0) = black") {
-      CHECK(pattern.ColorAt(ray_tracer::Point(1, 0, 0)) == kBlack);
-    }
+    THEN("stripe_at(pattern, point(1,0,0) = black") { CHECK(pattern.ColorAt(ray_tracer::Point(1, 0, 0)) == kBlack); }
     THEN("stripe_at(pattern, point(-0.1,0,0) = black") {
       CHECK(pattern.ColorAt(ray_tracer::Point(-0.1, 0, 0)) == kBlack);
     }
-    THEN("stripe_at(pattern, point(-1,0,0) = black") {
-      CHECK(pattern.ColorAt(ray_tracer::Point(-1, 0, 0)) == kBlack);
-    }
+    THEN("stripe_at(pattern, point(-1,0,0) = black") { CHECK(pattern.ColorAt(ray_tracer::Point(-1, 0, 0)) == kBlack); }
     THEN("stripe_at(pattern, point(-1.1,0,0) = white") {
       CHECK(pattern.ColorAt(ray_tracer::Point(-1.1, 0, 0)) == kWhite);
     }
@@ -83,7 +73,9 @@ SCENARIO("10: A stripe pattern alternates in x") {
 }
 
 SCENARIO("10: Lighting with a pattern applied") {
-  GIVEN(" m.pattern = stripe_pattern(white, black), m.ambient = 1, m.light = point_light(point(0,0,-10), white), m.object = sphere(), eyev = vector(0,0,-1), normalv = vector(0,0,-1)") {
+  GIVEN(
+      " m.pattern = stripe_pattern(white, black), m.ambient = 1, m.light = point_light(point(0,0,-10), white), "
+      "m.object = sphere(), eyev = vector(0,0,-1), normalv = vector(0,0,-1)") {
     const ray_tracer::StripePattern pattern(kWhite, kBlack);
     ray_tracer::Material material;
     material.SetPattern(std::make_shared<StripePattern>(pattern));
@@ -165,11 +157,9 @@ SCENARIO("14: A pattern on an object in a transformed group") {
 }
 
 SCENARIO("10: A gradient linearly interpolates between colors") {
-  GIVEN("pattern = gradientPattern(white, black)"){
+  GIVEN("pattern = gradientPattern(white, black)") {
     const ray_tracer::GradientPattern pattern(kWhite, kBlack);
-    THEN("pattern_at(pattern, point(0,0,0) = white") {
-      CHECK(pattern.ColorAt(ray_tracer::Point(0, 0, 0)) == kWhite);
-    }
+    THEN("pattern_at(pattern, point(0,0,0) = white") { CHECK(pattern.ColorAt(ray_tracer::Point(0, 0, 0)) == kWhite); }
     THEN("pattern_at(pattern, point(0.25,0,0) = color(0.75,0.75,0.75)") {
       CHECK(pattern.ColorAt(ray_tracer::Point(0.25, 0, 0)) == ray_tracer::Color(0.75, 0.75, 0.75));
     }
@@ -185,15 +175,9 @@ SCENARIO("10: A gradient linearly interpolates between colors") {
 SCENARIO("10: A ring should extend in both x and z") {
   GIVEN("pattern = ring_pattern(white, black)") {
     const ray_tracer::RingPattern pattern(kWhite, kBlack);
-    THEN("pattern_at(pattern, point(0,0,0) = white") {
-      CHECK(pattern.ColorAt(ray_tracer::Point(0, 0, 0)) == kWhite);
-    }
-    THEN("pattern_at(pattern, point(1,0,0) = black") {
-      CHECK(pattern.ColorAt(ray_tracer::Point(1, 0, 0)) == kBlack);
-    }
-    THEN("pattern_at(pattern, point(0,0,1) = black") {
-      CHECK(pattern.ColorAt(ray_tracer::Point(0, 0, 1)) == kBlack);
-    }
+    THEN("pattern_at(pattern, point(0,0,0) = white") { CHECK(pattern.ColorAt(ray_tracer::Point(0, 0, 0)) == kWhite); }
+    THEN("pattern_at(pattern, point(1,0,0) = black") { CHECK(pattern.ColorAt(ray_tracer::Point(1, 0, 0)) == kBlack); }
+    THEN("pattern_at(pattern, point(0,0,1) = black") { CHECK(pattern.ColorAt(ray_tracer::Point(0, 0, 1)) == kBlack); }
     THEN("pattern_at(pattern, point(0.708,0,0.708) = black") {
       CHECK(pattern.ColorAt(ray_tracer::Point(0.708, 0, 0.708)) == kBlack);
     }
@@ -203,9 +187,7 @@ SCENARIO("10: A ring should extend in both x and z") {
 SCENARIO("10: Checkers should repeat in x") {
   GIVEN("pattern = checkers_pattern(white, black)") {
     const ray_tracer::CheckersPattern pattern(kWhite, kBlack);
-    THEN("pattern_at(pattern, point(0,0,0) = white") {
-      CHECK(pattern.ColorAt(ray_tracer::Point(0, 0, 0)) == kWhite);
-    }
+    THEN("pattern_at(pattern, point(0,0,0) = white") { CHECK(pattern.ColorAt(ray_tracer::Point(0, 0, 0)) == kWhite); }
     THEN("pattern_at(pattern, point(0.99,0,0) = white") {
       CHECK(pattern.ColorAt(ray_tracer::Point(0.99, 0, 0)) == kWhite);
     }
@@ -218,9 +200,7 @@ SCENARIO("10: Checkers should repeat in x") {
 SCENARIO("10: Checkers should repear in y") {
   GIVEN("pattern = checkers_pattern(white, black)") {
     const ray_tracer::CheckersPattern pattern(kWhite, kBlack);
-    THEN("pattern_at(pattern, point(0,0,0) = white") {
-      CHECK(pattern.ColorAt(ray_tracer::Point(0, 0, 0)) == kWhite);
-    }
+    THEN("pattern_at(pattern, point(0,0,0) = white") { CHECK(pattern.ColorAt(ray_tracer::Point(0, 0, 0)) == kWhite); }
     THEN("pattern_at(pattern, point(0,0.99,0) = white") {
       CHECK(pattern.ColorAt(ray_tracer::Point(0, 0.99, 0)) == kWhite);
     }
@@ -233,9 +213,7 @@ SCENARIO("10: Checkers should repear in y") {
 SCENARIO("10: Checkers should repeat in z") {
   GIVEN("pattern = checkers_pattern(white, black)") {
     const ray_tracer::CheckersPattern pattern(kWhite, kBlack);
-    THEN("pattern_at(pattern, point(0,0,0) = white") {
-      CHECK(pattern.ColorAt(ray_tracer::Point(0, 0, 0)) == kWhite);
-    }
+    THEN("pattern_at(pattern, point(0,0,0) = white") { CHECK(pattern.ColorAt(ray_tracer::Point(0, 0, 0)) == kWhite); }
     THEN("pattern_at(pattern, point(0,0,0.99) = white") {
       CHECK(pattern.ColorAt(ray_tracer::Point(0, 0, 0.99)) == kWhite);
     }
@@ -245,4 +223,4 @@ SCENARIO("10: Checkers should repeat in z") {
   }
 }
 
-} // namespace ray_tracer
+}  // namespace ray_tracer

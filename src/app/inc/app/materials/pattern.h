@@ -6,8 +6,8 @@
 #include <utility>
 
 #include "app/materials/color.h"
-#include "app/primitives/matrix.h"
 #include "app/materials/perlin.h"
+#include "app/primitives/matrix.h"
 #include "app/primitives/point.h"
 #include "app/primitives/utilities.h"
 
@@ -42,14 +42,11 @@ class SolidPattern : public Pattern {
   Color color_;
 };
 
-inline auto MakeSolid(const Color& color) -> std::shared_ptr<Pattern> {
-  return std::make_shared<SolidPattern>(color);
-}
+inline auto MakeSolid(const Color& color) -> std::shared_ptr<Pattern> { return std::make_shared<SolidPattern>(color); }
 
 class StripePattern : public Pattern {
  public:
-  StripePattern(Color color_a, Color color_b)
-      : pattern_a_(MakeSolid(color_a)), pattern_b_(MakeSolid(color_b)) {}
+  StripePattern(Color color_a, Color color_b) : pattern_a_(MakeSolid(color_a)), pattern_b_(MakeSolid(color_b)) {}
   StripePattern(std::shared_ptr<Pattern> pattern_a, std::shared_ptr<Pattern> pattern_b)
       : pattern_a_(std::move(pattern_a)), pattern_b_(std::move(pattern_b)) {}
   [[nodiscard]] auto GetA() const -> Color { return pattern_a_->ColorAt(Point(0, 0, 0)); }
@@ -114,7 +111,9 @@ class CheckersPattern : public Pattern {
   [[nodiscard]] auto LocalColorAt(const Point& point) const -> Color override {
     if ((static_cast<int>(std::floor(point.GetX() + utilities::kEpsilon) +
                           std::floor(point.GetY() + utilities::kEpsilon) +
-                          std::floor(point.GetZ() + utilities::kEpsilon))) % 2 == 0) {
+                          std::floor(point.GetZ() + utilities::kEpsilon))) %
+            2 ==
+        0) {
       return pattern_a_->ColorAt(point);
     }
     return pattern_b_->ColorAt(point);
@@ -189,8 +188,8 @@ class PerturbedPattern : public Pattern {
     const auto noise_x = Perlin::Turbulence(point.GetX(), point.GetY(), point.GetZ());
     const auto noise_y = Perlin::Turbulence(point.GetX() + 1.3, point.GetY() + 1.3, point.GetZ() + 1.3);
     const auto noise_z = Perlin::Turbulence(point.GetX() + 2.7, point.GetY() + 2.7, point.GetZ() + 2.7);
-    const Point perturbed{point.GetX() + noise_x * scale_, point.GetY() + noise_y * scale_,
-                          point.GetZ() + noise_z * scale_};
+    const Point perturbed{
+        point.GetX() + noise_x * scale_, point.GetY() + noise_y * scale_, point.GetZ() + noise_z * scale_};
     return pattern_->ColorAt(perturbed);
   }
 

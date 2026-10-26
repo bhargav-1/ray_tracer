@@ -5,10 +5,10 @@
 #include "app/materials/material.h"
 #include "app/primitives/matrix.h"
 #include "app/primitives/point.h"
-#include "app/rendering/ray.h"
-#include "app/shapes/shape.h"
 #include "app/primitives/tuple.h"
 #include "app/primitives/utilities.h"
+#include "app/rendering/ray.h"
+#include "app/shapes/shape.h"
 
 namespace ray_tracer {
 class Intersection;
@@ -46,9 +46,7 @@ inline auto Plane::LocalNormalAt(const ray_tracer::Point& point) const -> ray_tr
   return {0, 1, 0};
 }
 inline auto Plane::BoundsOf() const -> BoundingBox {
-  return {
-Point(-1 * std::numeric_limits<double>::infinity(), 0, -1 * std::numeric_limits<double>::infinity()),
-Point(std::numeric_limits<double>::infinity(), 0, std::numeric_limits<double>::infinity())
-  };
+  return {Point(-1 * std::numeric_limits<double>::infinity(), 0, -1 * std::numeric_limits<double>::infinity()),
+          Point(std::numeric_limits<double>::infinity(), 0, std::numeric_limits<double>::infinity())};
 }
 }  // namespace ray_tracer

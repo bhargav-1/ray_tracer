@@ -1,7 +1,7 @@
-#include <chrono>
-#include <thread>
 #include <array>
+#include <chrono>
 #include <iostream>
+#include <thread>
 
 #include "imgui.h"               // NOLINT
 #include "imgui_impl_glfw.h"     // NOLINT
@@ -12,9 +12,9 @@
 
 #include "app/scene_editor/add_panel.h"
 #include "app/scene_editor/render_controller.h"
+#include "app/scene_editor/render_state.h"
 #include "app/scene_editor/scene_editor_app.h"
 #include "app/scene_editor/scene_panel.h"
-#include "app/scene_editor/render_state.h"
 #include "app/scene_editor/viewport_panel.h"
 
 namespace {
@@ -35,11 +35,11 @@ auto GlfwErrorCallback(int error, const char* description) -> void {
   std::cerr << "GLFW Error " << error << ": " << description << '\n';
 }
 
-auto DrawMainLayout(SceneEditorApp& app, UiRenderState& render_state, std::array<char, 1024>& path_buffer)
-    -> ray_tracer::scene_editor::ViewportPanelResult {
+auto DrawMainLayout(SceneEditorApp& app,
+                    UiRenderState& render_state,
+                    std::array<char, 1024>& path_buffer) -> ray_tracer::scene_editor::ViewportPanelResult {
   bool changed = false;
-  constexpr auto kFixedPaneFlags =
-      ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse;
+  constexpr auto kFixedPaneFlags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse;
 
   ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
   ImGui::SetNextWindowSize(ImVec2(430, 900), ImGuiCond_Always);
@@ -126,8 +126,8 @@ auto main(int argc, char** argv) -> int {
     int display_height = 0;
     glfwGetFramebufferSize(window, &display_width, &display_height);
     glViewport(0, 0, display_width, display_height);
-    glClearColor(kClearColor.x * kClearColor.w, kClearColor.y * kClearColor.w,
-                 kClearColor.z * kClearColor.w, kClearColor.w);
+    glClearColor(
+        kClearColor.x * kClearColor.w, kClearColor.y * kClearColor.w, kClearColor.z * kClearColor.w, kClearColor.w);
     glClear(GL_COLOR_BUFFER_BIT);
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     glfwSwapBuffers(window);

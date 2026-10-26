@@ -1,13 +1,13 @@
-#include <app/rendering/intersection.h>            // for Intersection
-#include <app/rendering/ray_tracing_engine.h>     // for Intersect, Hit
-#include <app/primitives/matrix.h>                  // for matrix
-#include <app/primitives/point.h>                   // for tuple
-#include <app/rendering/ray.h>                     // for Ray
-#include <app/shapes/sphere.h>                  // for Sphere
-#include <app/primitives/tuple.h>                   // for tuple
-#include <app/primitives/vec3.h>                    // for vector
+#include <app/primitives/matrix.h>             // for matrix
+#include <app/primitives/point.h>              // for tuple
+#include <app/primitives/tuple.h>              // for tuple
+#include <app/primitives/vec3.h>               // for vector
+#include <app/rendering/intersection.h>        // for Intersection
+#include <app/rendering/ray.h>                 // for Ray
+#include <app/rendering/ray_tracing_engine.h>  // for Intersect, Hit
+#include <app/shapes/sphere.h>                 // for Sphere
+#include <catch2/catch_test_macros.hpp>        // for operator""_catch_sr, Section
 #include <vector>
-#include <catch2/catch_test_macros.hpp>  // for operator""_catch_sr, Section
 
 namespace ray_tracer {
 
@@ -124,7 +124,7 @@ SCENARIO("The hit, when all intersections have positive t") {
     THEN("xs = Intersection(1,s),Intersection(2,s)") {
       const std::vector<ray_tracer::Intersection> xs_intersection{intersectn1, intersectn2};
       THEN("i = hit(xs)") {
-        auto i = Hit(xs_intersection); // NOLINT
+        auto i = Hit(xs_intersection);  // NOLINT
         THEN("i = i1") { CHECK(i == intersectn1); }
       }
     }
@@ -139,7 +139,7 @@ SCENARIO("The hit, when some intersections have negative t") {
     THEN("xs = Intersection(-1,s),Intersection(1,s)") {
       const std::vector<ray_tracer::Intersection> xs_intersection{intersectn1, intersectn2};
       THEN("i = hit(xs)") {
-        auto i = Hit(xs_intersection); // NOLINT
+        auto i = Hit(xs_intersection);  // NOLINT
         THEN("i = i2") { CHECK(i == intersectn2); }
       }
     }
@@ -153,8 +153,8 @@ SCENARIO("The hit, when all intersections have negative t") {
     THEN("xs = Intersection(-2,s),Intersection(-1,s)") {
       const std::vector<ray_tracer::Intersection> xs_intersection{intersectn1, intersectn2};
       THEN("i = hit(xs)") {
-        auto i = Hit(xs_intersection); // NOLINT
-        THEN("i = nullptr") { CHECK(i == std::nullopt); } // NOLINT
+        auto i = Hit(xs_intersection);                     // NOLINT
+        THEN("i = nullptr") { CHECK(i == std::nullopt); }  // NOLINT
       }
     }
   }
@@ -168,9 +168,9 @@ SCENARIO("The hit is always the lowest nonnegative intersection") {
     const ray_tracer::Intersection intersectn3(-3, sphe);
     const ray_tracer::Intersection intersectn4(2, sphe);
     THEN("xs = Intersection(5,s),Intersection(7,s),Intersection(-3,s),Intersection(2,s)") {
-      std::vector<ray_tracer::Intersection> xs_inte{intersectn1, intersectn2, intersectn3, intersectn4}; // NOLINT
+      std::vector<ray_tracer::Intersection> xs_inte{intersectn1, intersectn2, intersectn3, intersectn4};  // NOLINT
       THEN("i = hit(xs)") {
-        auto i = Hit(xs_inte); // NOLINT
+        auto i = Hit(xs_inte);  // NOLINT
         THEN("i = i4") { CHECK(i == intersectn4); }
       }
     }

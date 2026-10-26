@@ -1,12 +1,12 @@
 // #include <imgui.h>
 
-#include <numbers>
 #include <memory>
-#include "app/rendering/camera.h"
+#include <numbers>
 #include "app/primitives/matrix.h"
-#include "app/shapes/sphere.h"
 #include "app/primitives/transformations.h"
+#include "app/rendering/camera.h"
 #include "app/rendering/world.h"
+#include "app/shapes/sphere.h"
 // #include "app/rendering/canvas.h"
 #include <chrono>
 
@@ -72,7 +72,7 @@ auto main() noexcept -> int {  // NOLINT
   auto start = std::chrono::steady_clock::now();
   auto image = Render(camera, world);
   auto end_time = std::chrono::steady_clock::now();
-  std::cout << "render time: "
-              << std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start).count() << "ms\n";
+  std::cout << "render time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start).count()
+            << "ms\n";
   return 0;
 }

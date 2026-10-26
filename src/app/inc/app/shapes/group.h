@@ -7,10 +7,10 @@
 #include "app/materials/material.h"
 #include "app/primitives/matrix.h"
 #include "app/primitives/point.h"
-#include "app/rendering/ray.h"
-#include "app/shapes/shape.h"
 #include "app/primitives/tuple.h"
 #include "app/primitives/utilities.h"
+#include "app/rendering/ray.h"
+#include "app/shapes/shape.h"
 
 namespace ray_tracer {
 class Intersection;
@@ -29,9 +29,8 @@ class Group : public Shape, public std::enable_shared_from_this<Group> {
   }
   auto GetChildren() const -> std::vector<std::shared_ptr<Shape>> { return children_; }
   [[nodiscard]] auto Includes(const Shape* object) const -> bool override {  // NOLINT(misc-no-recursion)
-    return Shape::Includes(object) || std::ranges::any_of(children_, [object](const auto& child) {
-      return child->Includes(object);
-    });
+    return Shape::Includes(object) ||
+           std::ranges::any_of(children_, [object](const auto& child) { return child->Includes(object); });
   }
   auto BoundsOf() const -> BoundingBox override {
     if (cached_bounds_.has_value()) {
@@ -73,20 +72,21 @@ class Group : public Shape, public std::enable_shared_from_this<Group> {
     AddChild(sub_group);
     return sub_group;
   }
-  void Divide(const int &threshold) override {
-    if (std::cmp_less_equal(threshold ,GetChildren().size())) {
-        auto [left_children, right_children] = PartitionChildren();
-        if (!left_children.empty()) {
-          MakeSubGroup(left_children);
-        }
-        if (!right_children.empty()) {
-          MakeSubGroup(right_children);
-        }
+  void Divide(const int& threshold) override {
+    if (std::cmp_less_equal(threshold, GetChildren().size())) {
+      auto [left_children, right_children] = PartitionChildren();
+      if (!left_children.empty()) {
+        MakeSubGroup(left_children);
+      }
+      if (!right_children.empty()) {
+        MakeSubGroup(right_children);
+      }
     }
     for (const auto& child : children_) {
       child->Divide(threshold);
     }
   }
+
  private:
   void InvalidateBounds() override {
     cached_bounds_.reset();
@@ -122,9 +122,8 @@ inline auto Group::LocalOccludes(const Ray& ray, const double max_distance) cons
   if (!BoundsOf().Intersects(ray, entry, exit) || exit <= utilities::kEpsilon || entry >= max_distance) {
     return false;
   }
-  return std::ranges::any_of(children_, [&](const std::shared_ptr<Shape>& child) {
-    return child->Occludes(ray, max_distance);
-  });
+  return std::ranges::any_of(children_,
+                             [&](const std::shared_ptr<Shape>& child) { return child->Occludes(ray, max_distance); });
 }
 
 }  // namespace ray_tracer

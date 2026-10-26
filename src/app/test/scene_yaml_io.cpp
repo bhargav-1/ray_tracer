@@ -1,6 +1,6 @@
 #include <app/scene/scene_yaml.h>
-#include <catch2/catch_test_macros.hpp>
 #include <catch2/catch_message.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #include <filesystem>
 #include <fstream>
@@ -154,7 +154,8 @@ SCENARIO("scene yaml: parses and serializes triangle objects") {
 
 SCENARIO("scene yaml: preserves custom triangle vertices and rejects malformed geometry") {
   auto yaml = std::string{kFullSceneYaml};
-  yaml.replace(yaml.find("type: plane"), std::string{"type: plane"}.size(),
+  yaml.replace(yaml.find("type: plane"),
+               std::string{"type: plane"}.size(),
                "type: triangle\n    vertices: [[-2, 0, 2], [2, 0, 2], [0, 3, 2]]");
   const auto parsed = scene_io::ParseSceneYaml(yaml);
   REQUIRE(parsed.ok);
@@ -175,7 +176,8 @@ SCENARIO("scene yaml: preserves custom triangle vertices and rejects malformed g
   CHECK_FALSE(scene_io::ParseSceneYaml(unsupported).ok);
 
   auto smooth_yaml = yaml;
-  smooth_yaml.replace(smooth_yaml.find("type: triangle"), std::string{"type: triangle"}.size(),
+  smooth_yaml.replace(smooth_yaml.find("type: triangle"),
+                      std::string{"type: triangle"}.size(),
                       "type: smooth_triangle\n    normals: [[0, 1, 0], [-1, 0, 0], [1, 0, 0]]");
   const auto smooth = scene_io::ParseSceneYaml(smooth_yaml);
   REQUIRE(smooth.ok);
@@ -243,8 +245,7 @@ SCENARIO("scene yaml: rejects invalid scenes with useful errors") {
   CHECK_FALSE(object_result.error.empty());
 
   auto unknown_pattern = std::string{kFullSceneYaml};
-  unknown_pattern.replace(
-      unknown_pattern.find("type: stripe"), std::string{"type: stripe"}.size(), "type: noise");
+  unknown_pattern.replace(unknown_pattern.find("type: stripe"), std::string{"type: stripe"}.size(), "type: noise");
   const auto pattern_result = scene_io::ParseSceneYaml(unknown_pattern);
   CHECK_FALSE(pattern_result.ok);
   CHECK_FALSE(pattern_result.error.empty());

@@ -13,14 +13,14 @@
 #include <mutex>
 #include <thread>
 
-#include "app/rendering/canvas.h"
 #include "app/materials/color.h"
-#include "app/rendering/lighting.h"
 #include "app/materials/material.h"
 #include "app/primitives/matrix.h"
 #include "app/primitives/point.h"
-#include "app/rendering/point_light.h"
 #include "app/primitives/tuple.h"
+#include "app/rendering/canvas.h"
+#include "app/rendering/lighting.h"
+#include "app/rendering/point_light.h"
 
 static void GlfwErrorCallback(int error, const char* description) {
   fprintf(stderr, "GLFW Error %d: %s\n", error, description);
@@ -72,11 +72,10 @@ static void RenderScene() {
           auto normal = shape.NormalAt(point);
           auto eye = -ray.GetDirection();
           auto sphere_color = ray_tracer::Lighting(material, shape, light, point, eye, normal);
-          row_pixels.push_back({x, {
-            static_cast<unsigned char>(std::clamp(sphere_color.GetRed(), 0.0, 1.0) * 255.0),
-            static_cast<unsigned char>(std::clamp(sphere_color.GetGreen(), 0.0, 1.0) * 255.0),
-            static_cast<unsigned char>(std::clamp(sphere_color.GetBlue(), 0.0, 1.0) * 255.0)
-          }});
+          row_pixels.push_back({x,
+                                {static_cast<unsigned char>(std::clamp(sphere_color.GetRed(), 0.0, 1.0) * 255.0),
+                                 static_cast<unsigned char>(std::clamp(sphere_color.GetGreen(), 0.0, 1.0) * 255.0),
+                                 static_cast<unsigned char>(std::clamp(sphere_color.GetBlue(), 0.0, 1.0) * 255.0)}});
         }
       }
       {
@@ -109,7 +108,7 @@ static void RenderScene() {
 }
 
 // Main code
-auto main(int /*unused*/, char* * /*unused*/) -> int {  // NOLINT
+auto main(int /*unused*/, char** /*unused*/) -> int {  // NOLINT
   glfwSetErrorCallback(GlfwErrorCallback);
   if (!glfwInit()) {
     return 1;

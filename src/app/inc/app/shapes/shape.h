@@ -2,14 +2,14 @@
 #include <algorithm>
 #include <cstddef>
 #include <vector>
-#include "app/rendering/bounding_box.h"
-#include "app/rendering/intersection.h"
 #include "app/materials/material.h"
 #include "app/primitives/matrix.h"
 #include "app/primitives/point.h"
-#include "app/rendering/ray.h"
 #include "app/primitives/tuple.h"
 #include "app/primitives/utilities.h"
+#include "app/rendering/bounding_box.h"
+#include "app/rendering/intersection.h"
+#include "app/rendering/ray.h"
 
 namespace ray_tracer {
 class Group;
@@ -57,8 +57,8 @@ class Shape {
   }
   [[nodiscard]] virtual auto LocalIntersect(const Ray& ray) const -> std::vector<Intersection> = 0;
   [[nodiscard]] virtual auto LocalNormalAt(const ray_tracer::Point& point) const -> ray_tracer::Vec3 = 0;
-  [[nodiscard]] virtual auto LocalNormalAt(const Point& point, [[maybe_unused]] const Intersection& intersection) const
-      -> Vec3 {
+  [[nodiscard]] virtual auto LocalNormalAt(const Point& point,
+                                           [[maybe_unused]] const Intersection& intersection) const -> Vec3 {
     return LocalNormalAt(point);
   }
   [[nodiscard]] auto GetCastShadow() const -> bool { return cast_shadow_; }
@@ -94,7 +94,8 @@ class Shape {
 
   [[nodiscard]] auto ParentSpaceBounds() const -> BoundingBox { return BoundsOf().Transform(GetTransform()); }
   [[nodiscard]] virtual auto BoundsOf() const -> BoundingBox = 0;
-  virtual void Divide(const int& threshold) {(void)threshold;}
+  virtual void Divide(const int& threshold) { (void)threshold; }
+
  protected:
   [[nodiscard]] virtual auto LocalOccludes(const Ray& ray, const double max_distance) const -> bool {
     if (!GetCastShadow()) {
@@ -113,6 +114,7 @@ class Shape {
       parent->InvalidateBounds();
     }
   }
+
  private:
   std::size_t id_;
   Matrix<4, 4> transform_ = Matrix<4, 4>::IdentityMatrix();

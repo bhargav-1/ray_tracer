@@ -91,7 +91,7 @@ RUN if [ "${CI_CHECKS}" = "true" ]; then  \
 WORKDIR /home/${USER}/${PROJ_NAME}/build/packages
 # Generate a list of deps so we can use that later to install all the deps
 # before installing the app to prevent docker cache misses
-RUN ls && dpkg-deb -I chirp-raytracerchallenge*.deb \
+RUN dpkg-deb -I chirp-raytracerchallenge*.deb \
     | grep -E "Depends|Recommends|Suggests|Pre\-Depends" \
     | tr -d "|," \
     | sed "s/([^)]*)/()/g" \

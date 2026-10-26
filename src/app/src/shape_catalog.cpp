@@ -2,8 +2,8 @@
 
 #include <array>
 #include <cctype>
-#include <cstddef>
 #include <cmath>
+#include <cstddef>
 #include <memory>
 #include <span>
 #include <stdexcept>
@@ -11,17 +11,17 @@
 #include <string_view>
 #include <type_traits>
 
+#include "app/io/obj_parser.h"
+#include "app/primitives/point.h"
+#include "app/primitives/tuple.h"
+#include "app/scene/scene.h"
 #include "app/shapes/cone.h"
 #include "app/shapes/cube.h"
 #include "app/shapes/cylinder.h"
 #include "app/shapes/plane.h"
-#include "app/io/obj_parser.h"
-#include "app/primitives/point.h"
-#include "app/scene/scene.h"
 #include "app/shapes/shape.h"
 #include "app/shapes/sphere.h"
 #include "app/shapes/triangle.h"
-#include "app/primitives/tuple.h"
 
 namespace ray_tracer::shape_catalog {
 namespace {
@@ -42,8 +42,7 @@ auto CreateAxialShape(std::size_t object_id, const scene::ShapeSpec& spec) -> st
 }
 
 template <typename TriangleType>
-auto CreateTriangle(std::size_t object_id, const scene::ShapeSpec& spec)
-    -> std::shared_ptr<Shape> {
+auto CreateTriangle(std::size_t object_id, const scene::ShapeSpec& spec) -> std::shared_ptr<Shape> {
   std::array<Point, 3> vertices;
   for (std::size_t index = 0; index < vertices.size(); ++index) {
     const auto& vertex = spec.vertices[index];
@@ -98,9 +97,7 @@ constexpr std::array kShapes{
 
 }  // namespace
 
-auto All() -> std::span<const ShapeRegistration> {
-  return kShapes;
-}
+auto All() -> std::span<const ShapeRegistration> { return kShapes; }
 
 auto Find(scene::ObjectType type) -> const ShapeRegistration& {
   for (const auto& shape : kShapes) {
@@ -137,8 +134,6 @@ auto DisplayName(std::string_view serialized_name) -> std::string {
   return display_name;
 }
 
-auto DisplayName(scene::ObjectType type) -> std::string {
-  return DisplayName(Find(type).serialized_name);
-}
+auto DisplayName(scene::ObjectType type) -> std::string { return DisplayName(Find(type).serialized_name); }
 
 }  // namespace ray_tracer::shape_catalog

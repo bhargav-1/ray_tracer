@@ -2,10 +2,10 @@
 #include <atomic>
 #include <cstdio>
 #include <iostream>
+#include <memory>
 #include <optional>
 #include <thread>
 #include <vector>
-#include <memory>
 #include "imgui.h"               // NOLINT
 #include "imgui_impl_glfw.h"     // NOLINT
 #include "imgui_impl_opengl3.h"  // NOLINT
@@ -13,14 +13,14 @@
 #include <GLFW/glfw3.h>  // Will drag system OpenGL headers
 #include <chrono>
 #include <numbers>
-#include "app/rendering/camera.h"
 #include "app/materials/color.h"
-#include "app/rendering/intersection.h"
 #include "app/primitives/matrix.h"
-#include "app/shapes/sphere.h"
 #include "app/primitives/transformations.h"
+#include "app/rendering/camera.h"
+#include "app/rendering/intersection.h"
 #include "app/rendering/ray_tracing_engine.h"
 #include "app/rendering/world.h"
+#include "app/shapes/sphere.h"
 
 static void GlfwErrorCallback(int error, const char* description) {
   fprintf(stderr, "GLFW Error %d: %s\n", error, description);
@@ -38,17 +38,15 @@ static void RenderScene() {
     floor.SetMaterial(ray_tracer::Material{ray_tracer::Color{1, 0.9, 0.9}, 0.1, 0.9, 0.0, 200});
 
     auto left_wall = ray_tracer::Sphere(2);
-    left_wall.SetTransform(ray_tracer::Matrix<4, 4>::Translation(0, 0, 5) *
-                           ray_tracer::Matrix<4, 4>::RotationY(-std::numbers::pi / 4) *
-                           ray_tracer::Matrix<4, 4>::RotationX(std::numbers::pi / 2) *
-                           ray_tracer::Matrix<4, 4>::Scaling(10, 0.01, 10));
+    left_wall.SetTransform(
+        ray_tracer::Matrix<4, 4>::Translation(0, 0, 5) * ray_tracer::Matrix<4, 4>::RotationY(-std::numbers::pi / 4) *
+        ray_tracer::Matrix<4, 4>::RotationX(std::numbers::pi / 2) * ray_tracer::Matrix<4, 4>::Scaling(10, 0.01, 10));
     left_wall.SetMaterial(floor.GetMaterial());
 
     auto right_wall = ray_tracer::Sphere(3);
-    right_wall.SetTransform(ray_tracer::Matrix<4, 4>::Translation(0, 0, 5) *
-                            ray_tracer::Matrix<4, 4>::RotationY(std::numbers::pi / 4) *
-                            ray_tracer::Matrix<4, 4>::RotationX(std::numbers::pi / 2) *
-                            ray_tracer::Matrix<4, 4>::Scaling(10, 0.01, 10));
+    right_wall.SetTransform(
+        ray_tracer::Matrix<4, 4>::Translation(0, 0, 5) * ray_tracer::Matrix<4, 4>::RotationY(std::numbers::pi / 4) *
+        ray_tracer::Matrix<4, 4>::RotationX(std::numbers::pi / 2) * ray_tracer::Matrix<4, 4>::Scaling(10, 0.01, 10));
     right_wall.SetMaterial(floor.GetMaterial());
 
     auto middle = ray_tracer::Sphere(4);
@@ -92,17 +90,14 @@ static void RenderScene() {
 
     world.AddLight(ray_tracer::PointLight(ray_tracer::Point(-10, 10, -10), ray_tracer::Color(1, 1, 1)));
     auto camera = ray_tracer::Camera(1000, 500, std::numbers::pi / 3);
-    camera.SetTransform(ray_tracer::ViewTransform(ray_tracer::Point(0, 1.5, -5),
-                                                  ray_tracer::Point(0, 1, 0),
-                                                  ray_tracer::Vec3(0, 1, 0)));
+    camera.SetTransform(ray_tracer::ViewTransform(
+        ray_tracer::Point(0, 1.5, -5), ray_tracer::Point(0, 1, 0), ray_tracer::Vec3(0, 1, 0)));
 
     cached_width = camera.GetHorizontalSize();
     cached_height = camera.GetVerticalSize();
-    std::vector<ray_tracer::Color> pixels(static_cast<size_t>(cached_width) *
-                                          static_cast<size_t>(cached_height));
+    std::vector<ray_tracer::Color> pixels(static_cast<size_t>(cached_width) * static_cast<size_t>(cached_height));
     const unsigned int worker_count = std::max(1U, std::thread::hardware_concurrency());
-    const int rows_per_worker = (cached_height + static_cast<int>(worker_count) - 1) /
-                                static_cast<int>(worker_count);
+    const int rows_per_worker = (cached_height + static_cast<int>(worker_count) - 1) / static_cast<int>(worker_count);
     std::atomic<int> rows_done{0};
     std::atomic<int> last_bucket{-1};
     std::vector<std::thread> workers;

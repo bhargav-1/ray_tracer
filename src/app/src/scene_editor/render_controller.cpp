@@ -44,8 +44,8 @@ auto StartRender(UiRenderState& render_state,
   render_state.render_started = started;
   render_state.worker = std::thread([&render_state, compiled_scene, preview, render_id, started]() {
     auto image = SceneRenderer::Render(compiled_scene, preview, &render_state.cancel, &render_state.progress);
-    const auto elapsed_ms = std::chrono::duration<double, std::milli>(
-        std::chrono::steady_clock::now() - started).count();
+    const auto elapsed_ms =
+        std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - started).count();
     if (!render_state.cancel.load() && !image.pixels.empty()) {
       const std::lock_guard lock{render_state.image_mutex};
       render_state.pending_image = std::move(image);
@@ -60,8 +60,10 @@ auto StartRender(UiRenderState& render_state,
   });
 }
 
-auto ScheduleRender(SceneEditorApp& app, UiRenderState& render_state,
-                    const bool preview, const bool camera_only) -> void {
+auto ScheduleRender(SceneEditorApp& app,
+                    UiRenderState& render_state,
+                    const bool preview,
+                    const bool camera_only) -> void {
   const bool prepared = camera_only ? app.UpdateCamera() : app.RecompileCurrentScene();
   if (!prepared) {
     render_state.preview_pending = false;
@@ -138,8 +140,8 @@ auto ProcessDeferredRenders(SceneEditorApp& app, UiRenderState& render_state) ->
   }
 
   if (render_state.high_res_pending && !render_state.interaction_active) {
-    const auto elapsed = std::chrono::duration<double>(
-        std::chrono::steady_clock::now() - render_state.last_interaction).count();
+    const auto elapsed =
+        std::chrono::duration<double>(std::chrono::steady_clock::now() - render_state.last_interaction).count();
     if (elapsed >= static_cast<double>(render_state.high_res_delay)) {
       render_state.high_res_pending = false;
       const auto& compiled_scene = app.CompiledScene();

@@ -1,5 +1,5 @@
-#include <app/primitives/tuple.h>                  // for Tuple
-#include <app/primitives/matrix.h>                  // for point
+#include <app/primitives/matrix.h>  // for point
+#include <app/primitives/tuple.h>   // for Tuple
 #include <app/primitives/utilities.h>
 #include <catch2/catch_test_macros.hpp>  // for operator""_catch_sr, Section
 
@@ -259,7 +259,7 @@ SCENARIO("inverse of transpose of matrix and transpose of Inverse of matrix") {
     }
   }
 }
-  SCENARIO("Mutiplying almost I with tuple ") {
+SCENARIO("Mutiplying almost I with tuple ") {
   GIVEN("A ={{1,0,0,0},{0,1,0,0},{0,0,1,0},{0,0,0,2}}, b = {1,2,3,4}") {
     THEN("A * b = {1,2,3,4}") {
       ray_tracer::Matrix<4, 4> const a_matrix{{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 2}};
@@ -270,7 +270,7 @@ SCENARIO("inverse of transpose of matrix and transpose of Inverse of matrix") {
     }
   }
 }
-  SCENARIO("Multiplying I with tuple") {
+SCENARIO("Multiplying I with tuple") {
   GIVEN("A ={{1,0,0,0},{0,1,0,0},{0,0,1,0},{0,0,0,1}}, b = {2,3,4,5}") {
     THEN("A * b = {1,2,3,4}") {
       ray_tracer::Matrix<4, 4> const a_matrix{{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}};

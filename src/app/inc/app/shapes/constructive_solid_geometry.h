@@ -31,8 +31,10 @@ class ConstructiveSolidGeometry : public Shape {
   [[nodiscard]] auto Includes(const Shape* object) const -> bool override {  // NOLINT(misc-no-recursion)
     return Shape::Includes(object) || left_->Includes(object) || right_->Includes(object);
   }
-  static auto IntersectionAllowed(const CSGOperation operation, const bool lhit, const bool inl, const bool inr)
-      -> bool {
+  static auto IntersectionAllowed(const CSGOperation operation,
+                                  const bool lhit,
+                                  const bool inl,
+                                  const bool inr) -> bool {
     switch (operation) {
       case CSGOperation::kUnion:
         return (lhit && !inr) || (!lhit && !inl);

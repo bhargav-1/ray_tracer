@@ -5,9 +5,9 @@
 #include "app/materials/material.h"
 #include "app/primitives/matrix.h"
 #include "app/primitives/point.h"
+#include "app/primitives/tuple.h"
 #include "app/rendering/ray.h"
 #include "app/shapes/shape.h"
-#include "app/primitives/tuple.h"
 
 namespace ray_tracer {
 class Intersection;

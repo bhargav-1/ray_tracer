@@ -271,7 +271,8 @@ auto ParseObject(const YAML::Node& node, const std::string& label) -> scene::Obj
   }
 
   if (type_name == "csg") {
-    RequireOnlyKeys(node, {"name", "type", "visible", "transform", "operation", "children", "material", "cast_shadow"}, label);
+    RequireOnlyKeys(
+        node, {"name", "type", "visible", "transform", "operation", "children", "material", "cast_shadow"}, label);
     scene::CsgSpec csg;
     const auto operation = Required(node, "operation", label).as<std::string>();
     if (operation == "union") {
@@ -305,7 +306,9 @@ auto ParseObject(const YAML::Node& node, const std::string& label) -> scene::Obj
   }
 
   RequireOnlyKeys(
-      node, {"name", "type", "bounds", "vertices", "normals", "source", "visible", "cast_shadow", "transform", "material"}, label);
+      node,
+      {"name", "type", "bounds", "vertices", "normals", "source", "visible", "cast_shadow", "transform", "material"},
+      label);
   const auto& registration = shape_catalog::Find(type_name);
   scene::ShapeSpec shape;
   shape.type = registration.type;
@@ -444,9 +447,15 @@ auto EmitObject(YAML::Emitter& out, const scene::Object& object) -> void {  // N
       const auto& csg = object.Csg();
       out << YAML::Key << "operation" << YAML::Value;
       switch (csg.operation) {
-        case scene::CsgOperation::kUnion: out << "union"; break;
-        case scene::CsgOperation::kIntersection: out << "intersection"; break;
-        case scene::CsgOperation::kDifference: out << "difference"; break;
+        case scene::CsgOperation::kUnion:
+          out << "union";
+          break;
+        case scene::CsgOperation::kIntersection:
+          out << "intersection";
+          break;
+        case scene::CsgOperation::kDifference:
+          out << "difference";
+          break;
       }
       out << YAML::Key << "cast_shadow" << YAML::Value << csg.cast_shadow;
       if (csg.material.has_value()) {
@@ -491,8 +500,7 @@ auto EmitObject(YAML::Emitter& out, const scene::Object& object) -> void {  // N
 }
 
 // NOLINTNEXTLINE(misc-no-recursion)
-auto ResolveObjSources(std::vector<scene::Object>& objects, const std::filesystem::path& directory)
-    -> void {
+auto ResolveObjSources(std::vector<scene::Object>& objects, const std::filesystem::path& directory) -> void {
   for (auto& object : objects) {
     if (object.IsContainer()) {
       ResolveObjSources(object.Children(), directory);
@@ -503,8 +511,7 @@ auto ResolveObjSources(std::vector<scene::Object>& objects, const std::filesyste
 }
 
 // NOLINTNEXTLINE(misc-no-recursion)
-auto RelativizeObjSources(std::vector<scene::Object>& objects, const std::filesystem::path& directory)
-    -> void {
+auto RelativizeObjSources(std::vector<scene::Object>& objects, const std::filesystem::path& directory) -> void {
   for (auto& object : objects) {
     if (object.IsContainer()) {
       RelativizeObjSources(object.Children(), directory);

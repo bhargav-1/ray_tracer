@@ -12,12 +12,12 @@
 
 #include "app/primitives/matrix.h"
 #include "app/primitives/point.h"
-#include "app/scene/scene.h"
-#include "app/scene_editor/render_state.h"
-#include "app/scene_editor/scene_editor_app.h"
-#include "app/scene/shape_catalog.h"
 #include "app/primitives/transformations.h"
 #include "app/primitives/vec3.h"
+#include "app/scene/scene.h"
+#include "app/scene/shape_catalog.h"
+#include "app/scene_editor/render_state.h"
+#include "app/scene_editor/scene_editor_app.h"
 
 namespace ray_tracer::scene_editor {
 namespace {
@@ -35,9 +35,7 @@ struct ObjectEntry {
   Matrix<4, 4> world_transform;
 };
 
-auto ToPoint(const scene::Vec3& value) -> Point {
-  return {value.x, value.y, value.z};
-}
+auto ToPoint(const scene::Vec3& value) -> Point { return {value.x, value.y, value.z}; }
 
 auto BuildTransformMatrix(const scene::Transform& transform) -> Matrix<4, 4> {
   auto matrix = Matrix<4, 4>::Translation(transform.translate.x, transform.translate.y, transform.translate.z);
@@ -170,7 +168,8 @@ auto ProjectWorldPoint(const scene::Camera& camera,
                        const Point& world_point,
                        ImVec2 image_min,
                        ImVec2 image_size) -> std::optional<ProjectedPoint> {
-  const auto view = ViewTransform(ToPoint(camera.from), ToPoint(camera.to), Vec3(camera.up.x, camera.up.y, camera.up.z));
+  const auto view =
+      ViewTransform(ToPoint(camera.from), ToPoint(camera.to), Vec3(camera.up.x, camera.up.y, camera.up.z));
   const auto camera_point = view * world_point;
   const double depth = -camera_point.GetZ();
   if (depth <= 0.01) {
@@ -184,14 +183,14 @@ auto ProjectWorldPoint(const scene::Camera& camera,
   const double projected_x = camera_point.GetX() / depth;
   const double projected_y = camera_point.GetY() / depth;
 
-  const float screen_x = image_min.x + static_cast<float>((half_width - projected_x) / (2.0 * half_width)) * image_size.x;
-  const float screen_y = image_min.y + static_cast<float>((half_height - projected_y) / (2.0 * half_height)) * image_size.y;
+  const float screen_x =
+      image_min.x + static_cast<float>((half_width - projected_x) / (2.0 * half_width)) * image_size.x;
+  const float screen_y =
+      image_min.y + static_cast<float>((half_height - projected_y) / (2.0 * half_height)) * image_size.y;
   return ProjectedPoint{ImVec2(screen_x, screen_y), static_cast<float>(depth)};
 }
 
-auto AxisEndpoint(const Matrix<4, 4>& world_transform,
-                  const Point& center,
-                  GizmoAxis axis) -> Point {
+auto AxisEndpoint(const Matrix<4, 4>& world_transform, const Point& center, GizmoAxis axis) -> Point {
   constexpr double kAxisLength = 1.25;
   switch (axis) {
     case GizmoAxis::kX:
@@ -229,7 +228,8 @@ auto ApplyAxisDrag(scene::Scene& scene,
   const double world_x = endpoint.GetX() - center.GetX();
   const double world_y = endpoint.GetY() - center.GetY();
   const double world_z = endpoint.GetZ() - center.GetZ();
-  const auto world_length = static_cast<float>(std::sqrt((world_x * world_x) + (world_y * world_y) + (world_z * world_z)));
+  const auto world_length =
+      static_cast<float>(std::sqrt((world_x * world_x) + (world_y * world_y) + (world_z * world_z)));
   const float signed_pixels = ((mouse_delta.x * screen_x) + (mouse_delta.y * screen_y)) / screen_length;
   const float world_delta = signed_pixels * std::max(world_length, 0.1F) / screen_length;
 
@@ -260,9 +260,7 @@ auto ApplyAxisDrag(scene::Scene& scene,
 
 }  // namespace
 
-auto ObjectTypeLabel(scene::ObjectType type) -> std::string {
-  return shape_catalog::DisplayName(type);
-}
+auto ObjectTypeLabel(scene::ObjectType type) -> std::string { return shape_catalog::DisplayName(type); }
 
 auto SelectedName(const scene::Scene& scene, const Selection& selection) -> std::string {
   if (selection.target == SelectionTarget::kCamera) {
@@ -309,8 +307,8 @@ auto DrawViewportOverlay(scene::Scene& scene,
     if (!projected.has_value()) {
       continue;
     }
-    const bool selected = editor_state.selection.target == SelectionTarget::kObject &&
-                          editor_state.selection.object_path == entry.path;
+    const bool selected =
+        editor_state.selection.target == SelectionTarget::kObject && editor_state.selection.object_path == entry.path;
     const ImU32 color = selected ? IM_COL32(255, 225, 80, 255) : IM_COL32(255, 255, 255, 220);
     draw_list->AddCircleFilled(projected->screen, selected ? 6.0F : 4.0F, color);
     draw_list->AddCircle(projected->screen, 10.0F, color, 20, 1.5F);
@@ -336,7 +334,8 @@ auto DrawViewportOverlay(scene::Scene& scene,
     const bool selected = editor_state.selection.target == SelectionTarget::kLight && editor_state.selection.index == i;
     const ImU32 color = selected ? IM_COL32(255, 225, 80, 255) : IM_COL32(255, 245, 160, 230);
     draw_list->AddRectFilled(ImVec2(projected->screen.x - 5.0F, projected->screen.y - 5.0F),
-                             ImVec2(projected->screen.x + 5.0F, projected->screen.y + 5.0F), color);
+                             ImVec2(projected->screen.x + 5.0F, projected->screen.y + 5.0F),
+                             color);
     const std::string label = "Light " + std::to_string(i + 1);
     draw_list->AddText(ImVec2(projected->screen.x + 10.0F, projected->screen.y - 10.0F), color, label.c_str());
 
@@ -353,12 +352,13 @@ auto DrawViewportOverlay(scene::Scene& scene,
   if (editor_state.selection.target == SelectionTarget::kLight && editor_state.selection.index < scene.lights.size() &&
       scene.lights[editor_state.selection.index].visible) {
     selected_center = ToPoint(scene.lights[editor_state.selection.index].position);
-    selected_transform = Matrix<4, 4>::Translation(
-        selected_center->GetX(), selected_center->GetY(), selected_center->GetZ());
+    selected_transform =
+        Matrix<4, 4>::Translation(selected_center->GetX(), selected_center->GetY(), selected_center->GetZ());
   } else if (editor_state.selection.target == SelectionTarget::kObject) {
-    const auto selected_entry = std::find_if(object_entries.begin(), object_entries.end(), [&](const ObjectEntry& entry) {
-      return entry.path == editor_state.selection.object_path;
-    });
+    const auto selected_entry =
+        std::find_if(object_entries.begin(), object_entries.end(), [&](const ObjectEntry& entry) {
+          return entry.path == editor_state.selection.object_path;
+        });
     if (selected_entry != object_entries.end()) {
       selected_transform = selected_entry->world_transform;
       selected_center = Point{selected_transform * Point(0, 0, 0)};
@@ -381,8 +381,8 @@ auto DrawViewportOverlay(scene::Scene& scene,
         const ImU32 color = AxisColor(axis);
         draw_list->AddLine(center_projected->screen, endpoint_projected->screen, color, 3.0F);
         draw_list->AddCircleFilled(endpoint_projected->screen, 8.0F, color);
-        draw_list->AddText(ImVec2(endpoint_projected->screen.x + 9.0F, endpoint_projected->screen.y - 8.0F),
-                           color, AxisName(axis));
+        draw_list->AddText(
+            ImVec2(endpoint_projected->screen.x + 9.0F, endpoint_projected->screen.y - 8.0F), color, AxisName(axis));
 
         ImGui::PushID(static_cast<int>(axis));
         ImGui::SetCursorScreenPos(ImVec2(endpoint_projected->screen.x - 10.0F, endpoint_projected->screen.y - 10.0F));
@@ -391,8 +391,13 @@ auto DrawViewportOverlay(scene::Scene& scene,
         handle_active |= ImGui::IsItemActive();
         if (ImGui::IsItemActive() && ImGui::IsMouseDragging(ImGuiMouseButton_Left)) {
           render_state.active_axis = axis;
-          result.changed |= ApplyAxisDrag(scene, editor_state, axis, *selected_center, endpoint,
-                                          center_projected->screen, endpoint_projected->screen,
+          result.changed |= ApplyAxisDrag(scene,
+                                          editor_state,
+                                          axis,
+                                          *selected_center,
+                                          endpoint,
+                                          center_projected->screen,
+                                          endpoint_projected->screen,
                                           ImGui::GetIO().MouseDelta);
         }
         ImGui::PopID();
@@ -412,7 +417,8 @@ auto DrawViewportOverlay(scene::Scene& scene,
     result.block_camera = true;
   }
 
-  result.block_camera |= marker_hovered || handle_hovered || handle_active || render_state.active_axis != GizmoAxis::kNone;
+  result.block_camera |=
+      marker_hovered || handle_hovered || handle_active || render_state.active_axis != GizmoAxis::kNone;
   return result;
 }
 

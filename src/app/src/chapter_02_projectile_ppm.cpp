@@ -1,8 +1,8 @@
 #include <iostream>
-#include "app/rendering/canvas.h"
 #include "app/primitives/point.h"
 #include "app/primitives/tuple.h"
 #include "app/primitives/vec3.h"
+#include "app/rendering/canvas.h"
 
 struct Environment {
   ray_tracer::Vec3 gravity;

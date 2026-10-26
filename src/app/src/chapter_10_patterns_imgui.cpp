@@ -27,10 +27,10 @@
 #include <atomic>
 #include <cstdio>
 #include <iostream>
+#include <memory>
 #include <optional>
 #include <thread>
 #include <vector>
-#include <memory>
 #include "imgui.h"               // NOLINT
 #include "imgui_impl_glfw.h"     // NOLINT
 #include "imgui_impl_opengl3.h"  // NOLINT
@@ -38,16 +38,16 @@
 #include <GLFW/glfw3.h>  // Will drag system OpenGL headers
 #include <chrono>
 #include <numbers>
-#include "app/rendering/camera.h"
 #include "app/materials/color.h"
-#include "app/rendering/intersection.h"
-#include "app/primitives/matrix.h"
-#include "app/shapes/sphere.h"
-#include "app/shapes/plane.h"
 #include "app/materials/pattern.h"
+#include "app/primitives/matrix.h"
 #include "app/primitives/transformations.h"
+#include "app/rendering/camera.h"
+#include "app/rendering/intersection.h"
 #include "app/rendering/ray_tracing_engine.h"
 #include "app/rendering/world.h"
+#include "app/shapes/plane.h"
+#include "app/shapes/sphere.h"
 
 static void GlfwErrorCallback(int error, const char* description) {
   fprintf(stderr, "GLFW Error %d: %s\n", error, description);
@@ -63,11 +63,11 @@ static void RenderScene() {
 
     // Floor plane — checkers of two radial gradients
     auto floor = ray_tracer::Plane(1);
-    auto floor_a = std::make_shared<ray_tracer::RadialGradientPattern>(
-        ray_tracer::Color{0.9, 0.9, 0.85}, ray_tracer::Color{0.4, 0.2, 0.1});
+    auto floor_a = std::make_shared<ray_tracer::RadialGradientPattern>(ray_tracer::Color{0.9, 0.9, 0.85},
+                                                                       ray_tracer::Color{0.4, 0.2, 0.1});
     floor_a->SetPatternTransform(ray_tracer::Matrix<4, 4>::Scaling(0.15, 0.15, 0.15));
-    auto floor_b = std::make_shared<ray_tracer::RadialGradientPattern>(
-        ray_tracer::Color{0.6, 0.8, 0.9}, ray_tracer::Color{0.1, 0.2, 0.4});
+    auto floor_b = std::make_shared<ray_tracer::RadialGradientPattern>(ray_tracer::Color{0.6, 0.8, 0.9},
+                                                                       ray_tracer::Color{0.1, 0.2, 0.4});
     floor_b->SetPatternTransform(ray_tracer::Matrix<4, 4>::Scaling(0.15, 0.15, 0.15));
     auto floor_pat = ray_tracer::CheckersPattern(floor_a, floor_b);
     auto floor_mat = ray_tracer::Material{ray_tracer::Color{1, 0.9, 0.9}, 0.1, 0.9, 0.0, 200};
@@ -79,8 +79,7 @@ static void RenderScene() {
     auto s1 = ray_tracer::Sphere(2);
     s1.SetTransform(ray_tracer::Matrix<4, 4>::Translation(-3.2, 0.4, 0) *
                     ray_tracer::Matrix<4, 4>::Scaling(0.4, 0.4, 0.4));
-    auto s1_pat = ray_tracer::StripePattern(
-        ray_tracer::Color{1, 0.2, 0.2}, ray_tracer::Color{1, 1, 1});
+    auto s1_pat = ray_tracer::StripePattern(ray_tracer::Color{1, 0.2, 0.2}, ray_tracer::Color{1, 1, 1});
     s1_pat.SetPatternTransform(ray_tracer::Matrix<4, 4>::Scaling(0.2, 0.2, 0.2) *
                                ray_tracer::Matrix<4, 4>::RotationZ(std::numbers::pi / 4));
     auto s1_mat = ray_tracer::Material{ray_tracer::Color{1, 1, 1}, 0.1, 0.7, 0.3, 200};
@@ -92,8 +91,7 @@ static void RenderScene() {
     auto s2 = ray_tracer::Sphere(3);
     s2.SetTransform(ray_tracer::Matrix<4, 4>::Translation(-1.8, 0.6, 0) *
                     ray_tracer::Matrix<4, 4>::Scaling(0.6, 0.6, 0.6));
-    auto s2_pat = ray_tracer::GradientPattern(
-        ray_tracer::Color{0.2, 0.8, 0.3}, ray_tracer::Color{0.8, 0.2, 0.8});
+    auto s2_pat = ray_tracer::GradientPattern(ray_tracer::Color{0.2, 0.8, 0.3}, ray_tracer::Color{0.8, 0.2, 0.8});
     auto s2_mat = ray_tracer::Material{ray_tracer::Color{1, 1, 1}, 0.1, 0.7, 0.3, 200};
     s2_mat.SetPattern(std::make_shared<ray_tracer::GradientPattern>(s2_pat));
     s2.SetMaterial(s2_mat);
@@ -103,8 +101,7 @@ static void RenderScene() {
     auto s3 = ray_tracer::Sphere(4);
     s3.SetTransform(ray_tracer::Matrix<4, 4>::Translation(-0.2, 0.8, 0) *
                     ray_tracer::Matrix<4, 4>::Scaling(0.8, 0.8, 0.8));
-    auto s3_pat = ray_tracer::RingPattern(
-        ray_tracer::Color{0.1, 0.3, 0.8}, ray_tracer::Color{0.9, 0.9, 0.2});
+    auto s3_pat = ray_tracer::RingPattern(ray_tracer::Color{0.1, 0.3, 0.8}, ray_tracer::Color{0.9, 0.9, 0.2});
     s3_pat.SetPatternTransform(ray_tracer::Matrix<4, 4>::Scaling(0.12, 0.12, 0.12) *
                                ray_tracer::Matrix<4, 4>::RotationX(std::numbers::pi / 3));
     auto s3_mat = ray_tracer::Material{ray_tracer::Color{1, 1, 1}, 0.1, 0.7, 0.3, 200};
@@ -116,8 +113,8 @@ static void RenderScene() {
     auto s4 = ray_tracer::Sphere(5);
     s4.SetTransform(ray_tracer::Matrix<4, 4>::Translation(1.5, 1.0, 0) *
                     ray_tracer::Matrix<4, 4>::Scaling(1.0, 1.0, 1.0));
-    auto s4_pat = ray_tracer::UVCheckersPattern(
-        16, 8, ray_tracer::Color{0.8, 0.2, 0.1}, ray_tracer::Color{0.0, 0.9, 1});
+    auto s4_pat =
+        ray_tracer::UVCheckersPattern(16, 8, ray_tracer::Color{0.8, 0.2, 0.1}, ray_tracer::Color{0.0, 0.9, 1});
     auto s4_mat = ray_tracer::Material{ray_tracer::Color{1, 1, 1}, 0.1, 0.7, 0.3, 200};
     s4_mat.SetPattern(std::make_shared<ray_tracer::UVCheckersPattern>(s4_pat));
     s4.SetMaterial(s4_mat);
@@ -127,8 +124,7 @@ static void RenderScene() {
     auto s5 = ray_tracer::Sphere(6);
     s5.SetTransform(ray_tracer::Matrix<4, 4>::Translation(3.2, 0.7, 0) *
                     ray_tracer::Matrix<4, 4>::Scaling(0.7, 0.7, 0.7));
-    auto s5_pat = ray_tracer::RadialGradientPattern(
-        ray_tracer::Color{1.0, 0.8, 0.0}, ray_tracer::Color{0.2, 0.0, 0.6});
+    auto s5_pat = ray_tracer::RadialGradientPattern(ray_tracer::Color{1.0, 0.8, 0.0}, ray_tracer::Color{0.2, 0.0, 0.6});
     s5_pat.SetPatternTransform(ray_tracer::Matrix<4, 4>::Scaling(0.25, 0.25, 0.25));
     auto s5_mat = ray_tracer::Material{ray_tracer::Color{1, 1, 1}, 0.1, 0.7, 0.3, 200};
     s5_mat.SetPattern(std::make_shared<ray_tracer::RadialGradientPattern>(s5_pat));
@@ -139,11 +135,11 @@ static void RenderScene() {
     auto s6 = ray_tracer::Sphere(7);
     s6.SetTransform(ray_tracer::Matrix<4, 4>::Translation(4.6, 0.5, 0) *
                     ray_tracer::Matrix<4, 4>::Scaling(0.5, 0.5, 0.5));
-    auto bl_a = std::make_shared<ray_tracer::StripePattern>(
-        ray_tracer::Color{0.9, 0.1, 0.1}, ray_tracer::Color{0.9, 0.9, 0.2});
+    auto bl_a =
+        std::make_shared<ray_tracer::StripePattern>(ray_tracer::Color{0.9, 0.1, 0.1}, ray_tracer::Color{0.9, 0.9, 0.2});
     bl_a->SetPatternTransform(ray_tracer::Matrix<4, 4>::Scaling(0.05, 0.05, 0.05));
-    auto bl_b = std::make_shared<ray_tracer::StripePattern>(
-        ray_tracer::Color{0.1, 0.1, 0.9}, ray_tracer::Color{0.2, 0.9, 0.2});
+    auto bl_b =
+        std::make_shared<ray_tracer::StripePattern>(ray_tracer::Color{0.1, 0.1, 0.9}, ray_tracer::Color{0.2, 0.9, 0.2});
     bl_b->SetPatternTransform(ray_tracer::Matrix<4, 4>::Scaling(0.05, 0.05, 0.05) *
                               ray_tracer::Matrix<4, 4>::RotationZ(std::numbers::pi / 2));
     auto s6_pat = ray_tracer::BlendedPattern(bl_a, bl_b);
@@ -156,11 +152,11 @@ static void RenderScene() {
     auto s7 = ray_tracer::Sphere(8);
     s7.SetTransform(ray_tracer::Matrix<4, 4>::Translation(1.0, 1.5, 4) *
                     ray_tracer::Matrix<4, 4>::Scaling(1.5, 1.5, 1.5));
-    auto n_a = std::make_shared<ray_tracer::StripePattern>(
-        ray_tracer::Color{0.1, 0.8, 0.1}, ray_tracer::Color{0.0, 0.3, 0.0});
+    auto n_a =
+        std::make_shared<ray_tracer::StripePattern>(ray_tracer::Color{0.1, 0.8, 0.1}, ray_tracer::Color{0.0, 0.3, 0.0});
     n_a->SetPatternTransform(ray_tracer::Matrix<4, 4>::Scaling(0.15, 0.15, 0.15));
-    auto n_b = std::make_shared<ray_tracer::StripePattern>(
-        ray_tracer::Color{0.9, 0.5, 0.0}, ray_tracer::Color{0.5, 0.0, 0.9});
+    auto n_b =
+        std::make_shared<ray_tracer::StripePattern>(ray_tracer::Color{0.9, 0.5, 0.0}, ray_tracer::Color{0.5, 0.0, 0.9});
     n_b->SetPatternTransform(ray_tracer::Matrix<4, 4>::Scaling(0.15, 0.15, 0.15) *
                              ray_tracer::Matrix<4, 4>::RotationY(std::numbers::pi / 2));
     auto s7_pat = ray_tracer::CheckersPattern(n_a, n_b);
@@ -172,17 +168,14 @@ static void RenderScene() {
 
     world.AddLight(ray_tracer::PointLight(ray_tracer::Point(10, 10, -10), ray_tracer::Color(1, 1, 1)));
     auto camera = ray_tracer::Camera(1000, 1000, std::numbers::pi / 3);
-    camera.SetTransform(ray_tracer::ViewTransform(ray_tracer::Point(1.0, 3.5, -9),
-                                                  ray_tracer::Point(1.0, 0.5, 0),
-                                                  ray_tracer::Vec3(0, 1, 0)));
+    camera.SetTransform(ray_tracer::ViewTransform(
+        ray_tracer::Point(1.0, 3.5, -9), ray_tracer::Point(1.0, 0.5, 0), ray_tracer::Vec3(0, 1, 0)));
 
     cached_width = camera.GetHorizontalSize();
     cached_height = camera.GetVerticalSize();
-    std::vector<ray_tracer::Color> pixels(static_cast<size_t>(cached_width) *
-                                          static_cast<size_t>(cached_height));
+    std::vector<ray_tracer::Color> pixels(static_cast<size_t>(cached_width) * static_cast<size_t>(cached_height));
     const unsigned int worker_count = std::max(1U, std::thread::hardware_concurrency());
-    const int rows_per_worker = (cached_height + static_cast<int>(worker_count) - 1) /
-                                static_cast<int>(worker_count);
+    const int rows_per_worker = (cached_height + static_cast<int>(worker_count) - 1) / static_cast<int>(worker_count);
     std::atomic<int> rows_done{0};
     std::atomic<int> last_bucket{-1};
     std::vector<std::thread> workers;

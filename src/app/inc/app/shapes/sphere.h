@@ -4,9 +4,9 @@
 #include "app/materials/material.h"
 #include "app/primitives/matrix.h"
 #include "app/primitives/point.h"
+#include "app/primitives/tuple.h"
 #include "app/rendering/ray.h"
 #include "app/shapes/shape.h"
-#include "app/primitives/tuple.h"
 
 namespace ray_tracer {
 class Intersection;
@@ -18,9 +18,7 @@ class Sphere : public Shape {
   [[nodiscard]] auto LocalIntersect(const Ray& ray) const -> std::vector<Intersection> override;
   [[nodiscard]] auto LocalNormalAt(const ray_tracer::Point& point) const -> ray_tracer::Vec3 override;
   auto static GlassSphere(size_t index, double transparency = 1, double refractive_index = 1.5) -> Sphere;
-  [[nodiscard]] auto BoundsOf() const -> BoundingBox override {
-    return {Point(-1, -1, -1), Point(1, 1, 1)};
-  }
+  [[nodiscard]] auto BoundsOf() const -> BoundingBox override { return {Point(-1, -1, -1), Point(1, 1, 1)}; }
 };
 
 inline auto operator==(const Sphere& lhs, const Sphere& rhs) -> bool { return lhs.GetId() == rhs.GetId(); }
@@ -44,8 +42,9 @@ inline auto Sphere::LocalNormalAt(const ray_tracer::Point& point) const -> ray_t
   return {point - ray_tracer::Point(0, 0, 0)};
 }
 
-inline auto Sphere::GlassSphere(const size_t index, const double transparency, const double refractive_index)
-    -> Sphere {
+inline auto Sphere::GlassSphere(const size_t index,
+                                const double transparency,
+                                const double refractive_index) -> Sphere {
   auto sphere = Sphere(index);
   auto material = sphere.GetMaterial();
   material.SetTransparency(transparency);

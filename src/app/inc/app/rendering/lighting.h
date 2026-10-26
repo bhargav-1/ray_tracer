@@ -2,9 +2,9 @@
 #include "app/materials/material.h"
 #include "app/materials/pattern.h"
 #include "app/primitives/point.h"
+#include "app/primitives/vec3.h"
 #include "app/rendering/point_light.h"
 #include "app/shapes/shape.h"
-#include "app/primitives/vec3.h"
 
 namespace ray_tracer {
 

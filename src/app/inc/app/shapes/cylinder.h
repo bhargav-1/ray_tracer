@@ -5,9 +5,9 @@
 #include "app/materials/material.h"
 #include "app/primitives/matrix.h"
 #include "app/primitives/point.h"
+#include "app/primitives/tuple.h"
 #include "app/rendering/ray.h"
 #include "app/shapes/shape.h"
-#include "app/primitives/tuple.h"
 
 namespace ray_tracer {
 class Intersection;
@@ -111,7 +111,5 @@ inline auto Cylinder::LocalNormalAt(const ray_tracer::Point& point) const -> ray
   return result;
 }
 
-inline auto Cylinder::BoundsOf() const -> BoundingBox {
-  return {Point(-1, minimum_, -1), Point(1, maximum_, 1)};
-}
+inline auto Cylinder::BoundsOf() const -> BoundingBox { return {Point(-1, minimum_, -1), Point(1, maximum_, 1)}; }
 }  // namespace ray_tracer

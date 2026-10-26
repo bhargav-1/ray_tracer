@@ -4,8 +4,8 @@
 #include <cmath>
 #include <memory>
 #include <numbers>
-#include "app/shapes/group.h"
 #include "app/primitives/matrix.h"
+#include "app/shapes/group.h"
 #include "app/shapes/shape.h"
 #include "app/shapes/sphere.h"
 
@@ -131,7 +131,7 @@ SCENARIO("14: Finding the normal on a child object") {
       auto sphere_1 = std::make_shared<Sphere>(1);
       sphere_1->SetTransform(Matrix<4, 4>::Translation(5, 0, 0));
       group_2->AddChild(sphere_1);
-      auto normal_var = sphere_1->NormalAt(Point(1.7321, 1.1547, -5.5774)); // NOLINT
+      auto normal_var = sphere_1->NormalAt(Point(1.7321, 1.1547, -5.5774));  // NOLINT
       CHECK(normal_var == Vec3(0.2857, 0.4285, -0.8571));
     }
   }

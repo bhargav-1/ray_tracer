@@ -55,9 +55,7 @@ class GitVersion:
         self.rev = context.run(
             "git log --pretty=format:'%h' -n 1", hide="out"
         ).stdout.strip()
-        tag_result = context.run(
-            "git describe --tags --abbrev=0", hide=True, warn=True
-        )
+        tag_result = context.run("git describe --tags --abbrev=0", hide=True, warn=True)
         # Untagged clones still need a numeric version for CMake and CPack.
         self.tag = tag_result.stdout.strip() if tag_result.ok else "0.0.0"
         self.diff = context.run(

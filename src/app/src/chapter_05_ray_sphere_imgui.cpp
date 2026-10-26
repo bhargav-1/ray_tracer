@@ -1,27 +1,27 @@
 #include <chrono>
-#include <thread>
 #include <cstdio>
+#include <thread>
 #include "imgui.h"               // NOLINT
 #include "imgui_impl_glfw.h"     // NOLINT
 #include "imgui_impl_opengl3.h"  // NOLINT
 #define GL_SILENCE_DEPRECATION
 #include <GLFW/glfw3.h>  // Will drag system OpenGL headers
+#include <app/materials/color.h>
 #include <app/rendering/intersection.h>
 #include <app/rendering/ray_tracing_engine.h>
 #include <app/shapes/sphere.h>
-#include <app/materials/color.h>
 
-#include "app/rendering/canvas.h"
 #include "app/primitives/matrix.h"
 #include "app/primitives/point.h"
 #include "app/primitives/tuple.h"
+#include "app/rendering/canvas.h"
 
 static void GlfwErrorCallback(int error, const char* description) {
   fprintf(stderr, "GLFW Error %d: %s\n", error, description);
 }
 
 // Main code
-auto main(int /*unused*/, char* * /*unused*/) -> int {  // NOLINT
+auto main(int /*unused*/, char** /*unused*/) -> int {  // NOLINT
   glfwSetErrorCallback(GlfwErrorCallback);
   if (!glfwInit()) {
     return 1;
@@ -83,9 +83,9 @@ auto main(int /*unused*/, char* * /*unused*/) -> int {  // NOLINT
 
       ray_tracer::Sphere shape(1);
       auto transform = ray_tracer::Matrix<4, 4>::Scaling(1, 1, 1);
-      transform =
-          transform * ray_tracer::Matrix<4, 4>::Shearing(
-                          {.proportion_to_y = 1, .proportion_to_z = 0}, {.proportion_to_x = 0, .proportion_to_z = 0}, {});
+      transform = transform * ray_tracer::Matrix<4, 4>::Shearing({.proportion_to_y = 1, .proportion_to_z = 0},
+                                                                 {.proportion_to_x = 0, .proportion_to_z = 0},
+                                                                 {});
       shape.SetTransform(transform);
 
       constexpr ray_tracer::Color kRed{255, 0, 0, 255};

@@ -44,8 +44,7 @@ auto DrawTopLegend(const scene::Scene& scene, EditorState& state) -> void {
 
 auto DrawViewportPanel(SceneEditorApp& app, UiRenderState& render_state) -> ViewportPanelResult {
   ViewportPanelResult result;
-  constexpr auto kFixedPaneFlags =
-      ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse;
+  constexpr auto kFixedPaneFlags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse;
 
   ImGui::Begin("Viewport", nullptr, kFixedPaneFlags);
   DrawTopLegend(app.CurrentScene(), app.MutableState());
@@ -103,8 +102,9 @@ auto DrawViewportPanel(SceneEditorApp& app, UiRenderState& render_state) -> View
   }
 
   if (render_state.rendering.load() && !render_state.is_preview) {
-    const auto elapsed_ms = std::chrono::duration<double, std::milli>(
-        std::chrono::steady_clock::now() - render_state.render_started).count();
+    const auto elapsed_ms =
+        std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - render_state.render_started)
+            .count();
     ImGui::TextDisabled("Full render: %.1f ms elapsed", elapsed_ms);
   } else {
     if (render_state.high_res_pending) {

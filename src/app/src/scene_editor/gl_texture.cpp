@@ -6,9 +6,7 @@
 
 namespace ray_tracer::scene_editor {
 
-GlTexture::~GlTexture() {
-  Reset();
-}
+GlTexture::~GlTexture() { Reset(); }
 
 auto GlTexture::UploadRgb(const int width, const int height, const std::vector<unsigned char>& rgb) -> void {
   if (texture_id_ == 0) {

@@ -48,20 +48,23 @@ repos:
     rev: v3.0.3
     hooks:
       - id: pylint
-  - repo: https://github.com/pocc/pre-commit-hooks
-    rev: v1.3.5
+  - repo: local
     hooks:
       - id: clang-format
+        name: clang-format
+        entry: clang-format-18
+        language: system
+        types_or: [c, c++]
         args: [ -i, -style=file ]
       - id: clang-tidy
-        args: [ -p=build ,-header-filter=.* ]
-        exclude: |
-#          (?x)(
-#          ^catkin_ws/src/panel_setter/panel_setter_manager/|
-#          ^catkin_ws/src/panel_setter/row_manager/|
-#          ^catkin_ws/src/base/worxx_node/
-#          )
-#      - id: include-what-you-use
-#      - id: cppcheck
-#        args: [--language=c++, --enable=all,--suppressions-list=suppressions.cppcheck]
-      - id: cpplint
+        name: clang-tidy
+        entry: run-clang-tidy-18
+        language: system
+        # The runner parallelizes analysis itself using the available CPU cores.
+        require_serial: true
+        types_or: [c, c++]
+        # Analyze translation units using their compiler flags; included headers are checked too.
+        files: \.(c|cc|cpp|cxx)$
+        # Match the legacy example sources marked SKIP_LINTING in src/app/CMakeLists.txt.
+        exclude: '^src/app/src/(imgui_demo|chapter_(05|06|07|08|09|10)_[^/]+)\.cpp$'
+        args: [ -p=build, -clang-tidy-binary=clang-tidy-18, -quiet ]

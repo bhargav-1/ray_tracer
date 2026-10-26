@@ -1,12 +1,12 @@
 #include "app/scene_editor/scene_editor_app.h"
 
-#include <utility>
 #include <cstddef>
 #include <filesystem>
+#include <utility>
 #include <vector>
 
-#include "app/scene/scene_compiler.h"
 #include "app/scene/scene.h"
+#include "app/scene/scene_compiler.h"
 #include "app/scene/scene_yaml.h"
 
 namespace ray_tracer::scene_editor {
@@ -59,8 +59,7 @@ auto SceneEditorApp::SetCurrentScene(scene::Scene scene) -> bool {
   return true;
 }
 
-auto SceneEditorApp::AddObj(const std::filesystem::path& path,
-                            const std::vector<std::size_t>& parent_path) -> bool {
+auto SceneEditorApp::AddObj(const std::filesystem::path& path, const std::vector<std::size_t>& parent_path) -> bool {
   auto candidate = current_scene_;
   auto* destination = &candidate.objects;
   for (const auto index : parent_path) {
@@ -85,9 +84,7 @@ auto SceneEditorApp::AddObj(const std::filesystem::path& path,
   return true;
 }
 
-auto SceneEditorApp::RecompileCurrentScene() -> bool {
-  return CompileCurrentScene();
-}
+auto SceneEditorApp::RecompileCurrentScene() -> bool { return CompileCurrentScene(); }
 
 auto SceneEditorApp::UpdateCamera() -> bool {
   if (!compiled_scene_.has_value() || !current_scene_.camera.has_value()) {

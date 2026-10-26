@@ -1,7 +1,7 @@
-#include <app/primitives/matrix.h>                  // for matrix
-#include <app/primitives/point.h>                   // for tuple
-#include <app/primitives/tuple.h>                   // for tuple
-#include <app/primitives/vec3.h>                    // for vector
+#include <app/primitives/matrix.h>       // for matrix
+#include <app/primitives/point.h>        // for tuple
+#include <app/primitives/tuple.h>        // for tuple
+#include <app/primitives/vec3.h>         // for vector
 #include <catch2/catch_test_macros.hpp>  // for operator""_catch_sr, Section
 #include <numbers>
 // #include <numbers>                       // for numbers

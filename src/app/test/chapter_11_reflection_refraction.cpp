@@ -9,18 +9,18 @@
 #include <vector>
 #include "app/materials/color.h"
 #include "app/materials/material.h"
-#include "app/primitives/matrix.h"
 #include "app/materials/pattern.h"
-#include "app/shapes/plane.h"
+#include "app/primitives/matrix.h"
 #include "app/primitives/point.h"
-#include "app/rendering/ray_tracing_engine.h"
-#include "app/shapes/sphere.h"
 #include "app/primitives/utilities.h"
 #include "app/primitives/vec3.h"
+#include "app/rendering/ray_tracing_engine.h"
 #include "app/rendering/world.h"
+#include "app/shapes/plane.h"
+#include "app/shapes/sphere.h"
 namespace ray_tracer {
 class TestPattern : public Pattern {
-public:
+ public:
   [[nodiscard]] auto LocalColorAt(const Point& point) const -> Color override {
     return {point.GetX(), point.GetY(), point.GetZ()};
   }
@@ -175,7 +175,7 @@ SCENARIO("11: Finding n1 and n2 at various intersections") {
                                                Intersection(6, sphere1)};
     THEN("the n1 and n2 values are as follows") {
       std::vector<std::pair<double, double>> expected_n_values{
-              {1.0, 1.5}, {1.5, 2.0}, {2.0, 2.5}, {2.5, 2.5}, {2.5, 1.5}, {1.5, 1.0}};
+          {1.0, 1.5}, {1.5, 2.0}, {2.0, 2.5}, {2.5, 2.5}, {2.5, 1.5}, {1.5, 1.0}};
       for (size_t i = 0; i < intersections_xs.size(); ++i) {
         auto comps = PrepareComputations(intersections_xs[i], Ray(Point(0, 0, -4), Vec3(0, 0, 1)), intersections_xs);
         CHECK(comps.GetRefractiveIndexN1() == expected_n_values[i].first);
@@ -322,7 +322,7 @@ SCENARIO("11: The Schlick Approximation with a small angle and n2 > n1") {
     auto intersections_xs = std::vector<Intersection>{Intersection(1.8589, shape)};
     auto comps = PrepareComputations(intersections_xs[0], ray, intersections_xs);
     auto reflectance = Schlick(comps);
-    THEN("reflectance = 0.48873") { CHECK(utilities::Equal(reflectance , 0.48873)); }
+    THEN("reflectance = 0.48873") { CHECK(utilities::Equal(reflectance, 0.48873)); }
   }
 }
 
@@ -348,10 +348,8 @@ SCENARIO("11: shade_hit() with a reflective, transparent material") {
     auto intersections_xs = std::vector{Intersection(std::numbers::sqrt2, floor)};
     auto comps = ray_tracer::PrepareComputations(intersections_xs[0], ray, intersections_xs);
     auto color = ray_tracer::ShadeHit(world, comps, 5);
-    THEN("color = Color(0.93391, 0.69643, 0.69243)") {
-      CHECK(color == Color(0.93391, 0.69643, 0.69243));
-    }
+    THEN("color = Color(0.93391, 0.69643, 0.69243)") { CHECK(color == Color(0.93391, 0.69643, 0.69243)); }
   }
 }
 
-} // namespace ray_tracer
+}  // namespace ray_tracer

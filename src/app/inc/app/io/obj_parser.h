@@ -12,10 +12,10 @@
 #include <unordered_map>
 #include <vector>
 
-#include "app/shapes/group.h"
 #include "app/primitives/point.h"
-#include "app/shapes/triangle.h"
 #include "app/primitives/vec3.h"
+#include "app/shapes/group.h"
+#include "app/shapes/triangle.h"
 
 namespace ray_tracer {
 class ObjParser {
@@ -83,8 +83,7 @@ inline auto ObjParser::Parse() -> void {
       double y_coordinate = 0;
       double z_coordinate = 0;
       if (!(record >> x_coordinate >> y_coordinate >> z_coordinate)) {
-        invalid_record(type == "v" ? "expected vertex coordinates: v x y z"
-                                    : "expected normal coordinates: vn x y z");
+        invalid_record(type == "v" ? "expected vertex coordinates: v x y z" : "expected normal coordinates: vn x y z");
       }
       if (type == "v") {
         vertices_.emplace_back(x_coordinate, y_coordinate, z_coordinate);
@@ -158,13 +157,13 @@ inline auto ObjParser::Parse() -> void {
 }
 
 inline auto ObjParser::FanTriangulateFace(const std::vector<long>& indices,
-                                        const std::vector<long>& normal_indices) -> void {
+                                          const std::vector<long>& normal_indices) -> void {
   for (std::size_t index = 1; index + 1 < indices.size(); ++index) {
     const std::array points{vertices_[indices[0]], vertices_[indices[index]], vertices_[indices[index + 1]]};
     std::shared_ptr<Triangle> triangle;
     if (normal_indices[0] != 0) {
-      const std::array normals{normals_[normal_indices[0]], normals_[normal_indices[index]],
-                               normals_[normal_indices[index + 1]]};
+      const std::array normals{
+          normals_[normal_indices[0]], normals_[normal_indices[index]], normals_[normal_indices[index + 1]]};
       triangle = std::make_shared<SmoothTriangle>(next_shape_id_++, points, normals);
     } else {
       triangle = std::make_shared<Triangle>(next_shape_id_++, points);

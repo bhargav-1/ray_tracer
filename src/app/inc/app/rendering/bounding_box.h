@@ -7,8 +7,8 @@
 
 #include "app/primitives/matrix.h"
 #include "app/primitives/point.h"
-#include "app/rendering/ray.h"
 #include "app/primitives/utilities.h"
+#include "app/rendering/ray.h"
 
 namespace ray_tracer {
 class BoundingBox {
@@ -120,8 +120,10 @@ class BoundingBox {
   }
 
  private:
-  [[nodiscard]] static auto CheckAxis(double origin, double direction, double min, double max)
-      -> std::pair<double, double> {
+  [[nodiscard]] static auto CheckAxis(double origin,
+                                      double direction,
+                                      double min,
+                                      double max) -> std::pair<double, double> {
     auto tmin_numerator = min - origin;
     auto tmax_numerator = max - origin;
     double tmin = 0;

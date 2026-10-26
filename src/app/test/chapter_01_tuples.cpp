@@ -1,9 +1,9 @@
-#include <app/primitives/point.h>                   // for point
-#include <app/primitives/tuple.h>                   // for tuple
-#include <app/primitives/vec3.h>                    // for point
+#include <app/primitives/point.h>        // for point
+#include <app/primitives/tuple.h>        // for tuple
+#include <app/primitives/vec3.h>         // for point
+#include <catch2/catch_test_macros.hpp>  // for operator""_catch_sr, Section
 #include <cmath>
 #include <numbers>
-#include <catch2/catch_test_macros.hpp>  // for operator""_catch_sr, Section
 // #include <catch2/catch_tostring.hpp>     // for ReusableStringStream
 
 // Behavior Driven Development Style Testing

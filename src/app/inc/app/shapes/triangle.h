@@ -1,17 +1,17 @@
 #pragma once
 #include <algorithm>
-#include <cmath>
 #include <array>
+#include <cmath>
 #include <cstddef>
 #include <vector>
 #include "app/materials/material.h"
 #include "app/primitives/matrix.h"
 #include "app/primitives/point.h"
+#include "app/primitives/tuple.h"
+#include "app/primitives/vec3.h"
+#include "app/rendering/intersection.h"
 #include "app/rendering/ray.h"
 #include "app/shapes/shape.h"
-#include "app/primitives/tuple.h"
-#include "app/rendering/intersection.h"
-#include "app/primitives/vec3.h"
 
 namespace ray_tracer {
 class Intersection;
@@ -34,7 +34,7 @@ class Triangle : public Shape {
   [[nodiscard]] auto LocalIntersect(const Ray& transformed_ray) const -> std::vector<Intersection> override;
   [[nodiscard]] auto LocalNormalAt(const ray_tracer::Point& point) const -> ray_tracer::Vec3 override;
   [[nodiscard]] auto BoundsOf() const -> BoundingBox override;
-  [[nodiscard]] auto IntersectionWithUV(double time, double u, double v) const -> Intersection { // NOLINT
+  [[nodiscard]] auto IntersectionWithUV(double time, double u, double v) const -> Intersection {  // NOLINT
     return {time, *this, u, v};
   }
 
@@ -71,8 +71,10 @@ inline auto Triangle::LocalOccludes(const Ray& ray, const double max_distance) c
   return IntersectTriangle(ray, time, u_value, v_value) && time > utilities::kEpsilon && time < max_distance;
 }
 
-inline auto Triangle::IntersectTriangle(const Ray& transformed_ray, double& time,
-                                       double& u_value, double& v_value) const -> bool {
+inline auto Triangle::IntersectTriangle(const Ray& transformed_ray,
+                                        double& time,
+                                        double& u_value,
+                                        double& v_value) const -> bool {
   if (!bounds_.Intersects(transformed_ray)) {
     return false;
   }
@@ -80,7 +82,7 @@ inline auto Triangle::IntersectTriangle(const Ray& transformed_ray, double& time
   if (std::abs(determinant) < utilities::kEpsilon) {
     return false;
   }
-  auto f_value = 1.0/determinant;
+  auto f_value = 1.0 / determinant;
   auto p1_to_origin = Vec3(transformed_ray.GetOrigin() - vertices_[0]);
   u_value = f_value * transformed_ray.GetDirection().Cross(edge2_).Dot(p1_to_origin);
   if (u_value < 0.0 || u_value > 1.0) {
@@ -99,18 +101,17 @@ inline auto Triangle::LocalNormalAt(const ray_tracer::Point& point) const -> ray
   (void)point;  // Unused parameter
   return normal_;
 }
-inline auto Triangle::BoundsOf() const -> BoundingBox {
-  return bounds_;
-}
+inline auto Triangle::BoundsOf() const -> BoundingBox { return bounds_; }
 class SmoothTriangle : public Triangle {
  public:
-  constexpr SmoothTriangle(std::size_t object_id, const std::array<Point, 3>& vertices,
+  constexpr SmoothTriangle(std::size_t object_id,
+                           const std::array<Point, 3>& vertices,
                            const std::array<Vec3, 3>& normals)
       : Triangle(object_id, vertices), normals_(normals) {}
   [[nodiscard]] auto GetNormals() const -> const std::array<Vec3, 3>& { return normals_; }
   using Triangle::LocalNormalAt;
-  [[nodiscard]] auto LocalNormalAt([[maybe_unused]] const Point& point, const Intersection& intersection) const
-      -> Vec3 override {
+  [[nodiscard]] auto LocalNormalAt([[maybe_unused]] const Point& point,
+                                   const Intersection& intersection) const -> Vec3 override {
     const auto u_value = intersection.GetU();
     const auto v_value = intersection.GetV();
     return normals_[0] * (1 - u_value - v_value) + normals_[1] * u_value + normals_[2] * v_value;

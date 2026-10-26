@@ -5,9 +5,9 @@
 #include "app/materials/material.h"
 #include "app/primitives/matrix.h"
 #include "app/primitives/point.h"
+#include "app/primitives/tuple.h"
 #include "app/rendering/ray.h"
 #include "app/shapes/shape.h"
-#include "app/primitives/tuple.h"
 
 namespace ray_tracer {
 class Intersection;
@@ -122,6 +122,6 @@ inline auto Cone::LocalNormalAt(const ray_tracer::Point& point) const -> ray_tra
 
 inline auto Cone::BoundsOf() const -> BoundingBox {
   auto limit = std::max(std::abs(minimum_), std::abs(maximum_));
-        return {Point(-limit, minimum_, -limit), Point(limit, maximum_, limit)};
+  return {Point(-limit, minimum_, -limit), Point(limit, maximum_, limit)};
 }
 }  // namespace ray_tracer

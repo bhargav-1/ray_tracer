@@ -3,12 +3,12 @@
 // #include "app/shapes/cylinder.h"
 #include <cmath>
 #include <limits>
-#include "app/shapes/cone.h"
-#include "app/shapes/cylinder.h"
 #include "app/primitives/point.h"
-#include "app/rendering/ray.h"
 #include "app/primitives/utilities.h"
 #include "app/primitives/vec3.h"
+#include "app/rendering/ray.h"
+#include "app/shapes/cone.h"
+#include "app/shapes/cylinder.h"
 
 namespace ray_tracer {
 SCENARIO("13: A ray misses a cylinder") {

@@ -7,7 +7,6 @@
 #include <app/rendering/intersection.h>
 #include <app/rendering/ray_tracing_engine.h>
 #include <app/shapes/sphere.h>
-#include <fmt/base.h>
 #include <algorithm>
 #include <array>
 #include <chrono>

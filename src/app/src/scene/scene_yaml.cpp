@@ -15,8 +15,11 @@
 #include "app/scene/scene.h"
 #include "app/scene/shape_catalog.h"
 
+#include <yaml-cpp/emitter.h>
 #include <yaml-cpp/emittermanip.h>
-#include <yaml-cpp/yaml.h>
+#include <yaml-cpp/node/node.h>
+#include <yaml-cpp/node/parse.h>
+#include <yaml-cpp/yaml.h>  // IWYU pragma: keep
 
 namespace ray_tracer::scene_io {
 namespace {
@@ -431,7 +434,7 @@ auto EmitObject(YAML::Emitter& out, const scene::Object& object) -> void {  // N
   } else if (object.IsCsg()) {
     out << "csg";
   } else {
-    out << shape_catalog::Find(object.Shape().type).serialized_name;
+    out << std::string{shape_catalog::Find(object.Shape().type).serialized_name};
   }
   out << YAML::Key << "visible" << YAML::Value << object.visible;
   out << YAML::Key << "transform" << YAML::Value;

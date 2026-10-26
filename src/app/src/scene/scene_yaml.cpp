@@ -502,6 +502,21 @@ auto ResolveObjSources(std::vector<scene::Object>& objects, const std::filesyste
   }
 }
 
+// NOLINTNEXTLINE(misc-no-recursion)
+auto RelativizeObjSources(std::vector<scene::Object>& objects, const std::filesystem::path& directory)
+    -> void {
+  for (auto& object : objects) {
+    if (object.IsContainer()) {
+      RelativizeObjSources(object.Children(), directory);
+    } else if (object.Shape().type == scene::ObjectType::kObj) {
+      const auto source = std::filesystem::path{object.Shape().source};
+      if (source.is_absolute()) {
+        object.Shape().source = source.lexically_relative(directory).generic_string();
+      }
+    }
+  }
+}
+
 }  // namespace
 
 auto ParseSceneYaml(std::string_view yaml_text) -> LoadSceneResult {
@@ -585,7 +600,9 @@ auto SaveSceneYaml(const scene::Scene& scene, const std::filesystem::path& path)
   if (!output) {
     return {.ok = false, .error = "failed to open scene file for writing '" + path.string() + "'"};
   }
-  output << SerializeSceneYaml(scene);
+  auto saved_scene = scene;
+  RelativizeObjSources(saved_scene.objects, std::filesystem::absolute(path).parent_path().lexically_normal());
+  output << SerializeSceneYaml(saved_scene);
   if (!output) {
     return {.ok = false, .error = "failed to write scene file '" + path.string() + "'"};
   }

@@ -1,25 +1,25 @@
-#include <app/scene/scene_yaml.h>
-#include <app/scene/scene_compiler.h>
 #include <app/primitives/utilities.h>
-#include <catch2/catch_test_macros.hpp>
+#include <app/scene/scene_compiler.h>
+#include <app/scene/scene_yaml.h>
 #include <catch2/catch_message.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #include <filesystem>
 #include <memory>
 #include <numbers>
 #include <string>
 
-#include "app/shapes/cube.h"
 #include "app/materials/color.h"
 #include "app/materials/material.h"
-#include "app/shapes/group.h"
 #include "app/primitives/matrix.h"
 #include "app/primitives/point.h"
+#include "app/primitives/tuple.h"
 #include "app/rendering/ray.h"
 #include "app/scene/scene.h"
-#include "app/shapes/triangle.h"
+#include "app/shapes/cube.h"
+#include "app/shapes/group.h"
 #include "app/shapes/shape.h"
-#include "app/primitives/tuple.h"
+#include "app/shapes/triangle.h"
 
 namespace ray_tracer {
 namespace {
@@ -33,15 +33,13 @@ auto Solid(scene::ColorRgb color) -> scene::Pattern {
 
 auto MakeCompiledSceneModel() -> scene::Scene {
   scene::Scene scene;
-  scene.camera = scene::Camera{
-      .from = {0.0F, 1.5F, -5.0F},
-      .to = {0.0F, 1.0F, 0.0F},
-      .up = {0.0F, 1.0F, 0.0F},
-      .fov_deg = 60.0F,
-      .resolution = {320, 200}};
+  scene.camera = scene::Camera{.from = {0.0F, 1.5F, -5.0F},
+                               .to = {0.0F, 1.0F, 0.0F},
+                               .up = {0.0F, 1.0F, 0.0F},
+                               .fov_deg = 60.0F,
+                               .resolution = {320, 200}};
   scene.lights.push_back({.position = {-10.0F, 10.0F, -10.0F}, .color = {1.0F, 1.0F, 1.0F}});
-  scene.lights.push_back(
-      {.position = {10.0F, 10.0F, -10.0F}, .color = {1.0F, 1.0F, 1.0F}, .visible = false});
+  scene.lights.push_back({.position = {10.0F, 10.0F, -10.0F}, .color = {1.0F, 1.0F, 1.0F}, .visible = false});
 
   scene::Pattern stripe;
   stripe.type = scene::PatternType::kStripe;
@@ -160,16 +158,14 @@ SCENARIO("scene compiler: compiles camera, lights, objects, transforms, material
   REQUIRE(compiled.world.Objects().size() == 3);
   CHECK_FALSE(compiled.world.Objects()[0]->GetCastShadow());
   CHECK(compiled.world.Objects()[0]->GetMaterial().HasPattern());
-  CHECK(compiled.world.Objects()[1]->GetTransform() ==
-        ray_tracer::Matrix<4, 4>::Translation(1, 2, 3) *
-            ray_tracer::Matrix<4, 4>::RotationY(std::numbers::pi / 2.0) *
-            ray_tracer::Matrix<4, 4>::Scaling(0.5, 0.5, 0.5));
+  CHECK(compiled.world.Objects()[1]->GetTransform() == ray_tracer::Matrix<4, 4>::Translation(1, 2, 3) *
+                                                           ray_tracer::Matrix<4, 4>::RotationY(std::numbers::pi / 2.0) *
+                                                           ray_tracer::Matrix<4, 4>::Scaling(0.5, 0.5, 0.5));
   CHECK(compiled.world.Objects()[1]->GetMaterial().GetColor() == ray_tracer::Color(0.8, 1.0, 0.6));
   CHECK(utilities::Equal(compiled.world.Objects()[1]->GetMaterial().GetReflective(), 0.1));
   CHECK(dynamic_cast<const ray_tracer::Cube*>(compiled.world.Objects()[2].get()) != nullptr);
   CHECK(compiled.world.Objects()[2]->GetTransform() ==
-        ray_tracer::Matrix<4, 4>::Translation(-1, 0, 0) *
-            ray_tracer::Matrix<4, 4>::Scaling(0.25, 0.25, 0.25));
+        ray_tracer::Matrix<4, 4>::Translation(-1, 0, 0) * ray_tracer::Matrix<4, 4>::Scaling(0.25, 0.25, 0.25));
 }
 
 SCENARIO("scene compiler: returns useful errors") {

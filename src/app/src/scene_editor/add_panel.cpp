@@ -9,10 +9,10 @@
 #include "imgui.h"  // NOLINT
 
 #include "app/scene/scene.h"
+#include "app/scene/shape_catalog.h"
 #include "app/scene_editor/imgui_file_dialog.h"
 #include "app/scene_editor/render_state.h"
 #include "app/scene_editor/scene_editor_app.h"
-#include "app/scene/shape_catalog.h"
 
 namespace ray_tracer::scene_editor {
 namespace {
@@ -61,8 +61,8 @@ auto DrawAddPanel(SceneEditorApp& app, UiRenderState& render_state) -> bool {
     if (ImGui::Button(button_label.c_str(), ImVec2(-1.0F, 40.0F))) {
       if (registration.type == scene::ObjectType::kObj) {
         state.obj_import_parent_path = destination_path;
-        ImGuiFileDialog::Instance()->OpenDialog("AddObjDialog", "Add OBJ Model", ".obj",
-                                               std::filesystem::path{RAY_TRACER_ASSET_DIR}, "Add");
+        ImGuiFileDialog::Instance()->OpenDialog(
+            "AddObjDialog", "Add OBJ Model", ".obj", std::filesystem::path{RAY_TRACER_ASSET_DIR}, "Add");
         continue;
       }
       scene::Object object;
@@ -108,7 +108,8 @@ auto DrawAddPanel(SceneEditorApp& app, UiRenderState& render_state) -> bool {
   ImGui::TextWrapped("Preview idle delay");
   ImGui::SliderFloat("##full_res_idle_delay", &render_state.high_res_delay, 0.0F, 10.0F, "%.1fs");
   if (ImGui::IsItemHovered()) {
-    ImGui::SetTooltip("Extra wait after interaction stops. 0 starts the full render as soon as the latest preview finishes.");
+    ImGui::SetTooltip(
+        "Extra wait after interaction stops. 0 starts the full render as soon as the latest preview finishes.");
   }
   return changed;
 }

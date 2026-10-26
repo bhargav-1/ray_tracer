@@ -1,13 +1,13 @@
-#include <app/scene_editor/scene_renderer.h>
 #include <app/scene/scene_compiler.h>
 #include <app/scene/scene_yaml.h>
-#include <catch2/catch_test_macros.hpp>
+#include <app/scene_editor/scene_renderer.h>
 #include <algorithm>
-#include <filesystem>
+#include <catch2/catch_test_macros.hpp>
 #include <cmath>
+#include <filesystem>
 
-#include "app/scene/scene.h"
 #include "app/materials/color.h"
+#include "app/scene/scene.h"
 
 namespace ray_tracer {
 
@@ -63,8 +63,8 @@ SCENARIO("scene renderer: renders fast low resolution previews") {
 }
 
 SCENARIO("scene renderer: renders an OBJ-backed YAML scene") {
-  auto loaded = scene_io::LoadSceneYaml(
-      std::filesystem::path{RAY_TRACER_ASSET_DIR} / "scenes" / "teapot_comparision_chapter15.yaml");
+  auto loaded = scene_io::LoadSceneYaml(std::filesystem::path{RAY_TRACER_ASSET_DIR} / "scenes" /
+                                        "teapot_comparision_chapter15.yaml");
   REQUIRE(loaded.ok);
   if (!loaded.scene.camera.has_value()) {
     FAIL("expected OBJ scene camera");

@@ -1,19 +1,35 @@
 #pragma once
+#include <memory>
 #include <utility>
 #include "app/materials/color.h"
 #include "app/materials/pattern.h"
-#include <memory>
 
 namespace ray_tracer {
 class Material {
  public:
   constexpr Material() noexcept : color_(1, 1, 1, 0) {}
-  constexpr explicit Material(Color  color, const double ambient =0.1, const double diffuse =0.9, const double specular =0.9, const double shininess =200, const double reflective = 0.0, const double transparency = 0.0, const double refractive_index = 1.0) noexcept // NOLINT(bugprone-easily-swappable-parameters)
-      : color_(std::move(color)), ambient_(ambient), diffuse_(diffuse), specular_(specular), shininess_(shininess) , reflective_(reflective), transparency_(transparency), refractive_index_(refractive_index){}
+  constexpr explicit Material(Color color,
+                              // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
+                              const double ambient = 0.1,
+                              const double diffuse = 0.9,
+                              const double specular = 0.9,
+                              const double shininess = 200,
+                              const double reflective = 0.0,
+                              const double transparency = 0.0,
+                              const double refractive_index = 1.0) noexcept
+      : color_(std::move(color)),
+        ambient_(ambient),
+        diffuse_(diffuse),
+        specular_(specular),
+        shininess_(shininess),
+        reflective_(reflective),
+        transparency_(transparency),
+        refractive_index_(refractive_index) {}
   ~Material() = default;
   constexpr auto operator==(const Material& rhs) const -> bool {
     return color_ == rhs.color_ && ambient_ == rhs.ambient_ && diffuse_ == rhs.diffuse_ && specular_ == rhs.specular_ &&
-           shininess_ == rhs.shininess_ && reflective_ == rhs.reflective_ && transparency_ == rhs.transparency_ && refractive_index_ == rhs.refractive_index_;
+           shininess_ == rhs.shininess_ && reflective_ == rhs.reflective_ && transparency_ == rhs.transparency_ &&
+           refractive_index_ == rhs.refractive_index_;
   }
   [[nodiscard]] constexpr auto GetColor() const -> Color { return color_; }
   constexpr void SetColor(const Color& color) { color_ = color; }
@@ -26,9 +42,7 @@ class Material {
   [[nodiscard]] constexpr auto GetShininess() const -> double { return shininess_; }
   constexpr void SetShininess(const double shininess) { shininess_ = shininess; }
   [[nodiscard]] auto HasPattern() const -> bool { return pattern_ != nullptr; }
-  auto SetPattern(std::shared_ptr<Pattern> pattern) -> void {
-    pattern_ = std::move(pattern);
-  }
+  auto SetPattern(std::shared_ptr<Pattern> pattern) -> void { pattern_ = std::move(pattern); }
   [[nodiscard]] auto GetPattern() const -> const Pattern* { return pattern_.get(); }
   [[nodiscard]] auto GetReflective() const -> double { return reflective_; }
   constexpr void SetReflective(const double reflective) { reflective_ = reflective; }

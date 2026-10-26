@@ -1,21 +1,21 @@
 #include <catch2/catch_test_macros.hpp>
 #include <cstddef>
+#include <numbers>
 #include <optional>
 #include <vector>
-#include "app/primitives/point.h"
-#include "app/primitives/vec3.h"
-#include "app/shapes/plane.h"
-#include "app/rendering/intersection.h"
 #include "app/materials/material.h"
 #include "app/primitives/matrix.h"
-#include "app/rendering/ray.h"
-#include "app/shapes/shape.h"
+#include "app/primitives/point.h"
+#include "app/primitives/vec3.h"
 #include "app/rendering/bounding_box.h"
-#include <numbers>
+#include "app/rendering/intersection.h"
+#include "app/rendering/ray.h"
+#include "app/shapes/plane.h"
+#include "app/shapes/shape.h"
 
 namespace ray_tracer {
 class TestShape : public Shape {
-public:
+ public:
   explicit TestShape(const std::size_t shape_id) : Shape(shape_id) {}
   ~TestShape() override = default;
   [[nodiscard]] auto LocalIntersect(const Ray& ray) const -> std::vector<Intersection> override {
@@ -23,11 +23,9 @@ public:
     return {};
   };
   [[nodiscard]] auto LocalNormalAt(const ray_tracer::Point& point) const -> ray_tracer::Vec3 override {
-    return  {point.GetX(), point.GetY(), point.GetZ()};
+    return {point.GetX(), point.GetY(), point.GetZ()};
   };
-  auto BoundsOf() const -> BoundingBox override {
-    return {Point(-1, -1, -1), Point(1, 1, 1)};
-  }
+  auto BoundsOf() const -> BoundingBox override { return {Point(-1, -1, -1), Point(1, 1, 1)}; }
   [[nodiscard]] auto GetSavedRay() const -> std::optional<Ray> { return saved_ray_; }
 
  private:
@@ -122,17 +120,23 @@ SCENARIO("9: Computing the normal on a translated shape") {
   }
 }
 SCENARIO("9: Computing the normal on a transformed shape") {
-  GIVEN("s = TestShape(), m= scaling(1, 0.5, 1)*rotation_Z(pi/5),s.SetTransform(m), n=normal_at(s, Point(0, 1/sqrt(2), -1/sqrt(2)") {
+  GIVEN(
+      "s = TestShape(), m= scaling(1, 0.5, 1)*rotation_Z(pi/5),s.SetTransform(m), n=normal_at(s, Point(0, 1/sqrt(2), "
+      "-1/sqrt(2)") {
     THEN("n = vec3(0, 0.97014,-0.24254") {
       TestShape shape1(1);
-      shape1.SetTransform(ray_tracer::Matrix<4, 4>::Scaling(1, 0.5, 1) * ray_tracer::Matrix<4, 4>::RotationZ(std::numbers::pi / 5));
-      CHECK(shape1.NormalAt(ray_tracer::Point(0, std::numbers::sqrt2 / 2, -std::numbers::sqrt2 / 2)) == ray_tracer::Vec3(0, 0.97014, -0.24254));
+      shape1.SetTransform(ray_tracer::Matrix<4, 4>::Scaling(1, 0.5, 1) *
+                          ray_tracer::Matrix<4, 4>::RotationZ(std::numbers::pi / 5));
+      CHECK(shape1.NormalAt(ray_tracer::Point(0, std::numbers::sqrt2 / 2, -std::numbers::sqrt2 / 2)) ==
+            ray_tracer::Vec3(0, 0.97014, -0.24254));
     }
   }
 }
 SCENARIO("9: the normal of a plane is constant everywhere") {
   GIVEN("p = plane()") {
-    WHEN("n1 = local_normal_at(p, point(0,0,0), n2 = local_normal_at(p, point(10, 0, -10), n3 = local_normal_at(p, point(-5, 0, 150)") {
+    WHEN(
+        "n1 = local_normal_at(p, point(0,0,0), n2 = local_normal_at(p, point(10, 0, -10), n3 = local_normal_at(p, "
+        "point(-5, 0, 150)") {
       THEN("n1 = n2 = n3 = vector(0,1,0)") {
         const ray_tracer::Plane plane_shape(1);
         CHECK(plane_shape.NormalAt(ray_tracer::Point(0, 0, 0)) == ray_tracer::Vec3(0, 1, 0));

@@ -6,7 +6,8 @@ namespace ray_tracer {
 class Vec3 : public Tuple {
  public:
   constexpr Vec3() noexcept = default;
-  constexpr Vec3(double x_coordinate, double y_coordinate, double z_coordinate) : Tuple(x_coordinate, y_coordinate, z_coordinate, 0) {}
+  constexpr Vec3(double x_coordinate, double y_coordinate, double z_coordinate)
+      : Tuple(x_coordinate, y_coordinate, z_coordinate, 0) {}
   constexpr Vec3(const Tuple& tuple) : Tuple(tuple) {}  // NOLINT // cppcheck-suppress [noExplicitConstructor]
   [[nodiscard]] constexpr auto Magnitude() const -> double { return std::sqrt((x_ * x_) + (y_ * y_) + (z_ * z_)); }
   [[nodiscard]] constexpr auto Normalize() const -> Vec3 {

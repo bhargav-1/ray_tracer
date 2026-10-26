@@ -25,7 +25,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 option(BUILD_WITH_SA_CHECKS "enforces static-analyses checks at compile time" ON)
 # Note: SA_CHECKS are disabled on Windows
 if (BUILD_WITH_SA_CHECKS AND CMAKE_COMPILER_IS_GNUCXX)
-    set(CMAKE_CXX_CLANG_TIDY clang-tidy;)
+    find_program(CLANG_TIDY_EXECUTABLE NAMES clang-tidy-18 REQUIRED)
+    set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_EXECUTABLE}")
     #    set(CMAKE_CXX_CPPCHECK cppcheck)
     #    list(APPEND CMAKE_CXX_CPPCHECK
     #            "--language=c++"

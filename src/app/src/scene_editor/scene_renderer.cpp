@@ -4,8 +4,8 @@
 #include <atomic>
 #include <cmath>
 #include <cstddef>
-#include <vector>
 #include <utility>
+#include <vector>
 
 #include "app/rendering/ray_tracing_engine.h"
 #include "app/rendering/render_rows.h"
@@ -15,9 +15,8 @@ namespace ray_tracer::scene_editor {
 namespace {
 
 auto PreviewDimensionFor(const int full_width, const int full_height) -> std::pair<int, int> {
-  int height = std::max(static_cast<int>(std::lround(
-                            static_cast<double>(full_height) / SceneRenderer::kPreviewDivisor)),
-                        20);
+  int height =
+      std::max(static_cast<int>(std::lround(static_cast<double>(full_height) / SceneRenderer::kPreviewDivisor)), 20);
   int width = static_cast<int>(std::lround((static_cast<double>(height) * full_width) / full_height));
   if (width < 40) {
     width = 40;
@@ -36,9 +35,9 @@ auto PreviewSamplePixel(const int preview_pixel, const int preview_size, const i
 }  // namespace
 
 auto SceneRenderer::Render(const scene_runtime::CompiledScene& scene,
-                             const bool preview,
-                             std::atomic<bool>* cancel,
-                             std::atomic<int>* progress) -> RenderPixels {
+                           const bool preview,
+                           std::atomic<bool>* cancel,
+                           std::atomic<int>* progress) -> RenderPixels {
   const auto& camera = scene.camera;
   const int full_width = camera.GetHorizontalSize();
   const int full_height = camera.GetVerticalSize();

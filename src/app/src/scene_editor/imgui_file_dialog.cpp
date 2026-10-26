@@ -5,8 +5,8 @@
 #include <cstring>
 #include <exception>
 #include <filesystem>
-#include <string>
 #include <sstream>
+#include <string>
 #include <vector>
 
 #include "imgui.h"  // NOLINT
@@ -35,7 +35,8 @@ auto CopyToBuffer(const std::string& text, std::array<char, 1024>& buffer) -> vo
   std::memcpy(buffer.data(), text.data(), count);
 }
 
-auto SortedEntries(const std::filesystem::path& directory, const std::string& filters,
+auto SortedEntries(const std::filesystem::path& directory,
+                   const std::string& filters,
                    std::string& error) -> std::vector<FileDialogEntry> {
   std::vector<FileDialogEntry> entries;
   error.clear();

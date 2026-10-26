@@ -1,5 +1,5 @@
-#include <app/scene_editor/scene_editor_app.h>
 #include <app/scene/scene_yaml.h>
+#include <app/scene_editor/scene_editor_app.h>
 #include <catch2/catch_test_macros.hpp>
 
 #include <filesystem>

@@ -1,9 +1,9 @@
 #include <catch2/catch_test_macros.hpp>
 
-#include "app/shapes/cube.h"
 #include "app/primitives/point.h"
-#include "app/rendering/ray.h"
 #include "app/primitives/vec3.h"
+#include "app/rendering/ray.h"
+#include "app/shapes/cube.h"
 namespace ray_tracer {
 
 SCENARIO("12: A ray intersects a cube") {
@@ -180,11 +180,12 @@ SCENARIO("12: The normal of the surface of the cube") {
     }
   }
   GIVEN("c=cube(), n=c.local_normal_at(point(-1, -1, -1))") {
-   THEN("n =vec3(-1, 0, 0)") {
-     auto cube = Cube(1);
-     auto normal = cube.NormalAt(Point(-1, -1, -1));
-     CHECK(normal == Vec3(-1, 0, 0));
-   }}
+    THEN("n =vec3(-1, 0, 0)") {
+      auto cube = Cube(1);
+      auto normal = cube.NormalAt(Point(-1, -1, -1));
+      CHECK(normal == Vec3(-1, 0, 0));
+    }
+  }
 }
 
 }  // namespace ray_tracer

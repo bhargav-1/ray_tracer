@@ -112,13 +112,13 @@ lint_coll.add_task(pre_commit, "pre-commit")
 @task(default=True)
 def run(context, args=""):
     """
-    Runs the application
+    Runs the scene editor
     :param context: Python Invoke provided context for running commands
     :param args: Additional Arguments
     :return:
     """
 
-    context.run(f"./build/src/app/light_and_shading_chapter6{args}")
+    context.run(f"./build/src/app/scene_editor {args}".rstrip())
 
 
 run_coll = Collection("run")

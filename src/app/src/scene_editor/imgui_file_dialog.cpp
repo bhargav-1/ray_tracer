@@ -1,3 +1,5 @@
+#include "app/asset_directory.h"
+
 #include "app/scene_editor/imgui_file_dialog.h"
 
 #include <algorithm>
@@ -118,7 +120,7 @@ auto ImGuiFileDialog::Display(const std::string& key) -> bool {
     }
     ImGui::SameLine();
     if (ImGui::Button("Assets")) {
-      current_directory_ = std::filesystem::path{RAY_TRACER_ASSET_DIR} / "scenes";
+      current_directory_ = ray_tracer::AssetDirectory() / "scenes";
     }
     ImGui::Separator();
 

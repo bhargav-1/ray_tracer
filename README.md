@@ -218,3 +218,7 @@ The most rewarding page while implementing was the [teapot competition](https://
 
 - [Physically Based Rendering](https://pbr-book.org/4ed/contents) — a detailed reference I would like to explore further.
 - [Ray Tracing in One Weekend series](https://raytracing.github.io/) — another introduction to ray tracing that I wish I had looked at earlier.
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).

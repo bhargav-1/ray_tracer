@@ -1,3 +1,5 @@
+#include "app/asset_directory.h"
+
 #include "app/scene_editor/add_panel.h"
 
 #include <cstddef>
@@ -61,8 +63,7 @@ auto DrawAddPanel(SceneEditorApp& app, UiRenderState& render_state) -> bool {
     if (ImGui::Button(button_label.c_str(), ImVec2(-1.0F, 40.0F))) {
       if (registration.type == scene::ObjectType::kObj) {
         state.obj_import_parent_path = destination_path;
-        ImGuiFileDialog::Instance()->OpenDialog(
-            "AddObjDialog", "Add OBJ Model", ".obj", std::filesystem::path{RAY_TRACER_ASSET_DIR}, "Add");
+        ImGuiFileDialog::Instance()->OpenDialog("AddObjDialog", "Add OBJ Model", ".obj", AssetDirectory(), "Add");
         continue;
       }
       scene::Object object;

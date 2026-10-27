@@ -1,3 +1,5 @@
+#include "app/asset_directory.h"
+
 #include "app/scene_editor/scene_editor_app.h"
 
 #include <cstddef>
@@ -11,9 +13,7 @@
 
 namespace ray_tracer::scene_editor {
 
-auto SceneEditorApp::LoadDefaultScene() -> bool {
-  return LoadScene(std::filesystem::path{RAY_TRACER_ASSET_DIR} / "scenes" / "default.yaml");
-}
+auto SceneEditorApp::LoadDefaultScene() -> bool { return LoadScene(AssetDirectory() / "scenes" / "default.yaml"); }
 
 auto SceneEditorApp::LoadScene(const std::filesystem::path& path) -> bool {
   auto loaded = scene_io::LoadSceneYaml(path);

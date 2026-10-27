@@ -46,8 +46,7 @@ auto ValidScene() -> scene::Scene {
 
 SCENARIO("asset lookup: development builds and missing executables use checkout assets") {
   CHECK(AssetDirectory() == std::filesystem::path{RAY_TRACER_ASSET_DIR});
-  CHECK(AssetDirectory("/nonexistent/ray_tracer/raytracerchallenge") ==
-        std::filesystem::path{RAY_TRACER_ASSET_DIR});
+  CHECK(AssetDirectory("/nonexistent/ray_tracer/raytracerchallenge") == std::filesystem::path{RAY_TRACER_ASSET_DIR});
 }
 
 SCENARIO("asset lookup: relocated installations load bundled scenes and relative OBJ models") {

@@ -12,7 +12,12 @@ Note: to run GUI applications on host run `xhost + local:root`
 # pylint: disable=import-error
 # pylint: disable=fixme
 import dataclasses
+import hashlib
 import os
+from pathlib import Path
+import shlex
+import shutil
+import tempfile
 from invoke import task
 
 proj = "raytracerchallenge"
@@ -55,7 +60,12 @@ class GitVersion:
         self.rev = context.run(
             "git log --pretty=format:'%h' -n 1", hide="out"
         ).stdout.strip()
-        tag_result = context.run("git describe --tags --abbrev=0", hide=True, warn=True)
+        tag_result = context.run(
+            "git describe --tags --abbrev=0"
+            " --match '[0-9]*.[0-9]*.[0-9]*' --match 'v[0-9]*.[0-9]*.[0-9]*'",
+            hide=True,
+            warn=True,
+        )
         # Untagged clones still need a numeric version for CMake and CPack.
         self.tag = tag_result.stdout.strip() if tag_result.ok else "0.0.0"
         self.diff = context.run(
@@ -64,19 +74,17 @@ class GitVersion:
 
 
 @task
-def build(ctx, hw="GPU", mode="dev", ci_checks=False):
+def build(ctx, hw="GPU", mode="dev", ci=False):
     """
     Builds docker container
     :param context:
     :param hw: CPU or GPU
     :param mode: dev
-    :param ci_checks: Execute pre-commit during build?
+    :param ci: Use the published development image, run CI checks, and copy packages to dist
     :return:
     """
     git = GitVersion(ctx)
-    ci_checks_str = "false"
-    if ci_checks:
-        ci_checks_str = "true"
+    ci_checks_str = "true" if ci else "false"
     docker_base = "ubuntu:noble"
     dockerfile = "docker/Dockerfile"
     image_name = f"bhargavulc/{proj}:{hw}-{mode}"
@@ -86,12 +94,50 @@ def build(ctx, hw="GPU", mode="dev", ci_checks=False):
         + f" --build-arg DOCKER_BASE={docker_base}"
         + f" --build-arg HARDWARE={hw}"
         + f" --build-arg CI_CHECKS={ci_checks_str}"
+        + (
+            " --build-arg DEV_ENV_IMAGE=bhargavulc/ray_tracer:dev-env"
+            if ci
+            else ""
+        )
         + f' --build-arg GIT_REV_ARG="{git.rev}"'
         + f' --build-arg GIT_DIFF_ARG="{git.diff}"'
         + f' --build-arg GIT_TAG_ARG="{git.tag}"'
         + f' --build-arg GIT_BRANCH_ARG="{git.branch}"'
         + f" -t {image_name} ."
     )
+    if ci:
+        _copy_artifacts(ctx, image_name)
+
+
+def _copy_artifacts(ctx, image_name, output="dist"):
+    """Extract Debian packages and checksums from a built image without starting it."""
+    image = shlex.quote(image_name)
+    workdir = ctx.run(
+        f"docker image inspect {image} --format '{{{{.Config.WorkingDir}}}}'",
+        hide=True,
+    ).stdout.strip()
+    container = ctx.run(
+        f"docker create --entrypoint /bin/true {image}", hide=True
+    ).stdout.strip()
+    try:
+        with tempfile.TemporaryDirectory(prefix="raytracer-packages-") as temporary:
+            source = shlex.quote(f"{container}:{workdir}/build/packages/.")
+            ctx.run(f"docker cp {source} {shlex.quote(temporary)}")
+            packages = sorted(Path(temporary).glob("*.deb"))
+            if not packages:
+                raise RuntimeError("The image contains no Debian packages")
+            destination = Path(output)
+            destination.mkdir(parents=True, exist_ok=True)
+            checksums = []
+            for package in packages:
+                shutil.copy2(package, destination / package.name)
+                checksum = hashlib.sha256(package.read_bytes()).hexdigest()
+                checksums.append(f"{checksum}  {package.name}\n")
+            (destination / "SHA256SUMS").write_text(
+                "".join(checksums), encoding="utf-8"
+            )
+    finally:
+        ctx.run(f"docker rm {shlex.quote(container)}", hide=True)
 
 
 @task

@@ -1,4 +1,5 @@
 ARG DOCKER_BASE=ubuntu:noble
+ARG DEV_ENV_IMAGE=dev-env-local
 # hadolint global ignore=DL3004
 # hadolint global ignore=DL3006
 FROM $DOCKER_BASE as base
@@ -37,7 +38,7 @@ RUN groupadd -g ${GID} -r ${USER_ARG}; \
 # REMEMBER TO ADD SUDO TO APTnv!
 USER ${USER_ARG}
 
-FROM base as dev
+FROM base as dev-env-local
 #
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
@@ -65,6 +66,20 @@ RUN USER=${USER_ARG} && \
     sudo mkdir -p /etc/fixuid && \
     printf "user: $USER\ngroup: $GROUP\n" | sudo tee -a /etc/fixuid/config.yml;
 
+# CI can pass a published dev environment; local builds use the stage above.
+FROM ${DEV_ENV_IMAGE} AS dev-env
+
+FROM dev-env AS dev
+
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
+ARG PROJ_NAME
+ARG HARDWARE=CPU
+ARG UID=1000
+ARG GID=1000
+ARG USER_ARG=bob
+ENV USER=${USER_ARG}
+
 WORKDIR /home/${USER_ARG}/${PROJ_NAME}
 COPY --chown=${UID}:${GID} ./ /home/${USER_ARG}/${PROJ_NAME}
 COPY --chown=${UID}:${GID} ./invoke_scripts/ ./invoke_scripts
@@ -83,7 +98,7 @@ ENV GIT_TAG ${GIT_TAG_ARG}
 ENV GIT_BRANCH ${GIT_BRANCH_ARG}
 ARG CI_CHECKS="false"
 RUN if [ "${CI_CHECKS}" = "true" ]; then  \
-      invoke app.build; \
+      invoke app.build.ci; \
     else \
       invoke app.build --preset="linux-notests" --sa-checks-off; \
     fi
@@ -91,7 +106,7 @@ RUN if [ "${CI_CHECKS}" = "true" ]; then  \
 WORKDIR /home/${USER}/${PROJ_NAME}/build/packages
 # Generate a list of deps so we can use that later to install all the deps
 # before installing the app to prevent docker cache misses
-RUN dpkg-deb -I chirp-raytracerchallenge*.deb \
+RUN dpkg-deb -I raytracerchallenge*.deb \
     | grep -E "Depends|Recommends|Suggests|Pre\-Depends" \
     | tr -d "|," \
     | sed "s/([^)]*)/()/g" \
@@ -104,12 +119,6 @@ WORKDIR /home/${USER_ARG}/${PROJ_NAME}
 COPY --chown=${UID}:${GID} ./.pre-commit-config.yaml ./.pre-commit-config.yaml
 COPY --chown=${UID}:${GID} ./.gitignore ./.gitignore
 
-#hadolint ignore=DL3003,SC2164
-RUN if [ "${CI_CHECKS}" = "true" ]; then  \
-        source ~/.bashrc; \
-        pre-commit install --install-hooks; \
-        SKIP=no-commit-to-branch pre-commit run -a; \
-    fi
 #
 RUN bash -c 'echo -e HARDWARE is $HARDWARE'
 
@@ -159,8 +168,8 @@ RUN sudo apt-get update && sudo DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-ge
 
 COPY --from=dev /home/${USER}/${PROJ_NAME}/build/packages/*.deb .
 RUN sudo apt-get update \
-    && sudo apt install -y ./chirp-raytracerchallenge*.deb \
-    && sudo apt-get clean && sudo rm -rf /var/lib/apt/lists/* && sudo rm chirp-raytracerchallenge*.deb
+    && sudo apt install -y ./raytracerchallenge*.deb \
+    && sudo apt-get clean && sudo rm -rf /var/lib/apt/lists/* && sudo rm raytracerchallenge*.deb
 
 WORKDIR /home/${USER}/
 RUN bash -c 'echo -e HARDWARE is $HARDWARE'

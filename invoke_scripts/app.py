@@ -37,6 +37,7 @@ def build(
     preset="",
     args="",
     sa_checks_off=False,
+    build_type="Debug",
 ):
     # pylint: disable=too-many-arguments
     """
@@ -45,6 +46,7 @@ def build(
     :param preset: Which cmake workflow preset (defined in CMakePresets.json) to build
     :param args: Space-separated CMake cache settings (NAME=VALUE)
     :param sa_checks_off: Run without Static-Analysis checks
+    :param build_type: CMake build configuration (Debug or Release)
     :return:
     """
     if preset == "":
@@ -52,28 +54,41 @@ def build(
 
     if preset not in ("linux", "linux-notests"):
         raise ValueError("Use the linux or linux-notests workflow")
-    cmake_args = [f"-D{arg}" for arg in shlex.split(args)]
+    settings = dict(arg.split("=", 1) for arg in shlex.split(args))
+    # Preserve callers that already select the configuration through --args.
+    build_type = settings.pop("CMAKE_BUILD_TYPE", build_type)
+    if build_type not in ("Debug", "Release", "RelWithDebInfo", "MinSizeRel"):
+        raise ValueError("Unsupported CMake build type")
+    settings.setdefault("BUILD_WITH_SA_CHECKS", "ON")
     if sa_checks_off:
-        cmake_args.append("-DBUILD_WITH_SA_CHECKS=OFF")
+        settings["BUILD_WITH_SA_CHECKS"] = "OFF"
+    cmake_args = [f"-DCMAKE_BUILD_TYPE={build_type}"]
+    cmake_args.extend(f"-D{key}={value}" for key, value in settings.items())
     context.run(
         "cmake --preset cfg-linux " + shlex.join(cmake_args),
         pty=is_linux,
     )
-    context.run("cmake --build --preset bld-linux", pty=is_linux)
+    config = shlex.quote(build_type)
+    context.run(f"cmake --build --preset bld-linux --config {config}", pty=is_linux)
     if preset == "linux":
-        context.run("ctest --preset test-linux", pty=is_linux)
-    context.run("cpack --preset pkg-linux", pty=is_linux)
-    context.run("cmake --install build --config Debug", pty=is_linux)
+        context.run(f"ctest --preset test-linux -C {config}", pty=is_linux)
+    context.run(f"cpack --preset pkg-linux -C {config}", pty=is_linux)
+    context.run(f"cmake --install build --config {config}", pty=is_linux)
 
 
 @task()
 def build_ci(context):
     """
-    Builds repo for CI (sa_checks_off)
+    Builds and tests Release packages with static analysis and all-file linting.
     :param context: Python Invoke provided context for running commands
     :return:
     """
-    build(context, sa_checks_off=True)
+    build(context, build_type="Release", args="BUILD_WITH_SA_CHECKS=ON")
+    context.run(
+        "pre-commit run --all-files --show-diff-on-failure",
+        env={"SKIP": "no-commit-to-branch"},
+        pty=is_linux,
+    )
 
 
 build_coll = Collection("build")
@@ -118,7 +133,7 @@ def run(context, args=""):
     :return:
     """
 
-    context.run(f"./build/src/app/scene_editor {args}".rstrip())
+    context.run(f"./build/src/app/raytracerchallenge {args}".rstrip())
 
 
 run_coll = Collection("run")

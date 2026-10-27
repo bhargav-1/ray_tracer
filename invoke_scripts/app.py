@@ -79,11 +79,11 @@ def build(
 @task()
 def build_ci(context):
     """
-    Builds and tests Release packages with static analysis and all-file linting.
+    Builds and tests Release packages, then runs static analysis through pre-commit.
     :param context: Python Invoke provided context for running commands
     :return:
     """
-    build(context, build_type="Release", args="BUILD_WITH_SA_CHECKS=ON")
+    build(context, build_type="Release", sa_checks_off=True)
     context.run(
         "pre-commit run --all-files --show-diff-on-failure",
         env={"SKIP": "no-commit-to-branch"},

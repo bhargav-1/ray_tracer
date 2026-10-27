@@ -1,0 +1,66 @@
+name: Linux CI
+
+on:
+  pull_request:
+  push:
+    branches: [ master, 'release*' ]
+    tags: [ '[0-9]*.[0-9]*.[0-9]*', 'v[0-9]*.[0-9]*.[0-9]*' ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build, checks, and Debian package
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Install Invoke
+        run: |
+          python3 -m venv .venv-ci
+          .venv-ci/bin/pip install -r requirements.txt
+          echo "$GITHUB_WORKSPACE/.venv-ci/bin" >> "$GITHUB_PATH"
+      - name: Build and check Release in Docker
+        run: invoke docker.build --hw=CPU --ci
+      - name: Upload Debian package and checksums
+        uses: actions/upload-artifact@v7
+        with:
+          name: raytracerchallenge-ubuntu24.04-amd64-${{ github.sha }}
+          path: |
+            dist/*.deb
+            dist/SHA256SUMS
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
+
+  release:
+    name: Publish tagged release
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      actions: read
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      RELEASE_TAG: ${{ github.ref_name }}
+    steps:
+      - name: Download CI packages
+        run: |
+          gh run download "$GITHUB_RUN_ID" \
+            --name "raytracerchallenge-ubuntu24.04-amd64-$GITHUB_SHA" --dir dist
+          cd dist
+          sha256sum --check SHA256SUMS
+      - name: Create release and attach packages
+        run: |
+          [[ "$RELEASE_TAG" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          if ! gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            gh release create "$RELEASE_TAG" --verify-tag --generate-notes --title "$RELEASE_TAG"
+          fi
+          gh release upload "$RELEASE_TAG" dist/*.deb dist/SHA256SUMS --clobber

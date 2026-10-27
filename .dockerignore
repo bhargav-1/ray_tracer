@@ -2,3 +2,5 @@
 #/.git/
 build/
 install/
+dist/
+.venv-ci/

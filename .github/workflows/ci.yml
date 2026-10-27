@@ -25,6 +25,11 @@ jobs:
           python3 -m venv .venv-ci
           .venv-ci/bin/pip install -r requirements.txt
           echo "$GITHUB_WORKSPACE/.venv-ci/bin" >> "$GITHUB_PATH"
+      - name: Log in to Docker Hub
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: printf '%s' "$DOCKERHUB_TOKEN" | docker login --username "$DOCKERHUB_USERNAME" --password-stdin
       - name: Build and check Release in Docker
         run: invoke docker.build --hw=CPU --ci
       - name: Upload Debian package and checksums

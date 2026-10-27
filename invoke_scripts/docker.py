@@ -94,11 +94,7 @@ def build(ctx, hw="GPU", mode="dev", ci=False):
         + f" --build-arg DOCKER_BASE={docker_base}"
         + f" --build-arg HARDWARE={hw}"
         + f" --build-arg CI_CHECKS={ci_checks_str}"
-        + (
-            " --build-arg DEV_ENV_IMAGE=bhargavulc/ray_tracer:dev-env"
-            if ci
-            else ""
-        )
+        + (" --build-arg DEV_ENV_IMAGE=bhargavulc/ray_tracer:dev-env" if ci else "")
         + f' --build-arg GIT_REV_ARG="{git.rev}"'
         + f' --build-arg GIT_DIFF_ARG="{git.diff}"'
         + f' --build-arg GIT_TAG_ARG="{git.tag}"'

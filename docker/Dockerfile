@@ -2,7 +2,7 @@ ARG DOCKER_BASE=ubuntu:noble
 ARG DEV_ENV_IMAGE=dev-env-local
 # hadolint global ignore=DL3004
 # hadolint global ignore=DL3006
-FROM $DOCKER_BASE as base
+FROM $DOCKER_BASE AS base
 # bug https://bugs.launchpad.net/cloud-images/+bug/2005129 - using one of the solution
 # deleting ubuntu user which has 1000/1000 uid/gid = first user, we want to use our usr with same uid/gid
 RUN userdel -r ubuntu
@@ -38,7 +38,7 @@ RUN groupadd -g ${GID} -r ${USER_ARG}; \
 # REMEMBER TO ADD SUDO TO APTnv!
 USER ${USER_ARG}
 
-FROM base as dev-env-local
+FROM base AS dev-env-local
 #
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
@@ -150,7 +150,7 @@ WORKDIR /home/${USER}/${PROJ_NAME}
 ENTRYPOINT [ "/usr/local/bin/dev_entrypoint.sh" ]
 CMD ["/bin/bash"]
 
-FROM base as prod
+FROM base AS prod
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 

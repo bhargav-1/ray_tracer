@@ -1,3 +1,5 @@
+#include "app/asset_directory.h"
+
 #include "app/scene_editor/scene_panel.h"
 
 #include <algorithm>
@@ -29,14 +31,14 @@ auto DrawFilePanel(SceneEditorApp& app, UiRenderState& render_state, std::array<
   ImGui::InputText("Path", path_buffer.data(), path_buffer.size());
   if (ImGui::Button("Load")) {
     const auto start_path = std::filesystem::path{path_buffer.data()}.empty()
-                                ? std::filesystem::path{RAY_TRACER_ASSET_DIR} / "scenes"
+                                ? AssetDirectory() / "scenes"
                                 : std::filesystem::path{path_buffer.data()};
     ImGuiFileDialog::Instance()->OpenDialog("LoadSceneDialog", "Load Scene", ".yaml,.yml", start_path);
   }
   ImGui::SameLine();
   if (ImGui::Button("Save As")) {
     const auto start_path = std::filesystem::path{path_buffer.data()}.empty()
-                                ? std::filesystem::path{RAY_TRACER_ASSET_DIR} / "scenes" / "scene.yaml"
+                                ? AssetDirectory() / "scenes" / "scene.yaml"
                                 : std::filesystem::path{path_buffer.data()};
     ImGuiFileDialog::Instance()->OpenDialog("SaveSceneDialog", "Save Scene As", ".yaml,.yml", start_path, "Save");
   }

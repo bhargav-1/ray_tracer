@@ -1,3 +1,5 @@
+#include "app/asset_directory.h"
+
 #include "app/scene_editor/object_panel.h"
 
 #include <algorithm>
@@ -266,7 +268,7 @@ auto DrawObjectEditor(scene::Object& object, const bool allow_hide) -> bool {
           dialog_key,
           "Select OBJ Model",
           ".obj",
-          shape.source.empty() ? std::filesystem::path{RAY_TRACER_ASSET_DIR} : std::filesystem::path{shape.source});
+          shape.source.empty() ? AssetDirectory() : std::filesystem::path{shape.source});
     }
     if (ImGuiFileDialog::Instance()->Display(dialog_key) && ImGuiFileDialog::Instance()->IsOk()) {
       shape.source = ImGuiFileDialog::Instance()->GetFilePathName();

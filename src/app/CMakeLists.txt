@@ -32,6 +32,7 @@ target_link_libraries(app_lib
 target_compile_definitions(app_lib
         PUBLIC
         RAY_TRACER_ASSET_DIR="${CMAKE_SOURCE_DIR}/assets"
+        RAY_TRACER_INSTALL_ASSET_DIR="${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME}/assets"
 )
 
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/inc/app/scene" PREFIX "Header Files\\scene"
@@ -221,6 +222,7 @@ target_link_libraries(patterns_chapter10_perturbed
         imgui_lib
 )
 add_executable(scene_editor)
+set_target_properties(scene_editor PROPERTIES OUTPUT_NAME raytracerchallenge)
 target_sources(scene_editor
         PRIVATE
         src/scene_editor/imgui_file_dialog.cpp
@@ -232,6 +234,10 @@ target_link_libraries(scene_editor
         imgui_lib
 )
 add_subdirectory(test)
+
+install(TARGETS scene_editor RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(DIRECTORY "${CMAKE_SOURCE_DIR}/assets/"
+        DESTINATION ${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME}/assets)
 
 install(TARGETS app_lib
         EXPORT "${PROJECT_NAME}Targets"

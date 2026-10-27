@@ -33,7 +33,6 @@
     {
       "name": "bld-linux",
       "configurePreset": "cfg-linux",
-      "configuration": "Debug",
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -61,15 +60,9 @@
       "name": "pkg-linux",
       "configurePreset": "cfg-linux",
       "generators": [
-        "DEB",
-        "STGZ",
-        "TGZ"
-      ],
-      "configurations": [
-        "Debug"
+        "DEB"
       ],
       "packageDirectory": "${sourceDir}/build/packages",
-      "vendorName": "Test",
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",

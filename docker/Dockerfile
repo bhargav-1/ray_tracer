@@ -84,6 +84,20 @@ ENV EM_CONFIG=/opt/emsdk/.emscripten \
 # CI can pass a published dev environment; local builds use the stage above.
 FROM ${DEV_ENV_IMAGE} AS dev-env
 
+ARG GIT_REV_ARG=""
+ARG GIT_DIFF_ARG=""
+ARG GIT_TAG_ARG="0.0.0"
+ARG GIT_BRANCH_ARG="master"
+ENV GIT_REV=${GIT_REV_ARG} \
+    GIT_DIFF=${GIT_DIFF_ARG} \
+    GIT_TAG=${GIT_TAG_ARG} \
+    GIT_BRANCH=${GIT_BRANCH_ARG}
+
+FROM dev-env AS web
+WORKDIR /workspace
+COPY --chown=1000:1000 ./ /workspace/
+RUN invoke app.build.web
+
 FROM dev-env AS dev
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
@@ -103,14 +117,6 @@ RUN { \
     echo "cd /home/${USER_ARG}/${PROJ_NAME}/"; \
     } >> ~/.bashrc
 
-ARG GIT_REV_ARG=""
-ARG GIT_DIFF_ARG=""
-ARG GIT_TAG_ARG="unknown"
-ARG GIT_BRANCH_ARG="master"
-ENV GIT_REV ${GIT_REV_ARG}
-ENV GIT_DIFF ${GIT_DIFF_ARG}
-ENV GIT_TAG ${GIT_TAG_ARG}
-ENV GIT_BRANCH ${GIT_BRANCH_ARG}
 ARG CI_CHECKS="false"
 RUN if [ "${CI_CHECKS}" = "true" ]; then  \
       invoke app.build.ci; \

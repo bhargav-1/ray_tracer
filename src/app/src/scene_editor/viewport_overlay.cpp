@@ -302,15 +302,18 @@ auto DrawViewportOverlay(scene::Scene& scene,
     if (entry.object->IsContainer()) {
       continue;
     }
+    const bool selected =
+        editor_state.selection.target == SelectionTarget::kObject && editor_state.selection.object_path == entry.path;
+    if (!selected) {
+      continue;
+    }
     const auto center = Point{entry.world_transform * Point(0, 0, 0)};
     const auto projected = ProjectWorldPoint(*scene.camera, center, image_min, image_size);
     if (!projected.has_value()) {
       continue;
     }
-    const bool selected =
-        editor_state.selection.target == SelectionTarget::kObject && editor_state.selection.object_path == entry.path;
-    const ImU32 color = selected ? IM_COL32(255, 225, 80, 255) : IM_COL32(255, 255, 255, 220);
-    draw_list->AddCircleFilled(projected->screen, selected ? 6.0F : 4.0F, color);
+    const ImU32 color = IM_COL32(255, 225, 80, 255);
+    draw_list->AddCircleFilled(projected->screen, 6.0F, color);
     draw_list->AddCircle(projected->screen, 10.0F, color, 20, 1.5F);
     const std::string label = entry.object->name + " (" + ObjectTypeLabel(entry.object->Shape().type) + ")";
     draw_list->AddText(ImVec2(projected->screen.x + 10.0F, projected->screen.y - 10.0F), color, label.c_str());
@@ -327,12 +330,15 @@ auto DrawViewportOverlay(scene::Scene& scene,
     if (!scene.lights[i].visible) {
       continue;
     }
+    const bool selected = editor_state.selection.target == SelectionTarget::kLight && editor_state.selection.index == i;
+    if (!selected) {
+      continue;
+    }
     const auto projected = ProjectWorldPoint(*scene.camera, ToPoint(scene.lights[i].position), image_min, image_size);
     if (!projected.has_value()) {
       continue;
     }
-    const bool selected = editor_state.selection.target == SelectionTarget::kLight && editor_state.selection.index == i;
-    const ImU32 color = selected ? IM_COL32(255, 225, 80, 255) : IM_COL32(255, 245, 160, 230);
+    const ImU32 color = IM_COL32(255, 225, 80, 255);
     draw_list->AddRectFilled(ImVec2(projected->screen.x - 5.0F, projected->screen.y - 5.0F),
                              ImVec2(projected->screen.x + 5.0F, projected->screen.y + 5.0F),
                              color);

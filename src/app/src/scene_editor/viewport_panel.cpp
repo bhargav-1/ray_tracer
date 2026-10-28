@@ -19,7 +19,7 @@ namespace {
 auto DrawTopLegend(const scene::Scene& scene, EditorState& state) -> void {
   ImGui::Text("Selected: %s", SelectedName(scene, state.selection).c_str());
   ImGui::SameLine();
-  ImGui::Checkbox("Viewport Overlays", &state.show_viewport_overlays);
+  ImGui::Checkbox("Show selected viewport", &state.show_selected_viewport);
   ImGui::SameLine();
   ImGui::TextColored(ImVec4(0.92F, 0.25F, 0.22F, 1.0F), "X");
   ImGui::SameLine();
@@ -76,7 +76,7 @@ auto DrawViewportPanel(SceneEditorApp& app, UiRenderState& render_state) -> View
     const ImVec2 image_max = ImGui::GetItemRectMax();
     auto& scene = app.MutableScene();
     OverlayResult overlay;
-    if (app.State().show_viewport_overlays) {
+    if (app.State().show_selected_viewport) {
       overlay = DrawViewportOverlay(scene, app.MutableState(), render_state, image_min, image_size);
     }
     result.changed |= overlay.changed;

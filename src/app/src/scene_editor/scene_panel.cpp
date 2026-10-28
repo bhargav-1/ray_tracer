@@ -99,6 +99,11 @@ auto IsSelected(const Selection& selection, const ObjectPath& path) -> bool {
   return selection.target == SelectionTarget::kObject && selection.object_path == path;
 }
 
+auto SelectItem(EditorState& state, Selection selection) -> void {
+  state.selection = std::move(selection);
+  state.show_selected_viewport = true;
+}
+
 auto AdjustSelectionAfterErase(Selection& selection, const ObjectPath& parent_path, std::size_t erased_index) -> void {
   if (selection.target != SelectionTarget::kObject || selection.object_path.size() <= parent_path.size() ||
       !std::equal(parent_path.begin(), parent_path.end(), selection.object_path.begin())) {
@@ -169,7 +174,7 @@ auto DrawObjectTree(std::vector<scene::Object>& objects,  // NOLINT(misc-no-recu
     auto& object = objects[index];
     ImGui::PushID(static_cast<int>(index));
     if (ImGui::SmallButton(IsSelected(state.selection, path) ? "Selected###select" : "Select###select")) {
-      state.selection = Selection::ForObject(path);
+      SelectItem(state, Selection::ForObject(path));
     }
     ImGui::SameLine();
     ImGui::BeginDisabled(csg_operands);
@@ -256,7 +261,7 @@ auto DrawScenePanel(SceneEditorApp& app, UiRenderState& render_state, std::array
   if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen)) {
     if (ImGui::SmallButton(editor_state.selection.target == SelectionTarget::kCamera ? "Selected###select"
                                                                                      : "Select###select")) {
-      editor_state.selection = Selection::ForCamera();
+      SelectItem(editor_state, Selection::ForCamera());
     }
     changed |= DragF3("From", scene.camera->from, 0.1F, -50.0F, 50.0F);
     changed |= DragF3("Look At", scene.camera->to, 0.1F, -50.0F, 50.0F);
@@ -281,7 +286,7 @@ auto DrawScenePanel(SceneEditorApp& app, UiRenderState& render_state, std::array
                                      editor_state.selection.index == i
                                  ? "Selected###select"
                                  : "Select###select")) {
-        editor_state.selection = Selection::ForLight(i);
+        SelectItem(editor_state, Selection::ForLight(i));
       }
       ImGui::SameLine();
       if (ImGui::SmallButton(scene.lights[i].visible ? "Hide###visibility" : "Show###visibility")) {

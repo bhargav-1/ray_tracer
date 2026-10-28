@@ -16,7 +16,9 @@
 
 namespace ray_tracer::scene_editor {
 
-auto SceneEditorApp::LoadDefaultScene() -> bool { return LoadScene(AssetDirectory() / "scenes" / "default.yaml"); }
+auto SceneEditorApp::LoadDefaultScene() -> bool {
+  return LoadScene(AssetDirectory() / "scenes" / "chapter_11_demo.yaml");
+}
 
 auto SceneEditorApp::LoadScene(const std::filesystem::path& path) -> bool {
   auto loaded = scene_io::LoadSceneYaml(path);

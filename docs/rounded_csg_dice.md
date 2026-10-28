@@ -1,6 +1,6 @@
 # Rounded CSG dice (Chapter 16)
 
-Open [rounded_csg_dice_chapter16.yaml](../assets/scenes/rounded_csg_dice_chapter16.yaml) in the scene editor.
+Open [chapter_16_rounded_csg_dice.yaml](../assets/scenes/chapter_16_rounded_csg_dice.yaml) in the scene editor.
 
 Each die uses a CSG `difference`: the left operand is the colored rounded body,
 and the right operand is a CSG `union` of small white spheres that cut the pips.

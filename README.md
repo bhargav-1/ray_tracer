@@ -1,10 +1,12 @@
 # Ray Tracer Challenge
 
-Yet another implementation of *The Ray Tracer Challenge* by Jamis Buck, written
-in C++23. The goal is to build a ray tracer from scratch while following the
-book as closely as possible.
+[![Linux CI](https://github.com/bhargav-1/ray_tracer/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/bhargav-1/ray_tracer/actions/workflows/ci.yml)
 
-[Try the browser demo](https://bhargav-1.github.io/ray_tracer/)
+Yet another implementation of [*The Ray Tracer Challenge*](http://raytracerchallenge.com/)
+by Jamis Buck, written in C++23. I set out to build a ray tracer from scratch
+while following the book as closely as possible.
+
+[Try in browser](https://bhargav-1.github.io/ray_tracer/)
 
 ![Starting with solid shapes, editing colors and patterns, enabling reflections, stretching a sphere, and orbiting the camera](images/scene_editor_demo.gif)
 
@@ -13,10 +15,10 @@ with materials, transforms, cameras, and lights. That led to a scene editor
 built with Dear ImGui, GLFW, and OpenGL. Ray tracing runs on the CPU; the editor
 displays the rendered image and lets me change the scene interactively.
 
-It started as a curiosity to play and understand the ray tracing concepts, it
-was/is immensely satisfying and incredibly fun to experiment/explore the concepts.
-It started out as if I can claim the world of graphics with just this book, but I
-quickly realized I am just scratching the surface, and I have a lot to learn.
+It started as a curiosity to play with and understand ray tracing concepts. It
+has been immensely satisfying and incredibly fun to experiment with and explore
+them. I started out thinking I could claim the world of graphics with just this
+book, but I quickly realized I am only scratching the surface and have a lot to learn.
 
 ## Build and run
 
@@ -109,8 +111,8 @@ The renderer supports reflective and transparent materials, refraction, and Schl
 ### Chapter 10: Patterns
 
 Procedural patterns can be transformed, nested, and blended.
-(notice the fixed pattern on sphere checkers, other shapes can be done as
-explained in bonus chapter of textures.)
+(Notice the fixed checker pattern on the sphere; other shapes can be handled as
+explained in the bonus chapter on textures.)
 
 ![Spheres and a floor with procedural patterns](images/chapter_10_patterns.png)
 
@@ -121,7 +123,7 @@ Perturbing a pattern with noise produces less regular surfaces.
 ### Chapter 9: Planes
 
 Planes form a room containing transformed spheres.
-Again played to generate a very odd looking result.
+I played around again and generated a very odd-looking result.
 
 <img src="images/chapter_09_planes.png" alt="Colorful room made from planes with spheres on its surfaces" width="400">
 
@@ -135,7 +137,7 @@ An eclipse example built with shadow rays.
 
 A camera, materials, and multiple objects come together in a scene.
 Both the GUI example and the PPM renderer produce visible output.
-I played around with transforms to get very odd looking result.
+I played around with transforms to get a very odd-looking result.
 
 <img src="images/chapter_07_scene.png" alt="Chapter 7 scene displayed in ImGui" width="400">
 
@@ -169,7 +171,7 @@ The projectile example writes a PPM image. This PNG is an export of that output.
 
 - **Bounding boxes and bounding volume hierarchies (BVH): implemented.**
    The [dragon scene](assets/scenes/bonus_bvh_dragons.yaml) and [sphere grid](assets/scenes/bonus_bvh_spheres_5x5x5.yaml)
-   provide larger scenes to explore. This is really needed to drop down rendering times for complex scenes.
+   provide larger scenes to explore. This really helps reduce render times for complex scenes.
 
   ![Dragon models with transparent bounding boxes](images/bonus_bounding_boxes_dragon.png)
 
@@ -178,14 +180,14 @@ The projectile example writes a PPM image. This PNG is an export of that output.
 
 ## Lessons learned
 
-- I think most common theme for numbers was == does not mean anything for floating point numbers, its always ~= Approximations,
-  and small differences can result in salt and pepper noise in the final image, so I had to be careful with floating point comparisons.
-- CPUs are slow for crunching numbers in large scope, might have to play/port to GPU for better numbers (realtime!?)
+- I think the most common theme with numbers was that `==` does not mean anything for floating point values; it's always about `~=` approximations.
+  Small differences can result in salt and pepper noise in the final image, so I had to be careful with floating point comparisons.
+- CPUs are slow when crunching large amounts of data; I might have to play with a GPU port for better numbers (real time!?).
 - Always cache the results of expensive calculations if they are reused.
-    (this exploded in terms of saving render time multiple times)
-- Multithreading can do wonders
+    (This saved render time many times over.)
+- Multithreading can do wonders.
 - Build flags can change rendering times, but optimized builds can make debugging a
-  pain because variables may be missing out in debugger. I prefer `-Og -g` for debugging and `-O3` for release builds. `-g` adds debug symbols; the `-O` flag controls optimization.
+  pain because variables may be missing in the debugger. I prefer `-Og -g` for debugging and `-O3` for release builds. `-g` adds debug symbols; the `-O` flag controls optimization.
 
     Same CPU renderer, tested on an Intel Core i7-10700K with GCC 13.3 and 16 render threads:
 
@@ -204,14 +206,14 @@ The projectile example writes a PPM image. This PNG is an export of that output.
     | RelWithDebInfo | `-O2 -g -DNDEBUG` | 5.10 | 24.7 |
 
 
-- I tried to use constexpr everywhere, I don't think it helped much with performance, it didn't move any of render times (runtime) to compile time.
-- Small improvements on bounding boxes, skipping identity transforms, etc were small changes but helped with render times.
-- We are standing on shoulders of giants, so many algorithms and techniques for
-  each minute detail, I am still bothered by aliasing of the shapes, later
-  chapter-17 made it clear that I need to implement anti-aliasing, texture mapping, blurs,
-  different lights, so many endless possibilities
+- I tried to use `constexpr` everywhere, but I don't think it helped much with performance; it didn't move any of the render work from runtime to compile time.
+- Small improvements to bounding boxes, skipping identity transforms, and so on helped with render times.
+- We stand on the shoulders of giants. There are so many algorithms and techniques for
+  every minute detail. I am still bothered by aliasing of shapes. Later, Chapter 17
+  made it clear that I need to implement anti-aliasing, texture mapping, blurs,
+  different lights, and so many other possibilities.
 
-The most rewarding page while implementing was the [teapot competition](https://graphics.cs.utah.edu/courses/cs6620/fall2013/?prj=13) and getting to know 50 years ago was first rendering of teapot.
+The most rewarding page I found while implementing this was the [teapot competition](https://graphics.cs.utah.edu/courses/cs6620/fall2013/?prj=13); I loved learning that the teapot was first rendered about 50 years ago.
 
 ## Other resources
 

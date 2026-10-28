@@ -41,8 +41,14 @@ auto ParallelRenderRows(const int height,
   if (height <= 0) {
     return true;
   }
-  const auto worker_count =
-      std::min(static_cast<unsigned int>(height), std::max(1U, std::thread::hardware_concurrency()));
+#ifdef __EMSCRIPTEN__
+  // Leave two logical CPUs available for the browser and other work.
+  const auto hardware_threads = std::thread::hardware_concurrency();
+  const auto worker_limit = hardware_threads > 2U ? hardware_threads - 2U : 1U;
+#else
+  const auto worker_limit = std::max(1U, std::thread::hardware_concurrency());
+#endif
+  const auto worker_count = std::min(static_cast<unsigned int>(height), worker_limit);
   std::atomic<int> next_row{0};
   std::atomic<int> completed_rows{0};
   std::atomic<bool> aborted{false};

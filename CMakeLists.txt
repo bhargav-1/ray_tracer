@@ -52,6 +52,9 @@ message("------------------------------CMAKE_PROJECT_VERSION_MINOR: ${CMAKE_PROJ
 message("------------------------------CMAKE_PROJECT_VERSION_PATCH: ${CMAKE_PROJECT_VERSION_PATCH}")
 
 
+if (EMSCRIPTEN)
+    include(cmake/web.cmake)
+else ()
 find_package(yaml-cpp CONFIG REQUIRED)
 find_package(Catch2 REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
@@ -63,6 +66,7 @@ find_path(IMGUI_BACKEND_INCLUDE_DIR NAMES imgui_impl_glfw.h
 target_include_directories(PkgConfig::IMGUI INTERFACE "${IMGUI_BACKEND_INCLUDE_DIR}")
 target_link_libraries(PkgConfig::IMGUI INTERFACE glfw OpenGL::GL ${CMAKE_DL_LIBS})
 add_library(imgui::imgui ALIAS PkgConfig::IMGUI)
+endif ()
 
 # Minimal inclusion, but see caveat further below
 # This generates CMAKE_INSTALL_* Variables
@@ -95,4 +99,6 @@ add_subdirectory(src/app)
 
 
 
-include(packing)
+if (NOT EMSCRIPTEN)
+    include(packing)
+endif ()

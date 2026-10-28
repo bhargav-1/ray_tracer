@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ray Tracer Challenge — C++ Scene Editor</title>
+  <link rel="icon" href="data:,">
+  <style>
+    body { margin: 0; background: #26262e; color: #eee; font: 14px system-ui, sans-serif; display: flex; flex-direction: column; height: 100vh; }
+    header { padding: 8px 12px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+    canvas { display: block; width: 100%; flex: 1; min-height: 0; outline: none; }
+    #status { color: #b9d6ff; }
+  </style>
+</head>
+<body>
+  <header>
+    <strong>C++ / ImGui Scene Editor</strong>
+    <label>Upload YAML / OBJ <input id="upload" type="file" accept=".yaml,.yml,.obj" multiple disabled></label>
+    <span id="status">Loading…</span>
+    <span>Use Load for bundled scenes. Drag to orbit; right-drag to pan; scroll to zoom.</span>
+  </header>
+  <canvas id="canvas" tabindex="0" oncontextmenu="event.preventDefault()"></canvas>
+  <!-- Upstream helper adds thread isolation on static hosts such as GitHub Pages. -->
+  <script src="coi-serviceworker.js"></script>
+  <script>
+    const status = document.getElementById('status');
+    var Module = {
+      canvas: document.getElementById('canvas'),
+      print: console.log,
+      printErr: console.error,
+      setStatus: text => { if (text) status.textContent = text; },
+      onAbort: reason => { status.textContent = 'Could not start: ' + reason; },
+      onRuntimeInitialized: () => {
+        status.textContent = 'Ready — all rendering runs locally in your browser.';
+        document.getElementById('upload').disabled = false;
+      }
+    };
+    document.getElementById('upload').addEventListener('change', async event => {
+      for (const file of event.target.files) {
+        const folder = file.name.toLowerCase().endsWith('.obj') ? '/assets/models/' : '/assets/scenes/';
+        Module.FS.writeFile(folder + file.name, new Uint8Array(await file.arrayBuffer()));
+      }
+      status.textContent = 'Uploaded. Open the files with Load or + Obj.';
+      event.target.value = '';
+    });
+    Module.canvas.addEventListener('click', () => Module.canvas.focus());
+    if (crossOriginIsolated) {
+      const script = document.createElement('script');
+      script.src = 'index.js';
+      document.body.appendChild(script);
+    } else {
+      status.textContent = 'Enabling browser threads… If this does not reload, allow service workers or use invoke app.run.web.';
+    }
+  </script>
+  <!-- Emscripten shell marker; the runtime is loaded above after thread isolation. -->
+  <template>{{{ SCRIPT }}}</template>
+</body>
+</html>

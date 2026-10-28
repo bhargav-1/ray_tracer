@@ -6,6 +6,9 @@
 #include <filesystem>
 #include <utility>
 #include <vector>
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
 
 #include "app/scene/scene.h"
 #include "app/scene/scene_compiler.h"
@@ -43,6 +46,20 @@ auto SceneEditorApp::SaveScene(const std::filesystem::path& path) -> bool {
   }
   state_.current_path = path;
   state_.status_message = "Saved " + path.string();
+#ifdef __EMSCRIPTEN__
+  // The browser filesystem is temporary; Save As also downloads the YAML.
+  // clang-format off: the macro body is JavaScript, not C++.
+  EM_ASM({
+    const path = UTF8ToString($0);
+    const url = URL.createObjectURL(new Blob([FS.readFile(path)], {type: 'application/yaml'}));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = path.split('/').pop();
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }, path.string().c_str());
+  // clang-format on
+#endif
   return true;
 }
 

@@ -66,6 +66,21 @@ RUN USER=${USER_ARG} && \
     sudo mkdir -p /etc/fixuid && \
     printf "user: $USER\ngroup: $GROUP\n" | sudo tee -a /etc/fixuid/config.yml;
 
+# Keep the web toolchain in the reusable environment image, not the project layer.
+ARG EMSDK_VERSION=4.0.23
+ENV EMSDK=/opt/emsdk
+RUN sudo install -d -o "${USER_ARG}" -g "${USER_ARG}" "${EMSDK}" \
+    && git clone --depth 1 --branch "${EMSDK_VERSION}" https://github.com/emscripten-core/emsdk.git "${EMSDK}" \
+    && "${EMSDK}/emsdk" install "${EMSDK_VERSION}" \
+    && "${EMSDK}/emsdk" activate "${EMSDK_VERSION}" \
+    && printf '. /opt/emsdk/emsdk_env.sh >/dev/null 2>&1\n' \
+       | sudo tee /etc/profile.d/emsdk.sh >/dev/null
+# BASH_ENV activates the SDK in Docker RUN commands and the bash entrypoint;
+# profile.d does the same for login/SSH shells. PATH also supports docker exec.
+ENV EM_CONFIG=/opt/emsdk/.emscripten \
+    BASH_ENV=/etc/profile.d/emsdk.sh \
+    PATH="/opt/emsdk:/opt/emsdk/upstream/emscripten:${PATH}"
+
 # CI can pass a published dev environment; local builds use the stage above.
 FROM ${DEV_ENV_IMAGE} AS dev-env
 

@@ -1,6 +1,7 @@
 #/.github/
 #/.git/
 build/
+build-web/
 install/
 dist/
 .venv-ci/

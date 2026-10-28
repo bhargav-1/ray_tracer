@@ -7,6 +7,10 @@ application.
 
 import os
 import shlex
+import shutil
+from pathlib import Path
+from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+from functools import partial
 
 # pylint: disable=import-error
 # pylint: disable=no-name-in-module
@@ -26,7 +30,7 @@ def clean(context):
     if not is_linux:
         del_cmd = "RMDIR /S /Q"
     context.run(
-        f"{del_cmd} build install",
+        f"{del_cmd} build build-web install",
         pty=is_linux,
     )
 
@@ -91,9 +95,28 @@ def build_ci(context):
     )
 
 
+@task
+def build_web(context):
+    """Build the shared C++/ImGui editor for browsers (requires an activated Emscripten SDK)."""
+    if shutil.which("emcmake") is None:
+        raise RuntimeError(
+            "Activate the Emscripten SDK first: source /path/to/emsdk/emsdk_env.sh"
+        )
+    context.run(
+        "emcmake cmake -S . -B build-web -G Ninja "
+        "-DCMAKE_BUILD_TYPE=Release -DBUILD_WITH_SA_CHECKS=OFF",
+        pty=is_linux,
+    )
+    context.run(
+        "cmake --build build-web --target scene_editor --parallel 4", pty=is_linux
+    )
+    print("Web app built in build-web/web. Start it with: invoke app.run.web")
+
+
 build_coll = Collection("build")
 build_coll.add_task(build)
 build_coll.add_task(build_ci, "ci")
+build_coll.add_task(build_web, "web")
 
 
 @task(default=True)
@@ -136,8 +159,33 @@ def run(context, args=""):
     context.run(f"./build/src/app/raytracerchallenge {args}".rstrip())
 
 
+@task
+def run_web(_context, port=8000):
+    """Serve the web build on localhost, with headers required for browser threads."""
+    directory = Path("build-web/web").resolve()
+    if not (directory / "index.html").is_file():
+        raise RuntimeError("Build the web app first: invoke app.build.web")
+
+    class WebHandler(SimpleHTTPRequestHandler):
+        """Allow the shared WebAssembly memory used by C++ rendering threads."""
+
+        def end_headers(self):
+            self.send_header("Cross-Origin-Opener-Policy", "same-origin")
+            self.send_header("Cross-Origin-Embedder-Policy", "require-corp")
+            super().end_headers()
+
+    handler = partial(WebHandler, directory=str(directory))
+    print(f"Open http://localhost:{port} (Ctrl+C to stop)")
+    with ThreadingHTTPServer(("127.0.0.1", int(port)), handler) as server:
+        try:
+            server.serve_forever()
+        except KeyboardInterrupt:
+            pass
+
+
 run_coll = Collection("run")
 run_coll.add_task(run)
+run_coll.add_task(run_web, "web")
 
 ns = Collection(
     build_coll,

@@ -64,9 +64,9 @@ SCENARIO("asset lookup: relocated installations load bundled scenes and relative
   CHECK(scene_runtime::CompileScene(mesh_scene.scene).ok);
 }
 
-SCENARIO("scene editor app: viewport overlays are disabled by default") {
+SCENARIO("scene editor app: selected viewport is disabled by default") {
   const scene_editor::SceneEditorApp app;
-  CHECK_FALSE(app.State().show_viewport_overlays);
+  CHECK_FALSE(app.State().show_selected_viewport);
 }
 
 SCENARIO("scene editor app: load replaces current scene only on success") {

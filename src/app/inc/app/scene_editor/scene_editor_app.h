@@ -48,7 +48,7 @@ struct EditorState {
   Selection selection;
   GizmoMode gizmo_mode{GizmoMode::kTranslate};
   RenderState render_state;
-  bool show_viewport_overlays{false};
+  bool show_selected_viewport{false};
   std::string status_message;
   std::vector<std::size_t> obj_import_parent_path;
 };

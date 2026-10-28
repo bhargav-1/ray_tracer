@@ -25,11 +25,6 @@ jobs:
           python3 -m venv .venv-ci
           .venv-ci/bin/pip install -r requirements.txt
           echo "$GITHUB_WORKSPACE/.venv-ci/bin" >> "$GITHUB_PATH"
-      - name: Log in to Docker Hub
-        env:
-          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-        run: printf '%s' "$DOCKERHUB_TOKEN" | docker login --username "$DOCKERHUB_USERNAME" --password-stdin
       - name: Build and check Release in Docker
         run: invoke docker.build --hw=CPU --ci
       - name: Upload Debian package and checksums
@@ -42,6 +37,49 @@ jobs:
           if-no-files-found: error
           retention-days: 30
           compression-level: 0
+
+  web:
+    name: Build browser app
+    if: github.event_name != 'pull_request' && (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/release'))
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Install Invoke
+        run: |
+          python3 -m venv .venv-ci
+          .venv-ci/bin/pip install -r requirements.txt
+          echo "$GITHUB_WORKSPACE/.venv-ci/bin" >> "$GITHUB_PATH"
+      - name: Build WebAssembly in Docker
+        run: invoke docker.build --hw=CPU --ci --web
+      - name: Upload browser app
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: build-web/web
+
+  pages:
+    name: Deploy browser app to GitHub Pages
+    needs: [build, web]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    concurrency:
+      group: github-pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+      - name: Deploy browser app
+        id: deployment
+        uses: actions/deploy-pages@v4
 
   release:
     name: Publish tagged release

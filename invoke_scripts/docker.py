@@ -74,22 +74,25 @@ class GitVersion:
 
 
 @task
-def build(ctx, hw="GPU", mode="dev", ci=False):
+def build(ctx, hw="GPU", mode="dev", ci=False, web=False):
+    # pylint: disable=too-many-arguments
     """
     Builds docker container
     :param context:
     :param hw: CPU or GPU
     :param mode: dev
     :param ci: Use the published development image, run CI checks, and copy packages to dist
+    :param web: Build the browser app and copy its files to build-web/web instead
     :return:
     """
     git = GitVersion(ctx)
     ci_checks_str = "true" if ci else "false"
     docker_base = "ubuntu:noble"
     dockerfile = "docker/Dockerfile"
-    image_name = f"bhargavulc/{proj}:{hw}-{mode}"
+    target = "web" if web else mode
+    image_name = f"bhargavulc/{proj}:{hw}-{target}"
     ctx.run(
-        f"docker build --network=host --target {mode} -f {dockerfile}"
+        f"docker build --network=host --target {target} -f {dockerfile}"
         + f" --build-arg PROJ_NAME={proj}"
         + f" --build-arg DOCKER_BASE={docker_base}"
         + f" --build-arg HARDWARE={hw}"
@@ -101,8 +104,24 @@ def build(ctx, hw="GPU", mode="dev", ci=False):
         + f' --build-arg GIT_BRANCH_ARG="{git.branch}"'
         + f" -t {image_name} ."
     )
-    if ci:
+    if web:
+        _copy_web_artifacts(ctx, image_name)
+    elif ci:
         _copy_artifacts(ctx, image_name)
+
+
+def _copy_web_artifacts(ctx, image_name):
+    """Extract the static browser app without starting the image."""
+    container = ctx.run(
+        f"docker create --entrypoint /bin/true {shlex.quote(image_name)}", hide=True
+    ).stdout.strip()
+    try:
+        destination = Path("build-web/web")
+        destination.mkdir(parents=True, exist_ok=True)
+        source = shlex.quote(f"{container}:/workspace/build-web/web/.")
+        ctx.run(f"docker cp {source} {shlex.quote(str(destination))}")
+    finally:
+        ctx.run(f"docker rm {shlex.quote(container)}", hide=True)
 
 
 def _copy_artifacts(ctx, image_name, output="dist"):

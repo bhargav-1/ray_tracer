@@ -4,6 +4,10 @@ Yet another implementation of *The Ray Tracer Challenge* by Jamis Buck, written
 in C++23. The goal is to build a ray tracer from scratch while following the
 book as closely as possible.
 
+[Try the browser demo](https://bhargav-1.github.io/ray_tracer/)
+
+![Starting with solid shapes, editing colors and patterns, enabling reflections, stretching a sphere, and orbiting the camera](images/scene_editor_demo.gif)
+
 Along the way, I wanted an easier way to visualize the results and experiment
 with materials, transforms, cameras, and lights. That led to a scene editor
 built with Dear ImGui, GLFW, and OpenGL. Ray tracing runs on the CPU; the editor
@@ -42,32 +46,13 @@ invoke app.build
 invoke app.run
 ```
 
+Browser build and local server: `invoke app.build.web` then `invoke app.run.web`.
+
 The container uses the standard runtime by default. Use `invoke docker.up --gpu` to enable the NVIDIA runtime for GPU-accelerated OpenGL display; this requires the NVIDIA Container Toolkit. Ray tracing still runs on the CPU. `invoke docker.login` connects to `localhost:1122`.
-
-### Native Ubuntu build
-
-To build directly on Ubuntu 24.04, install the system packages listed in [dev-cpu.deps](docker/dependencies/dev-cpu.deps) and the Python tools listed in [pip3.txt](docker/dependencies/pip3.txt). Then run these commands from the repository root:
-
-```sh
-invoke app.build
-invoke app.run
-```
-
-CLion can also import [CMakePresets.json](CMakePresets.json) and build the `scene_editor` target.
 
 ### Install the Ubuntu package
 
-For Ubuntu 24.04 x86_64, download the `.deb` from
-[Releases](https://github.com/bhargav-1/ray_tracer/releases) or extract it from
-**Actions → Linux CI → the run → Artifacts**, then install and run:
-
-```sh
-sudo apt install ./raytracerchallenge_*.deb
-raytracerchallenge
-```
-
-Choose a scene in the editor, or open one directly with
-`raytracerchallenge /path/to/scene.yaml`.
+For Ubuntu 24.04 x86_64, download the `.deb` from [Releases](https://github.com/bhargav-1/ray_tracer/releases), install it with `sudo apt install ./raytracerchallenge_*.deb`, and run `raytracerchallenge [scene.yaml]`.
 
 ## Exploring scenes
 
@@ -78,59 +63,48 @@ render the result. Model paths are saved relative to the scene file.
 To open a scene directly:
 
 ```sh
-invoke app.run --args="assets/scenes/rounded_csg_dice_chapter16.yaml"
+invoke app.run --args="assets/scenes/chapter_16_rounded_csg_dice.yaml"
 ```
 
 ## Chapters and results
 
-Chapters 1 and 3 cover tuples and matrices. They have tests but no standalone visual demos. Later chapters use either dedicated examples or YAML scenes loaded in the scene editor.
+Results are shown from the later chapters back to the first visual examples. Chapters 1 and 3 cover tuples and matrices; they have tests but no standalone visual demos.
 
-### Chapter 2: Drawing on a canvas
+### Chapter 16: Constructive solid geometry
 
-The projectile example writes a PPM image. This PNG is an export of that output.
+CSG combines shapes using union, intersection, and difference. The dice use these operations to create rounded edges and recessed pips.
 
-![Projectile trajectory drawn on a canvas](images/chapter_02_projectile.png)
+![Three rounded dice with recessed pips](images/chapter_16_csg.gif)
 
-### Chapter 4: Transformations
+### Chapter 15: Triangles and OBJ models
 
-A clock face built by rotating and translating points.
+OBJ loading makes it possible to render triangle meshes. This comparison shows the same teapot without normals and with normals interpolation.
 
-![Clock face showing transformed points](images/chapter_04_clock.png)
+![Teapots rendered with flat shading on the left and smooth shading on the right](images/chapter_15_triangles_obj.gif)
 
-### Chapter 5: Ray-sphere intersections
+### Chapter 14: Groups
 
-Casting rays onto a transformed sphere produces its silhouette.
+Groups let related objects share transforms and form larger structures.
 
-![Red silhouette of a transformed sphere](images/chapter_05_ray_sphere.png)
+![Hexagonal structure built from grouped objects](images/chapter_14_groups.gif)
 
-### Chapter 6: Light and shading
+### Chapter 13: Cylinders and cones
 
-Lighting gives the sphere its shape, shading, and specular highlight.
+This [material study](assets/scenes/chapter_13_cylinders_cones.yaml) combines glass and mirror cylinders, stepped brass rings, and cones with matte cobalt, polished copper, and glazed emerald finishes on a checkerboard floor.
 
-![Blue sphere with lighting and a specular highlight](images/chapter_06_lighting.png)
+![Glass and mirror cylinders, stepped rings, and three cones with different materials on a checkerboard floor](images/chapter_13_material_study.gif)
 
-### Chapter 7: Making a scene
+### Chapter 12: Cubes
 
-A camera, materials, and multiple objects come together in a scene.
-Both the GUI example and the PPM renderer produce visible output.
-I played around with transforms to get very odd looking result.
+A furnished room built largely from transformed cubes.
 
-![Chapter 7 scene displayed in ImGui](images/chapter_07_scene.png)
+![Room with a table, framed panels, and cubes](images/chapter_12_room_cubes.gif)
 
-![PNG exported from the chapter 7 PPM renderer](images/chapter_07_scene_ppm.png)
+### Chapter 11: Reflection and refraction
 
-### Chapter 8: Shadows
+The renderer supports reflective and transparent materials, refraction, and Schlick's approximation.
 
-An eclipse example built with shadow rays.
-
-![Eclipse rendered using shadow rays](images/chapter_08_shadows.png)
-
-### Chapter 9: Planes
-
-Planes form a room containing transformed spheres.
-Again played to generate a very odd looking result.
-
-![Colorful room made from planes with spheres on its surfaces](images/chapter_09_planes.png)
+![Pond and rocks displayed in the scene editor](images/chapter_11_reflections.gif)
 
 ### Chapter 10: Patterns
 
@@ -144,46 +118,57 @@ Perturbing a pattern with noise produces less regular surfaces.
 
 ![Perturbed patterns on green spheres and a floor](images/chapter_10_perturbed_patterns.png)
 
-### Chapter 11: Reflection and refraction
+### Chapter 9: Planes
 
-The renderer supports reflective and transparent materials, refraction, and Schlick's approximation. The pond scene is one example from this stage.
+Planes form a room containing transformed spheres.
+Again played to generate a very odd looking result.
 
-![Pond and rocks displayed in the scene editor](images/chapter_11_reflections.png)
+<img src="images/chapter_09_planes.png" alt="Colorful room made from planes with spheres on its surfaces" width="400">
 
-### Chapter 12: Cubes
+### Chapter 8: Shadows
 
-A furnished room built largely from transformed cubes.
+An eclipse example built with shadow rays.
 
-![Room with a table, framed panels, and cubes](images/chapter_12_room_cubes.png)
+<img src="images/chapter_08_shadows.png" alt="Eclipse rendered using shadow rays" width="400">
 
-### Chapter 13: Cylinders and cones
+### Chapter 7: Making a scene
 
-This [material study](assets/scenes/chapter_13_cylinders_cones.yaml) combines glass and mirror cylinders, stepped brass rings, and cones with matte cobalt, polished copper, and glazed emerald finishes on a checkerboard floor.
+A camera, materials, and multiple objects come together in a scene.
+Both the GUI example and the PPM renderer produce visible output.
+I played around with transforms to get very odd looking result.
 
-![Glass and mirror cylinders, stepped rings, and three cones with different materials on a checkerboard floor](images/chapter_13_material_study.png)
+<img src="images/chapter_07_scene.png" alt="Chapter 7 scene displayed in ImGui" width="400">
 
-### Chapter 14: Groups
+<img src="images/chapter_07_scene_ppm.png" alt="PNG exported from the chapter 7 PPM renderer" width="400">
 
-Groups let related objects share transforms and form larger structures.
+### Chapter 6: Light and shading
 
-![Hexagonal structure built from grouped objects](images/chapter_14_groups.png)
+Lighting gives the sphere its shape, shading, and specular highlight.
 
-### Chapter 15: Triangles and OBJ models
+<img src="images/chapter_06_lighting.png" alt="Blue sphere with lighting and a specular highlight" width="400">
 
-OBJ loading makes it possible to render triangle meshes. This comparison shows the same teapot without normals and with normals interpolation.
+### Chapter 5: Ray-sphere intersections
 
-![Teapots rendered with flat shading on the left and smooth shading on the right](images/chapter_15_triangles_obj.png)
+Casting rays onto a transformed sphere produces its silhouette.
 
-### Chapter 16: Constructive solid geometry
+<img src="images/chapter_05_ray_sphere.png" alt="Red silhouette of a transformed sphere" width="400">
 
-CSG combines shapes using union, intersection, and difference. The dice use these operations to create rounded edges and recessed pips.
+### Chapter 4: Transformations
 
-![Three rounded dice with recessed pips](images/chapter_16_csg.png)
+A clock face built by rotating and translating points.
+
+<img src="images/chapter_04_clock.png" alt="Clock face showing transformed points" width="400">
+
+### Chapter 2: Drawing on a canvas
+
+The projectile example writes a PPM image. This PNG is an export of that output.
+
+<img src="images/chapter_02_projectile.png" alt="Projectile trajectory drawn on a canvas" width="400">
 
 ## Bonus chapters
 
 - **Bounding boxes and bounding volume hierarchies (BVH): implemented.**
-   The [dragon scene](assets/scenes/dragon_bonus_bvh.yaml) and [sphere grid](assets/scenes/bvh_spheres_5x5x5.yaml)
+   The [dragon scene](assets/scenes/bonus_bvh_dragons.yaml) and [sphere grid](assets/scenes/bonus_bvh_spheres_5x5x5.yaml)
    provide larger scenes to explore. This is really needed to drop down rendering times for complex scenes.
 
   ![Dragon models with transparent bounding boxes](images/bonus_bounding_boxes_dragon.png)
@@ -204,8 +189,8 @@ CSG combines shapes using union, intersection, and difference. The dice use thes
 
     Same CPU renderer, tested on an Intel Core i7-10700K with GCC 13.3 and 16 render threads:
 
-    - **Dragons:** [dragon_bonus_bvh_max_time_render.yaml](assets/scenes/dragon_bonus_bvh_max_time_render.yaml), 1000×800, with six dragon meshes and transparent bounding boxes.
-    - **Simple:** [default.yaml](assets/scenes/default.yaml), 800×400, with one sphere and a checkerboard plane.
+    - **Dragons:** [bonus_bvh_dragons_max_render.yaml](assets/scenes/bonus_bvh_dragons_max_render.yaml), 1000×800, with six dragon meshes and transparent bounding boxes.
+    - **Simple:** [simple_scene.yaml](assets/scenes/simple_scene.yaml), 800×400, with one sphere and a checkerboard plane.
 
     | Build | Compiler flags | Dragons (s) | Simple (ms) |
     | --- | --- | ---: | ---: |

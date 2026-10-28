@@ -21,6 +21,7 @@ auto DrawViewportOverlay(scene::Scene& scene,
                          EditorState& editor_state,
                          UiRenderState& render_state,
                          ImVec2 image_min,
-                         ImVec2 image_size) -> OverlayResult;
+                         ImVec2 image_size,
+                         bool image_hovered) -> OverlayResult;
 
 }  // namespace ray_tracer::scene_editor

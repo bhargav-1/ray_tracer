@@ -1,6 +1,6 @@
 # Building a dodecahedron from triangles
 
-Open [triangle_solids.yaml](../assets/scenes/triangle_solids.yaml) in the scene editor and expand **Dodecahedron (12 pentagonal faces)**. It contains 36 triangle objects: three for each of its 12 pentagonal faces. The example also contains a separate **decahedron**, which has 10 triangular faces.
+Open [chapter_15_triangle_solids.yaml](../assets/scenes/chapter_15_triangle_solids.yaml) in the scene editor and expand **Dodecahedron (12 pentagonal faces)**. It contains 36 triangle objects: three for each of its 12 pentagonal faces. The example also contains a separate **decahedron**, which has 10 triangular faces.
 
 ## Think of two bowls
 

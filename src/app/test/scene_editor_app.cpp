@@ -56,10 +56,10 @@ SCENARIO("asset lookup: relocated installations load bundled scenes and relative
   std::filesystem::copy(RAY_TRACER_ASSET_DIR, assets, std::filesystem::copy_options::recursive);
   REQUIRE(AssetDirectory(install.root / "bin" / "raytracerchallenge") == assets);
 
-  const auto default_scene = scene_io::LoadSceneYaml(assets / "scenes" / "default.yaml");
+  const auto default_scene = scene_io::LoadSceneYaml(assets / "scenes" / "chapter_11_demo.yaml");
   REQUIRE(default_scene.ok);
   CHECK(scene_runtime::CompileScene(default_scene.scene).ok);
-  const auto mesh_scene = scene_io::LoadSceneYaml(assets / "scenes" / "teapot_comparision_chapter15.yaml");
+  const auto mesh_scene = scene_io::LoadSceneYaml(assets / "scenes" / "chapter_15_teapot_comparison.yaml");
   REQUIRE(mesh_scene.ok);
   CHECK(scene_runtime::CompileScene(mesh_scene.scene).ok);
 }

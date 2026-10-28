@@ -258,7 +258,7 @@ SCENARIO("scene yaml: rejects invalid scenes with useful errors") {
 }
 
 SCENARIO("scene yaml: loads relative OBJ sources and preserves them through Save As") {
-  const auto path = std::filesystem::path{RAY_TRACER_ASSET_DIR} / "scenes" / "teapot_comparision_chapter15.yaml";
+  const auto path = std::filesystem::path{RAY_TRACER_ASSET_DIR} / "scenes" / "chapter_15_teapot_comparison.yaml";
   const auto loaded = scene_io::LoadSceneYaml(path);
   INFO(loaded.error);
   REQUIRE(loaded.ok);
@@ -290,7 +290,7 @@ SCENARIO("scene yaml: loads relative OBJ sources and preserves them through Save
 }
 
 SCENARIO("scene yaml: saves nested OBJ sources relative to the destination") {
-  const auto path = std::filesystem::path{RAY_TRACER_ASSET_DIR} / "scenes" / "dragon_bonus_bvh_max_time_render.yaml";
+  const auto path = std::filesystem::path{RAY_TRACER_ASSET_DIR} / "scenes" / "bonus_bvh_dragons_max_render.yaml";
   const auto loaded = scene_io::LoadSceneYaml(path);
   INFO(loaded.error);
   REQUIRE(loaded.ok);

@@ -127,7 +127,7 @@ SCENARIO("scene compiler: rejects degenerate triangle vertices") {
 }
 
 SCENARIO("scene compiler: compiles the editable triangle solids example") {
-  const auto path = std::filesystem::path{RAY_TRACER_ASSET_DIR} / "scenes" / "triangle_solids.yaml";
+  const auto path = std::filesystem::path{RAY_TRACER_ASSET_DIR} / "scenes" / "chapter_15_triangle_solids.yaml";
   const auto loaded = scene_io::LoadSceneYaml(path);
   REQUIRE(loaded.ok);
   REQUIRE(loaded.scene.objects.size() == 6);
@@ -176,14 +176,14 @@ SCENARIO("scene compiler: returns useful errors") {
 }
 
 SCENARIO("scene compiler: default asset loads and compiles") {
-  const auto path = std::filesystem::path{RAY_TRACER_ASSET_DIR} / "scenes" / "default.yaml";
+  const auto path = std::filesystem::path{RAY_TRACER_ASSET_DIR} / "scenes" / "chapter_11_demo.yaml";
   const auto loaded = scene_io::LoadSceneYaml(path);
   REQUIRE(loaded.ok);
   REQUIRE(loaded.scene.camera.has_value());
   CHECK(!loaded.scene.lights.empty());
   CHECK(loaded.scene.objects.size() >= 2);
   CHECK(loaded.scene.objects[0].Shape().type == scene::ObjectType::kPlane);
-  CHECK(loaded.scene.objects[1].Shape().type == scene::ObjectType::kSphere);
+  CHECK(loaded.scene.objects[1].Shape().type == scene::ObjectType::kPlane);
 
   const auto compiled = scene_runtime::CompileScene(loaded.scene);
   REQUIRE(compiled.ok);

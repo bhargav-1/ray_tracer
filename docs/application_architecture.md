@@ -55,10 +55,10 @@ Materials can contain recursive patterns. Runtime shape IDs are assigned during 
 
 ## Loading, saving, and paths
 
-On startup, the editor loads the scene path supplied as its first command-line argument. Without one, it loads `assets/scenes/default.yaml`. CMake supplies the default asset directory through `RAY_TRACER_ASSET_DIR`.
+On startup, the editor loads the scene path supplied as its first command-line argument. Without one, it loads `assets/scenes/chapter_11_demo.yaml`. CMake supplies the default asset directory through `RAY_TRACER_ASSET_DIR`.
 
 ```sh
-./build/src/app/scene_editor assets/scenes/default.yaml
+./build/src/app/scene_editor assets/scenes/simple_scene.yaml
 ```
 
 The path textbox supplies the starting location for the ImGui **Load** and **Save As** dialogs. The editor also has an OBJ chooser for importing models.
@@ -98,10 +98,11 @@ Checked-in scenes use `version: 1`. The loader/compiler APIs are free functions 
 
 Use working assets as examples instead of maintaining a second copy of the schema here:
 
-- [default.yaml](../assets/scenes/default.yaml): camera, light, sphere, plane, materials, and a checker pattern.
-- [hexagon.yaml](../assets/scenes/hexagon.yaml): nested groups and shared transforms.
-- [teapot_comparision_chapter15.yaml](../assets/scenes/teapot_comparision_chapter15.yaml): relative OBJ sources and flat/smooth meshes.
-- [rounded_csg_dice_chapter16.yaml](../assets/scenes/rounded_csg_dice_chapter16.yaml): CSG operations and nested objects.
+- [chapter_11_demo.yaml](../assets/scenes/chapter_11_demo.yaml): default Chapter 11 demo scene.
+- [simple_scene.yaml](../assets/scenes/simple_scene.yaml): camera, light, sphere, plane, materials, and a checker pattern.
+- [chapter_14_hexagon.yaml](../assets/scenes/chapter_14_hexagon.yaml): nested groups and shared transforms.
+- [chapter_15_teapot_comparison.yaml](../assets/scenes/chapter_15_teapot_comparison.yaml): relative OBJ sources and flat/smooth meshes.
+- [chapter_16_rounded_csg_dice.yaml](../assets/scenes/chapter_16_rounded_csg_dice.yaml): CSG operations and nested objects.
 
 Important schema details:
 

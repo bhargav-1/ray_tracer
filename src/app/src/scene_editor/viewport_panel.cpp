@@ -16,10 +16,13 @@
 namespace ray_tracer::scene_editor {
 namespace {
 
-auto DrawTopLegend(const scene::Scene& scene, EditorState& state) -> void {
-  ImGui::Text("Selected: %s", SelectedName(scene, state.selection).c_str());
+auto DrawTopLegend(SceneEditorApp& app) -> bool {
+  auto& state = app.MutableState();
+  ImGui::Text("Selected: %s", SelectedName(app.CurrentScene(), state.selection).c_str());
   ImGui::SameLine();
   ImGui::Checkbox("Show selected viewport", &state.show_selected_viewport);
+  ImGui::SameLine();
+  const bool camera_reset = ImGui::Button("Reset Camera") && app.ResetCamera();
   ImGui::SameLine();
   ImGui::TextColored(ImVec4(0.92F, 0.25F, 0.22F, 1.0F), "X");
   ImGui::SameLine();
@@ -38,6 +41,7 @@ auto DrawTopLegend(const scene::Scene& scene, EditorState& state) -> void {
   if (ImGui::RadioButton("Rotate", state.gizmo_mode == GizmoMode::kRotate)) {
     state.gizmo_mode = GizmoMode::kRotate;
   }
+  return camera_reset;
 }
 
 }  // namespace
@@ -47,7 +51,7 @@ auto DrawViewportPanel(SceneEditorApp& app, UiRenderState& render_state) -> View
   constexpr auto kFixedPaneFlags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse;
 
   ImGui::Begin("Viewport", nullptr, kFixedPaneFlags);
-  DrawTopLegend(app.CurrentScene(), app.MutableState());
+  result.camera_moved = DrawTopLegend(app);
   ImGui::Separator();
 
   if (render_state.texture.Valid() && render_state.displayed_width > 0 && render_state.displayed_height > 0) {

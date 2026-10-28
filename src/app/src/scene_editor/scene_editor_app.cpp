@@ -35,6 +35,7 @@ auto SceneEditorApp::LoadScene(const std::filesystem::path& path) -> bool {
     return false;
   }
   state_.selection = Selection{};
+  loaded_camera_ = current_scene_.camera;
   state_.current_path = path;
   state_.status_message = "Loaded " + path.string();
   return true;
@@ -110,6 +111,14 @@ auto SceneEditorApp::UpdateCamera() -> bool {
     return RecompileCurrentScene();
   }
   compiled_scene_->camera = scene_runtime::CompileCamera(*current_scene_.camera);
+  return true;
+}
+
+auto SceneEditorApp::ResetCamera() -> bool {
+  if (!loaded_camera_.has_value() || current_scene_.camera == loaded_camera_) {
+    return false;
+  }
+  current_scene_.camera = loaded_camera_;
   return true;
 }
 

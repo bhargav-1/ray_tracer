@@ -72,6 +72,7 @@ class SceneEditorApp {
   auto SetCurrentScene(scene::Scene scene) -> bool;
   auto RecompileCurrentScene() -> bool;
   auto UpdateCamera() -> bool;
+  auto ResetCamera() -> bool;
   auto ClearRenderRequest() -> void { state_.render_state.render_requested = false; }
 
  private:
@@ -80,6 +81,7 @@ class SceneEditorApp {
   scene::Scene current_scene_;
   EditorState state_;
   std::optional<scene_runtime::CompiledScene> compiled_scene_;
+  std::optional<scene::Camera> loaded_camera_;
 };
 
 }  // namespace ray_tracer::scene_editor

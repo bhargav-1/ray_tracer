@@ -29,11 +29,38 @@ target_link_libraries(app_lib
         yaml-cpp::yaml-cpp
         imgui::imgui
 )
+if (EMSCRIPTEN)
+    set(APP_ASSET_DIRECTORY "/assets")
+else ()
+    set(APP_ASSET_DIRECTORY "${CMAKE_SOURCE_DIR}/assets")
+endif ()
 target_compile_definitions(app_lib
         PUBLIC
-        RAY_TRACER_ASSET_DIR="${CMAKE_SOURCE_DIR}/assets"
+        RAY_TRACER_ASSET_DIR="${APP_ASSET_DIRECTORY}"
         RAY_TRACER_INSTALL_ASSET_DIR="${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME}/assets"
 )
+
+if (EMSCRIPTEN)
+    add_executable(scene_editor src/scene_editor/imgui_file_dialog.cpp src/scene_editor_main.cpp)
+    target_link_libraries(scene_editor PRIVATE app_lib)
+    set_target_properties(scene_editor PROPERTIES
+        OUTPUT_NAME index SUFFIX ".html"
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/web")
+    target_link_options(scene_editor PRIVATE
+        "--shell-file=${CMAKE_SOURCE_DIR}/web/shell.html"
+        "--preload-file=${CMAKE_SOURCE_DIR}/assets@/assets"
+        "-sEXPORTED_RUNTIME_METHODS=['FS']")
+    set_property(TARGET scene_editor APPEND PROPERTY LINK_DEPENDS "${CMAKE_SOURCE_DIR}/web/shell.html")
+    file(GLOB_RECURSE WEB_ASSETS CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/assets/*")
+    set_property(TARGET scene_editor APPEND PROPERTY LINK_DEPENDS ${WEB_ASSETS})
+    configure_file("${CMAKE_SOURCE_DIR}/web/coi-serviceworker.js"
+        "${CMAKE_BINARY_DIR}/web/coi-serviceworker.js" COPYONLY)
+    configure_file("${CMAKE_SOURCE_DIR}/web/coi-serviceworker.LICENSE.txt"
+        "${CMAKE_BINARY_DIR}/web/coi-serviceworker.LICENSE.txt" COPYONLY)
+    configure_file("${imgui_SOURCE_DIR}/LICENSE.txt" "${CMAKE_BINARY_DIR}/web/imgui.LICENSE.txt" COPYONLY)
+    configure_file("${yaml-cpp_SOURCE_DIR}/LICENSE" "${CMAKE_BINARY_DIR}/web/yaml-cpp.LICENSE.txt" COPYONLY)
+    return() # Desktop demos, tests and packaging remain native-only.
+endif ()
 
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/inc/app/scene" PREFIX "Header Files\\scene"
         FILES inc/app/scene/scene.h inc/app/scene/scene_yaml.h inc/app/scene/scene_compiler.h

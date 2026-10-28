@@ -13,6 +13,7 @@
 # CMake
 cmake-build-*/
 build/
+build-web/
 install/
 dist/
 depot.json

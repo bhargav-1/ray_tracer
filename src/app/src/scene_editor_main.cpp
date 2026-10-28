@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <array>
 #include <chrono>
 #include <iostream>
@@ -9,6 +10,10 @@
 #define GL_SILENCE_DEPRECATION
 #include <GL/gl.h>
 #include <GLFW/glfw3.h>
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#include <emscripten/html5.h>
+#endif
 
 #include "app/scene_editor/add_panel.h"
 #include "app/scene_editor/render_controller.h"
@@ -41,20 +46,23 @@ auto DrawMainLayout(SceneEditorApp& app,
   bool changed = false;
   constexpr auto kFixedPaneFlags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse;
 
+  const auto size = ImGui::GetIO().DisplaySize;
+  const float left_width = std::min(430.0F, size.x * 0.27F);
+  const float right_width = std::min(190.0F, size.x * 0.12F);
   ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
-  ImGui::SetNextWindowSize(ImVec2(430, 900), ImGuiCond_Always);
+  ImGui::SetNextWindowSize(ImVec2(left_width, size.y), ImGuiCond_Always);
   ImGui::Begin("Scene", nullptr, kFixedPaneFlags);
   changed |= DrawScenePanel(app, render_state, path_buffer);
   ImGui::End();
 
-  ImGui::SetNextWindowPos(ImVec2(1410, 0), ImGuiCond_Always);
-  ImGui::SetNextWindowSize(ImVec2(190, 900), ImGuiCond_Always);
+  ImGui::SetNextWindowPos(ImVec2(size.x - right_width, 0), ImGuiCond_Always);
+  ImGui::SetNextWindowSize(ImVec2(right_width, size.y), ImGuiCond_Always);
   ImGui::Begin("Add", nullptr, kFixedPaneFlags);
   changed |= DrawAddPanel(app, render_state);
   ImGui::End();
 
-  ImGui::SetNextWindowPos(ImVec2(435, 0), ImGuiCond_Always);
-  ImGui::SetNextWindowSize(ImVec2(970, 900), ImGuiCond_Always);
+  ImGui::SetNextWindowPos(ImVec2(left_width + 5.0F, 0), ImGuiCond_Always);
+  ImGui::SetNextWindowSize(ImVec2(size.x - left_width - right_width - 10.0F, size.y), ImGuiCond_Always);
   const auto viewport_result = DrawViewportPanel(app, render_state);
   return {.changed = changed || viewport_result.changed, .camera_moved = viewport_result.camera_moved};
 }
@@ -67,7 +75,12 @@ auto main(int argc, char** argv) -> int {
     return 1;
   }
 
+#ifdef __EMSCRIPTEN__
+  const auto* glsl_version = "#version 300 es";
+  glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
+#else
   const auto* glsl_version = "#version 130";
+#endif
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 
@@ -88,9 +101,10 @@ auto main(int argc, char** argv) -> int {
   ImGui_ImplGlfw_InitForOpenGL(window, true);
   ImGui_ImplOpenGL3_Init(glsl_version);
 
-  SceneEditorApp app;
-  UiRenderState render_state;
-  std::array<char, 1024> path_buffer{};
+  // Browser callbacks outlive main's stack; keep their editor state alive.
+  static SceneEditorApp app;
+  static UiRenderState render_state;
+  static std::array<char, 1024> path_buffer{};
   const bool loaded = argc > 1 ? app.LoadScene(argv[1]) : app.LoadDefaultScene();
   CopyPathToBuffer(app.State().current_path, path_buffer);
   const auto& compiled_scene = app.CompiledScene();
@@ -99,13 +113,26 @@ auto main(int argc, char** argv) -> int {
     StartRender(render_state, *compiled_scene, false);
   }
 
-  constexpr auto kClearColor = ImVec4(0.15F, 0.15F, 0.18F, 1.00F);
-  while (!glfwWindowShouldClose(window)) {
+  static auto draw_frame = [window]() {
+    constexpr auto kClearColor = ImVec4(0.15F, 0.15F, 0.18F, 1.00F);
+#ifdef __EMSCRIPTEN__
+    double width = 0;
+    double height = 0;
+    emscripten_get_element_css_size("#canvas", &width, &height);
+    int old_width = 0;
+    int old_height = 0;
+    glfwGetWindowSize(window, &old_width, &old_height);
+    if (width > 0 && height > 0 && (old_width != static_cast<int>(width) || old_height != static_cast<int>(height))) {
+      glfwSetWindowSize(window, static_cast<int>(width), static_cast<int>(height));
+    }
+#endif
     glfwPollEvents();
+#ifndef __EMSCRIPTEN__
     if (glfwGetWindowAttrib(window, GLFW_ICONIFIED) != 0) {
       std::this_thread::sleep_for(std::chrono::milliseconds{10});
-      continue;
+      return;
     }
+#endif
 
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
@@ -131,7 +158,16 @@ auto main(int argc, char** argv) -> int {
     glClear(GL_COLOR_BUFFER_BIT);
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     glfwSwapBuffers(window);
+  };
+
+#ifdef __EMSCRIPTEN__
+  emscripten_set_main_loop_arg(
+      [](void* frame) { (*static_cast<decltype(draw_frame)*>(frame))(); }, &draw_frame, 0, true);
+#else
+  while (!glfwWindowShouldClose(window)) {
+    draw_frame();
   }
+#endif
 
   StopRender(render_state);
   ImGui_ImplOpenGL3_Shutdown();

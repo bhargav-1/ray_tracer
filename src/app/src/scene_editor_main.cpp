@@ -44,25 +44,42 @@ auto DrawMainLayout(SceneEditorApp& app,
                     UiRenderState& render_state,
                     std::array<char, 1024>& path_buffer) -> ray_tracer::scene_editor::ViewportPanelResult {
   bool changed = false;
-  constexpr auto kFixedPaneFlags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse;
+  constexpr auto kSidePaneFlags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize;
+  static bool scene_collapsed = false;
+  static bool add_collapsed = false;
 
   const auto size = ImGui::GetIO().DisplaySize;
-  const float left_width = std::min(430.0F, size.x * 0.27F);
-  const float right_width = std::min(190.0F, size.x * 0.12F);
+  const float expanded_left_width = std::min(430.0F, size.x * 0.27F);
+  const float expanded_right_width = std::min(190.0F, size.x * 0.12F);
+  const float collapsed_left_width = std::min(110.0F, expanded_left_width);
+  const float collapsed_right_width = std::min(70.0F, expanded_right_width);
+  float left_width = scene_collapsed ? collapsed_left_width : expanded_left_width;
+  float right_width = add_collapsed ? collapsed_right_width : expanded_right_width;
   ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
   ImGui::SetNextWindowSize(ImVec2(left_width, size.y), ImGuiCond_Always);
-  ImGui::Begin("Scene", nullptr, kFixedPaneFlags);
-  changed |= DrawScenePanel(app, render_state, path_buffer);
+  const bool scene_open = ImGui::Begin("Scene", nullptr, kSidePaneFlags);
+  scene_collapsed = !scene_open;
+  left_width = scene_collapsed ? collapsed_left_width : expanded_left_width;
+  ImGui::SetWindowSize(ImVec2(left_width, size.y), ImGuiCond_Always);
+  if (scene_open) {
+    changed |= DrawScenePanel(app, render_state, path_buffer);
+  }
   ImGui::End();
 
   ImGui::SetNextWindowPos(ImVec2(size.x - right_width, 0), ImGuiCond_Always);
   ImGui::SetNextWindowSize(ImVec2(right_width, size.y), ImGuiCond_Always);
-  ImGui::Begin("Add", nullptr, kFixedPaneFlags);
-  changed |= DrawAddPanel(app, render_state);
+  const bool add_open = ImGui::Begin("Add", nullptr, kSidePaneFlags);
+  add_collapsed = !add_open;
+  right_width = add_collapsed ? collapsed_right_width : expanded_right_width;
+  ImGui::SetWindowPos(ImVec2(size.x - right_width, 0), ImGuiCond_Always);
+  ImGui::SetWindowSize(ImVec2(right_width, size.y), ImGuiCond_Always);
+  if (add_open) {
+    changed |= DrawAddPanel(app, render_state);
+  }
   ImGui::End();
 
   ImGui::SetNextWindowPos(ImVec2(left_width + 5.0F, 0), ImGuiCond_Always);
-  ImGui::SetNextWindowSize(ImVec2(size.x - left_width - right_width - 10.0F, size.y), ImGuiCond_Always);
+  ImGui::SetNextWindowSize(ImVec2(std::max(1.0F, size.x - left_width - right_width - 10.0F), size.y), ImGuiCond_Always);
   const auto viewport_result = DrawViewportPanel(app, render_state);
   return {.changed = changed || viewport_result.changed, .camera_moved = viewport_result.camera_moved};
 }

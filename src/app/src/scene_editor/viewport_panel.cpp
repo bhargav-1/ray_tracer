@@ -72,22 +72,38 @@ auto DrawViewportPanel(SceneEditorApp& app, UiRenderState& render_state) -> View
     ImGui::SetCursorPos(ImVec2(cursor_x, cursor_y));
     // NOLINTNEXTLINE(performance-no-int-to-ptr): ImGui stores an opaque OpenGL handle.
     ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<uintptr_t>(render_state.texture.Id())), image_size);
+    const bool image_hovered = ImGui::IsItemHovered();
     const ImVec2 image_min = ImGui::GetItemRectMin();
-    const ImVec2 image_max = ImGui::GetItemRectMax();
+    static bool left_drag_started_on_image = false;
+    static bool right_drag_started_on_image = false;
+    if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+      left_drag_started_on_image = image_hovered;
+    }
+    if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+      right_drag_started_on_image = image_hovered;
+    }
+    if (!ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
+      left_drag_started_on_image = false;
+    }
+    if (!ImGui::IsMouseDown(ImGuiMouseButton_Right)) {
+      right_drag_started_on_image = false;
+    }
     auto& scene = app.MutableScene();
     OverlayResult overlay;
     if (app.State().show_selected_viewport) {
-      overlay = DrawViewportOverlay(scene, app.MutableState(), render_state, image_min, image_size);
+      overlay = DrawViewportOverlay(scene, app.MutableState(), render_state, image_min, image_size, image_hovered);
     }
     result.changed |= overlay.changed;
 
-    if (scene.camera.has_value() && ImGui::IsMouseHoveringRect(image_min, image_max) && !overlay.block_camera) {
+    if (scene.camera.has_value() && image_hovered && !overlay.block_camera) {
       const ImVec2 drag = ImGui::GetIO().MouseDelta;
-      if (ImGui::IsMouseDragging(ImGuiMouseButton_Left) && (drag.x != 0.0F || drag.y != 0.0F)) {
+      if (left_drag_started_on_image && ImGui::IsMouseDragging(ImGuiMouseButton_Left) &&
+          (drag.x != 0.0F || drag.y != 0.0F)) {
         OrbitCamera(*scene.camera, drag.x, drag.y);
         result.camera_moved = true;
       }
-      if (ImGui::IsMouseDragging(ImGuiMouseButton_Right) && (drag.x != 0.0F || drag.y != 0.0F)) {
+      if (right_drag_started_on_image && ImGui::IsMouseDragging(ImGuiMouseButton_Right) &&
+          (drag.x != 0.0F || drag.y != 0.0F)) {
         PanCamera(*scene.camera, drag.x, drag.y);
         result.camera_moved = true;
       }

@@ -281,16 +281,16 @@ auto DrawViewportOverlay(scene::Scene& scene,
                          EditorState& editor_state,
                          UiRenderState& render_state,
                          ImVec2 image_min,
-                         ImVec2 image_size) -> OverlayResult {
+                         ImVec2 image_size,
+                         bool image_hovered) -> OverlayResult {
   OverlayResult result;
   if (!scene.camera.has_value()) {
     return result;
   }
 
   ImDrawList* draw_list = ImGui::GetWindowDrawList();
-  const ImVec2 image_max{image_min.x + image_size.x, image_min.y + image_size.y};
   const ImVec2 mouse = ImGui::GetIO().MousePos;
-  const bool mouse_in_image = ImGui::IsMouseHoveringRect(image_min, image_max);
+  const bool mouse_in_image = image_hovered;
   constexpr float kPickRadius = 18.0F;
   float closest_distance_sq = kPickRadius * kPickRadius;
   Selection closest_selection;

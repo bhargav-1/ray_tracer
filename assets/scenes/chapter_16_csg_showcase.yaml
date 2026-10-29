@@ -1,0 +1,529 @@
+version: 1
+camera:
+  from: [5.4711895, 4.41407537, -13.8161201]
+  to: [1.60000002, 1.14999998, 0]
+  up: [0, 1, 0]
+  fov_deg: 54
+  resolution: [900, 450]
+lights:
+  - visible: true
+    position: [-6, 16, -2]
+    color: [1, 1, 1]
+  - visible: true
+    position: [0, 5, -10]
+    color: [0.349999994, 0.349999994, 0.349999994]
+objects:
+  - name: Checker room
+    type: cube
+    visible: true
+    transform:
+      translate: [0, 5, -6]
+      rotate_deg: [0, 0, 0]
+      scale: [20, 5, 13]
+    cast_shadow: false
+    material:
+      color: [0.800000012, 0.800000012, 0.800000012]
+      ambient: 0.119999997
+      diffuse: 0.800000012
+      specular: 0.0500000007
+      shininess: 50
+      reflective: 0
+      transparency: 0
+      refractive_index: 1
+      pattern:
+        type: checkers
+        children:
+          - type: solid
+            color: [0.779999971, 0.779999971, 0.779999971]
+            transform:
+              translate: [0, 0, 0]
+              rotate_deg: [0, 0, 0]
+              scale: [1, 1, 1]
+          - type: solid
+            color: [0.680000007, 0.680000007, 0.680000007]
+            transform:
+              translate: [0, 0, 0]
+              rotate_deg: [0, 0, 0]
+              scale: [1, 1, 1]
+        transform:
+          translate: [0, 0, 0]
+          rotate_deg: [0, 0, 0]
+          scale: [0.0199999996, 0.0549999997, 0.0423076935]
+  - name: Tricylinder
+    type: csg
+    visible: true
+    transform:
+      translate: [-3.20000005, 1.14999998, 0]
+      rotate_deg: [0, 20, 0]
+      scale: [1, 1, 1]
+    operation: intersection
+    cast_shadow: true
+    children:
+      - name: Red and green cylinder intersection
+        type: csg
+        visible: true
+        transform:
+          translate: [0, 0, 0]
+          rotate_deg: [0, 0, 0]
+          scale: [1, 1, 1]
+        operation: intersection
+        cast_shadow: true
+        children:
+          - name: Red cylinder X
+            type: cylinder
+            visible: true
+            transform:
+              translate: [0, 0, 0]
+              rotate_deg: [0, 0, 90]
+              scale: [1.04999995, 1, 1.04999995]
+            bounds:
+              minimum: -1.5
+              maximum: 1.5
+              closed: true
+            cast_shadow: true
+            material:
+              color: [0.879999995, 0.0900000036, 0.100000001]
+              ambient: 0.100000001
+              diffuse: 0.800000012
+              specular: 0.200000003
+              shininess: 50
+              reflective: 0
+              transparency: 0
+              refractive_index: 1
+          - name: Green cylinder Y
+            type: cylinder
+            visible: true
+            transform:
+              translate: [0, 0, 0]
+              rotate_deg: [0, 0, 0]
+              scale: [1.04999995, 1, 1.04999995]
+            bounds:
+              minimum: -1.5
+              maximum: 1.5
+              closed: true
+            cast_shadow: true
+            material:
+              color: [0.0399999991, 0.720000029, 0.159999996]
+              ambient: 0.100000001
+              diffuse: 0.800000012
+              specular: 0.200000003
+              shininess: 50
+              reflective: 0
+              transparency: 0
+              refractive_index: 1
+      - name: Blue cylinder Z
+        type: cylinder
+        visible: true
+        transform:
+          translate: [0, 0, 0]
+          rotate_deg: [90, 0, 0]
+          scale: [1.04999995, 1, 1.04999995]
+        bounds:
+          minimum: -1.5
+          maximum: 1.5
+          closed: true
+        cast_shadow: true
+        material:
+          color: [0.0599999987, 0.200000003, 0.920000017]
+          ambient: 0.100000001
+          diffuse: 0.800000012
+          specular: 0.200000003
+          shininess: 50
+          reflective: 0
+          transparency: 0
+          refractive_index: 1
+  - name: Cube with three bores
+    type: csg
+    visible: true
+    transform:
+      translate: [0, 1.14999998, 0]
+      rotate_deg: [0, 15, 0]
+      scale: [1, 1, 1]
+    operation: difference
+    cast_shadow: true
+    children:
+      - name: Rounded black and silver body
+        type: csg
+        visible: true
+        transform:
+          translate: [0, 0, 0]
+          rotate_deg: [0, 0, 0]
+          scale: [1, 1, 1]
+        operation: intersection
+        cast_shadow: true
+        children:
+          - name: Silver cube
+            type: cube
+            visible: true
+            transform:
+              translate: [0, 0, 0]
+              rotate_deg: [0, 0, 0]
+              scale: [1.04999995, 1.04999995, 1.04999995]
+            cast_shadow: true
+            material:
+              color: [0.389999986, 0.389999986, 0.389999986]
+              ambient: 0.170000002
+              diffuse: 0.649999976
+              specular: 0.899999976
+              shininess: 160
+              reflective: 0.119999997
+              transparency: 0
+              refractive_index: 1
+          - name: Black rounding sphere
+            type: sphere
+            visible: true
+            transform:
+              translate: [0, 0, 0]
+              rotate_deg: [0, 0, 0]
+              scale: [1.41999996, 1.41999996, 1.41999996]
+            cast_shadow: true
+            material:
+              color: [0.0599999987, 0.0599999987, 0.0599999987]
+              ambient: 0.159999996
+              diffuse: 0.75
+              specular: 0.850000024
+              shininess: 160
+              reflective: 0.0799999982
+              transparency: 0
+              refractive_index: 1
+      - name: Three colored bores
+        type: csg
+        visible: true
+        transform:
+          translate: [0, 0, 0]
+          rotate_deg: [0, 0, 0]
+          scale: [1, 1, 1]
+        operation: union
+        cast_shadow: true
+        children:
+          - name: Red and green bores
+            type: csg
+            visible: true
+            transform:
+              translate: [0, 0, 0]
+              rotate_deg: [0, 0, 0]
+              scale: [1, 1, 1]
+            operation: union
+            cast_shadow: true
+            children:
+              - name: Green bore X
+                type: cylinder
+                visible: true
+                transform:
+                  translate: [0, 0, 0]
+                  rotate_deg: [0, 0, 90]
+                  scale: [0.430000007, 1, 0.430000007]
+                bounds:
+                  minimum: -1.60000002
+                  maximum: 1.60000002
+                  closed: true
+                cast_shadow: true
+                material:
+                  color: [0.0199999996, 0.680000007, 0.170000002]
+                  ambient: 0.349999994
+                  diffuse: 0.699999988
+                  specular: 0.699999988
+                  shininess: 120
+                  reflective: 0
+                  transparency: 0
+                  refractive_index: 1
+              - name: Red bore Y
+                type: cylinder
+                visible: true
+                transform:
+                  translate: [0, 0, 0]
+                  rotate_deg: [0, 0, 0]
+                  scale: [0.430000007, 1, 0.430000007]
+                bounds:
+                  minimum: -1.60000002
+                  maximum: 1.60000002
+                  closed: true
+                cast_shadow: true
+                material:
+                  color: [0.800000012, 0.0299999993, 0.0399999991]
+                  ambient: 0.349999994
+                  diffuse: 0.699999988
+                  specular: 0.699999988
+                  shininess: 120
+                  reflective: 0
+                  transparency: 0
+                  refractive_index: 1
+          - name: Blue bore Z
+            type: cylinder
+            visible: true
+            transform:
+              translate: [0, 0, 0]
+              rotate_deg: [90, 0, 0]
+              scale: [0.430000007, 1, 0.430000007]
+            bounds:
+              minimum: -1.60000002
+              maximum: 1.60000002
+              closed: true
+            cast_shadow: true
+            material:
+              color: [0.0299999993, 0.170000002, 0.829999983]
+              ambient: 0.349999994
+              diffuse: 0.699999988
+              specular: 0.699999988
+              shininess: 120
+              reflective: 0
+              transparency: 0
+              refractive_index: 1
+  - name: Sphere with one cube wedge cut
+    type: csg
+    visible: false
+    transform:
+      translate: [3.20000005, 1.14999998, -0.105134383]
+      rotate_deg: [0, 0, 0]
+      scale: [1, 1, 1]
+    operation: difference
+    cast_shadow: true
+    children:
+      - name: Red sphere
+        type: sphere
+        visible: true
+        transform:
+          translate: [0, 0, 0]
+          rotate_deg: [0, 0, 0]
+          scale: [1, 1, 1]
+        cast_shadow: true
+        material:
+          color: [0.949999988, 0.0149999997, 0.0250000004]
+          ambient: 0.219999999
+          diffuse: 0.75
+          specular: 0.800000012
+          shininess: 120
+          reflective: 0
+          transparency: 0
+          refractive_index: 1
+      - name: Single wedge
+        type: group
+        visible: true
+        transform:
+          translate: [0, 0, -1.35606945]
+          rotate_deg: [0, 180, 0]
+          scale: [0.632369459, 1.20000005, 0.93598336]
+        children:
+          - name: Wedge cube
+            type: cube
+            visible: true
+            transform:
+              translate: [-0.0441522226, -0.163198948, 0.194643497]
+              rotate_deg: [0, 45, 0]
+              scale: [1, 1, 1]
+            cast_shadow: true
+            material:
+              color: [0.0199999996, 0.0199999996, 0.0199999996]
+              ambient: 0.150000006
+              diffuse: 0.649999976
+              specular: 0.100000001
+              shininess: 50
+              reflective: 0
+              transparency: 0
+              refractive_index: 1
+  - name: Hollow sphere (ellipsoid cuts)
+    type: csg
+    visible: true
+    transform:
+      translate: [3.29840946, 1.696661, 0]
+      rotate_deg: [0, 0, 0]
+      scale: [1.35206366, 1.69508684, 2.13294435]
+    operation: difference
+    cast_shadow: true
+    children:
+      - name: Spherical shell
+        type: csg
+        visible: true
+        transform:
+          translate: [0, 0, 0]
+          rotate_deg: [0, 0, 0]
+          scale: [1, 1, 1]
+        operation: difference
+        cast_shadow: true
+        children:
+          - name: Outer sphere
+            type: sphere
+            visible: true
+            transform:
+              translate: [0, 0, 0]
+              rotate_deg: [0, 0, 0]
+              scale: [1, 1, 1]
+            cast_shadow: true
+            material:
+              color: [0.949999988, 0.0149999997, 0.0250000004]
+              ambient: 0.219999999
+              diffuse: 0.75
+              specular: 0.800000012
+              shininess: 120
+              reflective: 0
+              transparency: 0
+              refractive_index: 1
+          - name: Inner sphere
+            type: sphere
+            visible: true
+            transform:
+              translate: [0, 0, 0]
+              rotate_deg: [0, 0, 0]
+              scale: [0.899999976, 0.899999976, 0.899999976]
+            cast_shadow: true
+            material:
+              color: [0.0199999996, 0.0199999996, 0.0199999996]
+              ambient: 0.150000006
+              diffuse: 0.649999976
+              specular: 0.100000001
+              shininess: 50
+              reflective: 0
+              transparency: 0
+              refractive_index: 1
+      - name: Ellipsoid cutters 1-6
+        type: csg
+        visible: true
+        transform:
+          translate: [0, 0, 0]
+          rotate_deg: [0, 0, 0]
+          scale: [1, 1, 1]
+        operation: union
+        cast_shadow: true
+        children:
+          - name: Ellipsoid cutters 1-3
+            type: csg
+            visible: true
+            transform:
+              translate: [0, 0, 0]
+              rotate_deg: [0, 0, 0]
+              scale: [1, 1, 1]
+            operation: union
+            cast_shadow: true
+            children:
+              - name: Ellipsoid cutter 1
+                type: sphere
+                visible: true
+                transform:
+                  translate: [0, 0, 0]
+                  rotate_deg: [0, 0, 0]
+                  scale: [0.119999997, 1, 2]
+                cast_shadow: true
+                material:
+                  color: [0.0199999996, 0.0199999996, 0.0199999996]
+                  ambient: 0.150000006
+                  diffuse: 0.649999976
+                  specular: 0.100000001
+                  shininess: 50
+                  reflective: 0
+                  transparency: 0
+                  refractive_index: 1
+              - name: Ellipsoid cutters 2-3
+                type: csg
+                visible: true
+                transform:
+                  translate: [0, 0, 0]
+                  rotate_deg: [0, 0, 0]
+                  scale: [1, 1, 1]
+                operation: union
+                cast_shadow: true
+                children:
+                  - name: Ellipsoid cutter 2
+                    type: sphere
+                    visible: true
+                    transform:
+                      translate: [0, 0, 0]
+                      rotate_deg: [0, 30, 0]
+                      scale: [0.119999997, 1, 2]
+                    cast_shadow: true
+                    material:
+                      color: [0.0199999996, 0.0199999996, 0.0199999996]
+                      ambient: 0.150000006
+                      diffuse: 0.649999976
+                      specular: 0.100000001
+                      shininess: 50
+                      reflective: 0
+                      transparency: 0
+                      refractive_index: 1
+                  - name: Ellipsoid cutter 3
+                    type: sphere
+                    visible: true
+                    transform:
+                      translate: [0, 0, 0]
+                      rotate_deg: [0, 60, 0]
+                      scale: [0.119999997, 1, 2]
+                    cast_shadow: true
+                    material:
+                      color: [0.0199999996, 0.0199999996, 0.0199999996]
+                      ambient: 0.150000006
+                      diffuse: 0.649999976
+                      specular: 0.100000001
+                      shininess: 50
+                      reflective: 0
+                      transparency: 0
+                      refractive_index: 1
+          - name: Ellipsoid cutters 4-6
+            type: csg
+            visible: true
+            transform:
+              translate: [0, 0, 0]
+              rotate_deg: [0, 0, 0]
+              scale: [1, 1, 1]
+            operation: union
+            cast_shadow: true
+            children:
+              - name: Ellipsoid cutter 4
+                type: sphere
+                visible: true
+                transform:
+                  translate: [0, 0, 0]
+                  rotate_deg: [0, 90, 0]
+                  scale: [0.119999997, 1, 2]
+                cast_shadow: true
+                material:
+                  color: [0.0199999996, 0.0199999996, 0.0199999996]
+                  ambient: 0.150000006
+                  diffuse: 0.649999976
+                  specular: 0.100000001
+                  shininess: 50
+                  reflective: 0
+                  transparency: 0
+                  refractive_index: 1
+              - name: Ellipsoid cutters 5-6
+                type: csg
+                visible: true
+                transform:
+                  translate: [0, 0, 0]
+                  rotate_deg: [0, 0, 0]
+                  scale: [1, 1, 1]
+                operation: union
+                cast_shadow: true
+                children:
+                  - name: Ellipsoid cutter 5
+                    type: sphere
+                    visible: true
+                    transform:
+                      translate: [0, 0, 0]
+                      rotate_deg: [0, 120, 0]
+                      scale: [0.119999997, 1, 2]
+                    cast_shadow: true
+                    material:
+                      color: [0.0199999996, 0.0199999996, 0.0199999996]
+                      ambient: 0.150000006
+                      diffuse: 0.649999976
+                      specular: 0.100000001
+                      shininess: 50
+                      reflective: 0
+                      transparency: 0
+                      refractive_index: 1
+                  - name: Ellipsoid cutter 6
+                    type: sphere
+                    visible: true
+                    transform:
+                      translate: [0, 0, 0]
+                      rotate_deg: [0, 150, 0]
+                      scale: [0.119999997, 1, 2]
+                    cast_shadow: true
+                    material:
+                      color: [0.0199999996, 0.0199999996, 0.0199999996]
+                      ambient: 0.150000006
+                      diffuse: 0.649999976
+                      specular: 0.100000001
+                      shininess: 50
+                      reflective: 0
+                      transparency: 0
+                      refractive_index: 1

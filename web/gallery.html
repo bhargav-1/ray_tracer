@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Scene Gallery — Ray Tracer Challenge</title>
+  <link rel="icon" href="data:,">
+  <style>
+    :root { color-scheme: dark; font-family: system-ui, sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #191c24; color: #f2f4fa; }
+    header { max-width: 1240px; margin: auto; padding: 42px 24px 20px; display: flex; justify-content: space-between; align-items: start; gap: 24px; }
+    h1 { margin: 4px 0 10px; font-size: clamp(2rem, 5vw, 3.5rem); }
+    p { margin: 0; color: #b9c2d3; line-height: 1.5; }
+    .eyebrow { color: #82b9ff; font-size: .8rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+    .header-links { display: flex; flex-wrap: wrap; gap: 10px; }
+    .back { color: #c7ddff; white-space: nowrap; padding: 10px 14px; border: 1px solid #465773; border-radius: 10px; text-decoration: none; }
+    .back:hover, .back:focus-visible { background: #29364b; }
+    main { max-width: 1240px; margin: auto; padding: 20px 24px 64px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 270px), 1fr)); gap: 20px; }
+    .card { overflow: hidden; border: 1px solid #364154; border-radius: 16px; background: #252c38; color: inherit; text-decoration: none; transition: border-color .15s, transform .15s; }
+    .card:hover, .card:focus-visible { border-color: #82b9ff; transform: translateY(-3px); outline: none; }
+    .card img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; background: #12151b; }
+    .body { padding: 16px; }
+    .tag { color: #a9cbff; font-size: .75rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; }
+    h2 { margin: 6px 0; font-size: 1.2rem; }
+    .body p { min-height: 3em; font-size: .9rem; }
+    .action { display: inline-block; margin-top: 14px; color: #99c4ff; font-weight: 650; }
+    @media (max-width: 620px) { header { flex-direction: column; padding-top: 28px; } }
+    @media (prefers-reduced-motion: reduce) { .card { transition: none; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <div class="eyebrow">Ray Tracer Challenge</div>
+      <h1>Scene gallery</h1>
+      <p>Choose from all 21 bundled scenes. Each one opens in a new editor tab.</p>
+    </div>
+    <nav class="header-links" aria-label="Gallery links">
+      <a class="back" href="index.html">Back to editor</a>
+      <a class="back" href="https://github.com/bhargav-1/ray_tracer">GitHub repository ↗</a>
+    </nav>
+  </header>
+  <main>
+    <div class="grid">
+      <a class="card" href="index.html?scene=bonus_bvh_random_spheres_showcase.yaml" target="_blank" rel="noopener">
+        <img src="gallery/random_spheres.jpg" alt="Many colorful spheres and shapes on a reflective floor">
+        <div class="body"><span class="tag">BVH bonus</span><h2>Random spheres</h2><p>A large mixed scene with hundreds of spheres.</p><span class="action">Open scene ↗</span></div>
+      </a>
+      <a class="card" href="index.html?scene=bonus_bvh_dragons_max_render.yaml" target="_blank" rel="noopener">
+        <img src="gallery/dragons_showcase.jpg" alt="Golden dragon mesh with surrounding bounding boxes" loading="lazy">
+        <div class="body"><span class="tag">BVH bonus</span><h2>Dragon showcase</h2><p>Six dragon meshes in a larger render.</p><span class="action">Open scene ↗</span></div>
+      </a>
+      <a class="card" href="index.html?scene=appendix_01_cover.yaml" target="_blank" rel="noopener">
+        <img src="gallery/cover.jpg" alt="Geometric shapes and a dark sphere from the book cover scene" loading="lazy">
+        <div class="body"><span class="tag">Appendix 1</span><h2>Book cover</h2><p>Explore the scene from the book's cover appendix.</p><span class="action">Open scene ↗</span></div>
+      </a>
+      <a class="card" href="index.html?scene=bonus_bvh_dragons.yaml" target="_blank" rel="noopener">
+        <img src="gallery/dragons.jpg" alt="Dragon models with bounding boxes" loading="lazy">
+        <div class="body"><span class="tag">BVH bonus</span><h2>Dragons</h2><p>A larger model scene that may take longer to render.</p><span class="action">Open scene ↗</span></div>
+      </a>
+      <a class="card" href="index.html?scene=chapter_13_us_capitol_building.yaml" target="_blank" rel="noopener">
+        <img src="gallery/capitol.jpg" alt="White US Capitol building with a domed roof" loading="lazy">
+        <div class="body"><span class="tag">Chapter 13</span><h2>US Capitol</h2><p>Explore a detailed building scene.</p><span class="action">Open scene ↗</span></div>
+      </a>
+      <a class="card" href="index.html?scene=chapter_15_polygon_models.yaml" target="_blank" rel="noopener">
+        <img src="gallery/polygon_models.jpg" alt="Teddy bear, teapot, and cow polygon models in a room" loading="lazy">
+        <div class="body"><span class="tag">Chapter 15</span><h2>Polygon models</h2><p>Three OBJ meshes in a red and green room.</p><span class="action">Open scene ↗</span></div>
+      </a>
+      <a class="card" href="index.html?scene=chapter_16_rounded_csg_dice.yaml" target="_blank" rel="noopener">
+        <img src="gallery/csg.jpg" alt="Three colorful dice with recessed pips" loading="lazy">
+        <div class="body"><span class="tag">Chapter 16</span><h2>CSG dice</h2><p>Rounded edges and recessed pips built with shape operations.</p><span class="action">Open scene ↗</span></div>
+      </a>
+      <a class="card" href="index.html?scene=chapter_16_csg_showcase.yaml" target="_blank" rel="noopener">
+        <img src="gallery/csg_showcase.jpg" alt="Tricylinder, carved cube, and a red hollow sphere with ellipsoid-cut openings" loading="lazy">
+        <div class="body"><span class="tag">Chapter 16</span><h2>CSG showcase</h2><p>A tricylinder, carved cube, and slotted hollow sphere.</p><span class="action">Open scene ↗</span></div>
+      </a>
+      <a class="card" href="index.html?scene=chapter_12_room.yaml" target="_blank" rel="noopener">
+        <img src="gallery/room.jpg" alt="Furnished room with reflective spheres" loading="lazy">
+        <div class="body"><span class="tag">Chapter 12</span><h2>Furnished room</h2><p>Explore a room built largely from cubes.</p><span class="action">Open scene ↗</span></div>
+      </a>
+      <a class="card" href="index.html?scene=chapter_13_saturn_v_rocket.yaml" target="_blank" rel="noopener">
+        <img src="gallery/rocket.jpg" alt="Saturn V rocket standing beside its launch tower" loading="lazy">
+        <div class="body"><span class="tag">Chapter 13</span><h2>Saturn V rocket</h2><p>A larger scene built from cubes, cylinders, and cones.</p><span class="action">Open scene ↗</span></div>
+      </a>
+      <a class="card" href="index.html?scene=chapter_15_teapot_comparison.yaml" target="_blank" rel="noopener">
+        <img src="gallery/teapots.jpg" alt="Two teapots with flat and smooth shading" loading="lazy">
+        <div class="body"><span class="tag">Chapter 15</span><h2>Teapot comparison</h2><p>Explore the same mesh with flat and smooth normals.</p><span class="action">Open scene ↗</span></div>
+      </a>
+      <a class="card" href="index.html?scene=chapter_15_bunny_normals_comparison.yaml" target="_blank" rel="noopener">
+        <img src="gallery/bunny.jpg" alt="Two blue bunny meshes comparing surface normals" loading="lazy">
+        <div class="body"><span class="tag">Chapter 15</span><h2>Bunny normals</h2><p>Compare flat and interpolated shading on a mesh.</p><span class="action">Open scene ↗</span></div>
+      </a>
+      <a class="card" href="index.html?scene=bonus_bvh_spheres_5x5x5.yaml" target="_blank" rel="noopener">
+        <img src="gallery/spheres_grid.jpg" alt="Dense cube of colored spheres" loading="lazy">
+        <div class="body"><span class="tag">BVH bonus</span><h2>Sphere grid</h2><p>A dense grid for exploring bounding volumes.</p><span class="action">Open scene ↗</span></div>
+      </a>
+      <a class="card" href="index.html?scene=chapter_13_cylinders_cones.yaml" target="_blank" rel="noopener">
+        <img src="gallery/materials.jpg" alt="Cylinders and cones with glass, metal, and colored materials" loading="lazy">
+        <div class="body"><span class="tag">Chapter 13</span><h2>Material study</h2><p>Glass, metal, and color on cylinders and cones.</p><span class="action">Open scene ↗</span></div>
+      </a>
+      <a class="card" href="index.html?scene=chapter_11_demo.yaml" target="_blank" rel="noopener">
+        <img src="gallery/demo.jpg" alt="Patterned cube and stretched spheres in a reflective scene" loading="lazy">
+        <div class="body"><span class="tag">Chapter 11</span><h2>Interactive demo</h2><p>Colors, patterns, transforms, and reflections.</p><span class="action">Open scene ↗</span></div>
+      </a>
+      <a class="card" href="index.html?scene=chapter_11_pond_rocks.yaml" target="_blank" rel="noopener">
+        <img src="gallery/pond.jpg" alt="Water surface and rocks in a pond" loading="lazy">
+        <div class="body"><span class="tag">Chapter 11</span><h2>Pond and rocks</h2><p>Change the view to see reflection and refraction.</p><span class="action">Open scene ↗</span></div>
+      </a>
+      <a class="card" href="index.html?scene=chapter_10_perturbed_reflective.yaml" target="_blank" rel="noopener">
+        <img src="gallery/patterns.jpg" alt="Patterned spheres on a red and white floor" loading="lazy">
+        <div class="body"><span class="tag">Chapter 10</span><h2>Perturbed patterns</h2><p>Explore noisy patterns and reflective materials.</p><span class="action">Open scene ↗</span></div>
+      </a>
+      <a class="card" href="index.html?scene=chapter_15_triangle_solids.yaml" target="_blank" rel="noopener">
+        <img src="gallery/solids.jpg" alt="Five colorful solids assembled from triangles" loading="lazy">
+        <div class="body"><span class="tag">Chapter 15</span><h2>Triangle solids</h2><p>Inspect polyhedra assembled from editable triangles.</p><span class="action">Open scene ↗</span></div>
+      </a>
+      <a class="card" href="index.html?scene=chapter_14_hexagon.yaml" target="_blank" rel="noopener">
+        <img src="gallery/groups.jpg" alt="Hexagonal structure made of grouped objects" loading="lazy">
+        <div class="body"><span class="tag">Chapter 14</span><h2>Grouped hexagon</h2><p>Select and change shapes inside a group.</p><span class="action">Open scene ↗</span></div>
+      </a>
+      <a class="card" href="index.html?scene=chapter_15_two_pyramids.yaml" target="_blank" rel="noopener">
+        <img src="gallery/pyramids.jpg" alt="A red pyramid and a green pyramid" loading="lazy">
+        <div class="body"><span class="tag">Chapter 15</span><h2>Two pyramids</h2><p>A focused triangle and group example.</p><span class="action">Open scene ↗</span></div>
+      </a>
+      <a class="card" href="index.html?scene=simple_scene.yaml" target="_blank" rel="noopener">
+        <img src="gallery/simple.jpg" alt="Purple sphere on a checkerboard floor" loading="lazy">
+        <div class="body"><span class="tag">Starter</span><h2>Sphere and floor</h2><p>A small scene for trying materials and transforms.</p><span class="action">Open scene ↗</span></div>
+      </a>
+    </div>
+  </main>
+</body>
+</html>

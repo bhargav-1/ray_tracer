@@ -2,71 +2,17 @@
 
 [![Linux CI](https://github.com/bhargav-1/ray_tracer/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/bhargav-1/ray_tracer/actions/workflows/ci.yml)
 
-Yet another implementation of [*The Ray Tracer Challenge*](http://raytracerchallenge.com/)
-by Jamis Buck, written in C++23. I set out to build a ray tracer from scratch
-while following the book as closely as possible.
+A C++23 implementation of [*The Ray Tracer Challenge*](http://raytracerchallenge.com/)
+by Jamis Buck, with an interactive Dear ImGui scene editor, multithreaded CPU rendering,
+BVH acceleration, and OBJ model loading. The same C++ application runs on desktop
+and in your browser through WebAssembly. It is yet another implementation of the book—but
+I kept wanting to change a material, move a light, or see a scene from another angle. That grew into a small rendering
+app where you can edit scenes and see what happens.
 
-[Try in browser](https://bhargav-1.github.io/ray_tracer/)
+[**Browse scenes in browser →**](https://bhargav-1.github.io/ray_tracer/gallery.html) · [Try in browser](https://bhargav-1.github.io/ray_tracer/)
 
-![Starting with solid shapes, editing colors and patterns, enabling reflections, stretching a sphere, and orbiting the camera](images/scene_editor_demo.gif)
+[![Starting with solid shapes, editing colors and patterns, enabling reflections, stretching a sphere, and orbiting the camera](images/scene_editor_demo.gif)](https://bhargav-1.github.io/ray_tracer/?scene=chapter_11_demo.yaml)
 
-Along the way, I wanted an easier way to visualize the results and experiment
-with materials, transforms, cameras, and lights. That led to a scene editor
-built with Dear ImGui, GLFW, and OpenGL. Ray tracing runs on the CPU; the editor
-displays the rendered image and lets me change the scene interactively.
-
-It started as a curiosity to play with and understand ray tracing concepts. It
-has been immensely satisfying and incredibly fun to experiment with and explore
-them. I started out thinking I could claim the world of graphics with just this
-book, but I quickly realized I am only scratching the surface and have a lot to learn.
-
-## Build and run
-
-The project targets Linux, with Ubuntu 24.04 as the Docker base and reference host environment.
-
-### Docker
-
-With Docker available, install Invoke in your Python environment:
-
-```sh
-pip install invoke
-# Alternatively: uv pip install invoke
-```
-
-Build the development image, start the container, and open its shell:
-
-```sh
-invoke docker.build
-invoke docker.up
-invoke docker.login
-```
-
-Inside the container, build and launch the scene editor:
-
-```sh
-invoke app.build
-invoke app.run
-```
-
-Browser build and local server: `invoke app.build.web` then `invoke app.run.web`.
-
-The container uses the standard runtime by default. Use `invoke docker.up --gpu` to enable the NVIDIA runtime for GPU-accelerated OpenGL display; this requires the NVIDIA Container Toolkit. Ray tracing still runs on the CPU. `invoke docker.login` connects to `localhost:1122`.
-
-### Install the Ubuntu package
-
-For Ubuntu 24.04 x86_64, download the `.deb` from [Releases](https://github.com/bhargav-1/ray_tracer/releases), install it with `sudo apt install ./raytracerchallenge_*.deb`, and run `raytracerchallenge [scene.yaml]`.
-
-## Exploring scenes
-
-Load one of the [scene files](assets/scenes), import an OBJ model, or build a scene
-in the editor. You can change materials, transforms, cameras, and lights, then
-render the result. Model paths are saved relative to the scene file.
-
-To open a scene directly:
-
-```sh
-invoke app.run --args="assets/scenes/chapter_16_rounded_csg_dice.yaml"
-```
 
 ## Chapters and results
 
@@ -76,37 +22,37 @@ Results are shown from the later chapters back to the first visual examples. Cha
 
 CSG combines shapes using union, intersection, and difference. The dice use these operations to create rounded edges and recessed pips.
 
-![Three rounded dice with recessed pips](images/chapter_16_csg.gif)
+[![Three rounded dice with recessed pips](images/chapter_16_csg.gif)](https://bhargav-1.github.io/ray_tracer/?scene=chapter_16_rounded_csg_dice.yaml)
 
 ### Chapter 15: Triangles and OBJ models
 
 OBJ loading makes it possible to render triangle meshes. This comparison shows the same teapot without normals and with normals interpolation.
 
-![Teapots rendered with flat shading on the left and smooth shading on the right](images/chapter_15_triangles_obj.gif)
+[![Teapots rendered with flat shading on the left and smooth shading on the right](images/chapter_15_triangles_obj.gif)](https://bhargav-1.github.io/ray_tracer/?scene=chapter_15_teapot_comparison.yaml)
 
 ### Chapter 14: Groups
 
 Groups let related objects share transforms and form larger structures.
 
-![Hexagonal structure built from grouped objects](images/chapter_14_groups.gif)
+[![Hexagonal structure built from grouped objects](images/chapter_14_groups.gif)](https://bhargav-1.github.io/ray_tracer/?scene=chapter_14_hexagon.yaml)
 
 ### Chapter 13: Cylinders and cones
 
 This [material study](assets/scenes/chapter_13_cylinders_cones.yaml) combines glass and mirror cylinders, stepped brass rings, and cones with matte cobalt, polished copper, and glazed emerald finishes on a checkerboard floor.
 
-![Glass and mirror cylinders, stepped rings, and three cones with different materials on a checkerboard floor](images/chapter_13_material_study.gif)
+[![Glass and mirror cylinders, stepped rings, and three cones with different materials on a checkerboard floor](images/chapter_13_material_study.gif)](https://bhargav-1.github.io/ray_tracer/?scene=chapter_13_cylinders_cones.yaml)
 
 ### Chapter 12: Cubes
 
 A furnished room built largely from transformed cubes.
 
-![Room with a table, framed panels, and cubes](images/chapter_12_room_cubes.gif)
+[![Room with a table, framed panels, and cubes](images/chapter_12_room_cubes.gif)](https://bhargav-1.github.io/ray_tracer/?scene=chapter_12_room.yaml)
 
 ### Chapter 11: Reflection and refraction
 
 The renderer supports reflective and transparent materials, refraction, and Schlick's approximation.
 
-![Pond and rocks displayed in the scene editor](images/chapter_11_reflections.gif)
+[![Pond and rocks displayed in the scene editor](images/chapter_11_reflections.gif)](https://bhargav-1.github.io/ray_tracer/?scene=chapter_11_pond_rocks.yaml)
 
 ### Chapter 10: Patterns
 
@@ -120,52 +66,13 @@ Perturbing a pattern with noise produces less regular surfaces.
 
 ![Perturbed patterns on green spheres and a floor](images/chapter_10_perturbed_patterns.png)
 
-### Chapter 9: Planes
+### Chapters 9–4: Results
 
-Planes form a room containing transformed spheres.
-I played around again and generated a very odd-looking result.
-
-<img src="images/chapter_09_planes.png" alt="Colorful room made from planes with spheres on its surfaces" width="400">
-
-### Chapter 8: Shadows
-
-An eclipse example built with shadow rays.
-
-<img src="images/chapter_08_shadows.png" alt="Eclipse rendered using shadow rays" width="400">
-
-### Chapter 7: Making a scene
-
-A camera, materials, and multiple objects come together in a scene.
-Both the GUI example and the PPM renderer produce visible output.
-I played around with transforms to get a very odd-looking result.
-
-<img src="images/chapter_07_scene.png" alt="Chapter 7 scene displayed in ImGui" width="400">
-
-<img src="images/chapter_07_scene_ppm.png" alt="PNG exported from the chapter 7 PPM renderer" width="400">
-
-### Chapter 6: Light and shading
-
-Lighting gives the sphere its shape, shading, and specular highlight.
-
-<img src="images/chapter_06_lighting.png" alt="Blue sphere with lighting and a specular highlight" width="400">
-
-### Chapter 5: Ray-sphere intersections
-
-Casting rays onto a transformed sphere produces its silhouette.
-
-<img src="images/chapter_05_ray_sphere.png" alt="Red silhouette of a transformed sphere" width="400">
-
-### Chapter 4: Transformations
-
-A clock face built by rotating and translating points.
-
-<img src="images/chapter_04_clock.png" alt="Clock face showing transformed points" width="400">
-
-### Chapter 2: Drawing on a canvas
-
-The projectile example writes a PPM image. This PNG is an export of that output.
-
-<img src="images/chapter_02_projectile.png" alt="Projectile trajectory drawn on a canvas" width="400">
+| Ch. 9: Planes | Ch. 8: Shadows | Ch. 7: Scene editor | Ch. 7: PPM output |
+| --- | --- | --- | --- |
+| <img src="images/chapter_09_planes.png" alt="Room made from planes" width="160"> | <img src="images/chapter_08_shadows.png" alt="Eclipse rendered with shadow rays" width="160"> | <img src="images/chapter_07_scene.png" alt="Early scene in ImGui" width="160"> | <img src="images/chapter_07_scene_ppm.png" alt="Early scene exported as PPM" width="160"> |
+| **Ch. 6: Lighting** | **Ch. 5: Ray casting** | **Ch. 4: Transforms** | |
+| <img src="images/chapter_06_lighting.png" alt="Sphere with lighting" width="160"> | <img src="images/chapter_05_ray_sphere.png" alt="Sphere silhouette" width="160"> | <img src="images/chapter_04_clock.png" alt="Clock built from transformed points" width="160"> | |
 
 ## Bonus chapters
 
@@ -214,6 +121,54 @@ The projectile example writes a PPM image. This PNG is an export of that output.
   different lights, and so many other possibilities.
 
 The most rewarding page I found while implementing this was the [teapot competition](https://graphics.cs.utah.edu/courses/cs6620/fall2013/?prj=13); I loved learning that the teapot was first rendered about 50 years ago.
+
+## Build and run
+
+The project targets Linux, with Ubuntu 24.04 as the Docker base and reference host environment.
+
+### Docker
+
+With Docker available, install Invoke in your Python environment:
+
+```sh
+pip install invoke
+# Alternatively: uv pip install invoke
+```
+
+Build the development image, start the container, and open its shell:
+
+```sh
+invoke docker.build
+invoke docker.up
+invoke docker.login
+```
+
+Inside the container, build and launch the scene editor:
+
+```sh
+invoke app.build
+invoke app.run
+```
+
+Browser build and local server: `invoke app.build.web` then `invoke app.run.web`.
+
+The container uses the standard runtime by default. Use `invoke docker.up --gpu` to enable the NVIDIA runtime for GPU-accelerated OpenGL display; this requires the NVIDIA Container Toolkit. Ray tracing still runs on the CPU. `invoke docker.login` connects to `localhost:1122`.
+
+### Install the Ubuntu package
+
+For Ubuntu 24.04 x86_64, download the `.deb` from [Releases](https://github.com/bhargav-1/ray_tracer/releases), install it with `sudo apt install ./raytracerchallenge_*.deb`, and run `raytracerchallenge [scene.yaml]`.
+
+## Exploring scenes
+
+Load one of the [scene files](assets/scenes), import an OBJ model, or build a scene
+in the editor. You can change materials, transforms, cameras, and lights, then
+render the result. Model paths are saved relative to the scene file.
+
+To open a scene directly:
+
+```sh
+invoke app.run --args="assets/scenes/chapter_16_rounded_csg_dice.yaml"
+```
 
 ## Other resources
 

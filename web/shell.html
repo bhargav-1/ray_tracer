@@ -8,6 +8,8 @@
   <style>
     body { margin: 0; background: #26262e; color: #eee; font: 14px system-ui, sans-serif; display: flex; flex-direction: column; height: 100vh; }
     header { padding: 8px 12px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+    header .gallery-link { color: #17283f; background: #a8ceff; border-radius: 8px; padding: 7px 11px; font-weight: 700; text-decoration: none; }
+    header .gallery-link:hover, header .gallery-link:focus-visible { background: #d1e5ff; }
     canvas { display: block; width: 100%; flex: 1; min-height: 0; outline: none; }
     #status { color: #b9d6ff; }
   </style>
@@ -15,16 +17,22 @@
 <body>
   <header>
     <strong>C++ / ImGui Scene Editor</strong>
+    <a class="gallery-link" href="gallery.html" target="_blank" rel="noopener">Browse scenes ↗</a>
+    <a class="gallery-link" href="https://github.com/bhargav-1/ray_tracer" target="_blank" rel="noopener">GitHub repository ↗</a>
     <label>Upload YAML / OBJ <input id="upload" type="file" accept=".yaml,.yml,.obj" multiple disabled></label>
     <span id="status">Loading…</span>
-    <span>Use Load for bundled scenes. Drag to orbit; right-drag to pan; scroll to zoom.</span>
+    <span>Browse scenes for examples. Drag to orbit; right-drag to pan; scroll to zoom.</span>
   </header>
   <canvas id="canvas" tabindex="0" oncontextmenu="event.preventDefault()"></canvas>
   <!-- Upstream helper adds thread isolation on static hosts such as GitHub Pages. -->
   <script src="coi-serviceworker.js"></script>
   <script>
     const status = document.getElementById('status');
+    const requestedScene = new URLSearchParams(location.search).get('scene');
+    const scenePath = requestedScene && /^[a-z0-9_]+\.yaml$/.test(requestedScene)
+      ? '/assets/scenes/' + requestedScene : null;
     var Module = {
+      arguments: scenePath ? [scenePath] : [],
       canvas: document.getElementById('canvas'),
       print: console.log,
       printErr: console.error,

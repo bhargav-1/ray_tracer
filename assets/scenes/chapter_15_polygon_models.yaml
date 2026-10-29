@@ -1,0 +1,137 @@
+version: 1
+camera:
+  from: [0, 6, -22]
+  to: [0, 2.8, 1.5]
+  up: [0, 1, 0]
+  fov_deg: 52
+  resolution: [900, 450]
+lights:
+  - visible: true
+    position: [-8, 11, -8]
+    color: [1, 1, 1]
+  - visible: true
+    position: [8, 8, -4]
+    color: [0.300000012, 0.300000012, 0.300000012]
+objects:
+  - name: Floor
+    type: plane
+    visible: true
+    transform:
+      translate: [0, 0, 0]
+      rotate_deg: [0, 0, 0]
+      scale: [1, 1, 1]
+    cast_shadow: false
+    material:
+      color: [0.649999976, 0.649999976, 0.649999976]
+      ambient: 0.119999997
+      diffuse: 0.850000024
+      specular: 0.0500000007
+      shininess: 50
+      reflective: 0
+      transparency: 0
+      refractive_index: 1
+  - name: Back wall
+    type: cube
+    visible: true
+    transform:
+      translate: [0, 6, 14]
+      rotate_deg: [0, 0, 0]
+      scale: [15, 6, 0.0799999982]
+    cast_shadow: false
+    material:
+      color: [0.579999983, 0.579999983, 0.579999983]
+      ambient: 0.180000007
+      diffuse: 0.800000012
+      specular: 0
+      shininess: 50
+      reflective: 0
+      transparency: 0
+      refractive_index: 1
+  - name: Red wall
+    type: cube
+    visible: true
+    transform:
+      translate: [-15, 6, -1]
+      rotate_deg: [0, 0, 0]
+      scale: [0.0799999982, 6, 15]
+    cast_shadow: false
+    material:
+      color: [0.519999981, 0.150000006, 0.159999996]
+      ambient: 0.180000007
+      diffuse: 0.800000012
+      specular: 0
+      shininess: 50
+      reflective: 0
+      transparency: 0
+      refractive_index: 1
+  - name: Green wall
+    type: cube
+    visible: true
+    transform:
+      translate: [15, 6, -1]
+      rotate_deg: [0, 0, 0]
+      scale: [0.0799999982, 6, 15]
+    cast_shadow: false
+    material:
+      color: [0.0799999982, 0.430000007, 0.180000007]
+      ambient: 0.180000007
+      diffuse: 0.800000012
+      specular: 0
+      shininess: 50
+      reflective: 0
+      transparency: 0
+      refractive_index: 1
+  - name: Teddy bear
+    type: obj
+    visible: true
+    transform:
+      translate: [-7, 2.193807, -2.5]
+      rotate_deg: [0, 180, 0]
+      scale: [0.104999997, 0.104999997, 0.104999997]
+    source: ../models/teddy.obj
+    cast_shadow: true
+    material:
+      color: [0.610000014, 0.400000006, 0.660000026]
+      ambient: 0.129999995
+      diffuse: 0.75999999
+      specular: 0.159999996
+      shininess: 40
+      reflective: 0
+      transparency: 0
+      refractive_index: 1
+  - name: Teapot
+    type: obj
+    visible: true
+    transform:
+      translate: [0, 0.01, 3.5]
+      rotate_deg: [0, 25, 0]
+      scale: [2.2, 2.2, 2.2]
+    source: ../models/teapot_normals.obj
+    cast_shadow: true
+    material:
+      color: [0.680000007, 0.200000003, 0.219999999]
+      ambient: 0.119999997
+      diffuse: 0.649999976
+      specular: 0.9
+      shininess: 180
+      reflective: 0.65
+      transparency: 0
+      refractive_index: 1
+  - name: Cow
+    type: obj
+    visible: true
+    transform:
+      translate: [6.5, 1.818518, -2.5]
+      rotate_deg: [0, 135, 0]
+      scale: [0.5, 0.5, 0.5]
+    source: ../models/cow.obj
+    cast_shadow: true
+    material:
+      color: [0.129999995, 0.280000001, 0.649999976]
+      ambient: 0.119999997
+      diffuse: 0.75
+      specular: 0.180000007
+      shininess: 45
+      reflective: 0
+      transparency: 0
+      refractive_index: 1

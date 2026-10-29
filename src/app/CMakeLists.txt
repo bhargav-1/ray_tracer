@@ -55,6 +55,13 @@ if (EMSCRIPTEN)
     set_property(TARGET scene_editor APPEND PROPERTY LINK_DEPENDS ${WEB_ASSETS})
     configure_file("${CMAKE_SOURCE_DIR}/web/coi-serviceworker.js"
         "${CMAKE_BINARY_DIR}/web/coi-serviceworker.js" COPYONLY)
+    configure_file("${CMAKE_SOURCE_DIR}/web/gallery.html"
+        "${CMAKE_BINARY_DIR}/web/gallery.html" COPYONLY)
+    file(GLOB GALLERY_IMAGES CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/web/gallery/*.jpg")
+    foreach (GALLERY_IMAGE IN LISTS GALLERY_IMAGES)
+        get_filename_component(GALLERY_IMAGE_NAME "${GALLERY_IMAGE}" NAME)
+        configure_file("${GALLERY_IMAGE}" "${CMAKE_BINARY_DIR}/web/gallery/${GALLERY_IMAGE_NAME}" COPYONLY)
+    endforeach ()
     configure_file("${CMAKE_SOURCE_DIR}/web/coi-serviceworker.LICENSE.txt"
         "${CMAKE_BINARY_DIR}/web/coi-serviceworker.LICENSE.txt" COPYONLY)
     configure_file("${imgui_SOURCE_DIR}/LICENSE.txt" "${CMAKE_BINARY_DIR}/web/imgui.LICENSE.txt" COPYONLY)
